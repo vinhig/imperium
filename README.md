@@ -31,3 +31,19 @@ cd build
 cmake ..
 ./Attempt
 ```
+
+## Architecture
+
+Everything starts with a `device`. This `device` creates an API context and its corresponding window. Then, the user
+can connect the desired backend that will be used through high-level device commands.
+
+Example: We are on a Windows/Ogl build and we decide to create a RenderTarget object. So, to do this:
+
+* Call to `Device::CreateRenderTarget(something)`
+* That calls to `BackendOgl::CreateTexture(something)` multiple times
+* Then calls `BackendOgl::CreateFramebuffer` and links previously created textures
+* Then returns an `RenderTarget` object
+
+This kind of abstraction is called `double level of abstraction` (MAYBE someone has already written a document or given
+it a more selling name).
+ 

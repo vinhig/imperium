@@ -5,9 +5,14 @@
 #include <iostream>
 
 #include "renderer/BackendOgl.h"
+#include "renderer/DeviceDesktop.h"
 
 // Entry point for desktop platform
 int main(int argc, char **argv) {
-    auto ogl = new BackendOgl()
-    std::cout << "Hello, world!" << std::endl;
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGLES32});
+
+  while (!device->ShouldClose()) {
+    device->Clear();
+    device->RequestAnimationFrame();
+  }
 }

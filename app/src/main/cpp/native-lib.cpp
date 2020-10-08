@@ -3,9 +3,17 @@
 
 #include <GLES3/gl3.h>
 
+
+#include <renderer/Descriptions.h>
+#include <renderer/DeviceAndroid.h>
+
+DeviceAndroid *_device = nullptr;
+
 extern "C" JNIEXPORT void JNICALL
 Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(JNIEnv *env, jclass clazz) {
-    glClearColor(1.0f, 0.2f, 1.0f, 1.0f);
+    _device = new DeviceAndroid(ApiDesc::OpenGLES32);
+    // OpenGL context created
+    // Create device
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -15,5 +23,5 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1changed(JNIEnv *env, j
 
 extern "C" JNIEXPORT void JNICALL
 Java_com_warnengine_imperium_RendererWrapper_on_1draw_1frame(JNIEnv *env, jclass clazz) {
-    glClear(GL_COLOR_BUFFER_BIT);
+    _device->Clear();
 }

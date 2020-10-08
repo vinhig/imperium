@@ -4,18 +4,23 @@
 
 #pragma once
 
-#include "Backend.h"
-
 #include <cstdint>
 #include <cstdio>
 
+#include "Backend.h"
+
+/**
+ * Backend built on OpenGL 3.3.
+ * Default backend on desktop (Linux, Mac and Windows).
+ */
 class BackendOgl : public Backend {
-public:
-    BackendOgl() = default;
-    ~BackendOgl() = default;
+ public:
+  BackendOgl() = default;
+  ~BackendOgl() = default;
 
-    uint32_t CreateBuffer(void *data, size_t size) override;
+  void Clear(uint32_t frambuffer) override;
 
-    void Initialize() override;
-    void Dispose() override;
+  uint32_t CreateBuffer(void *data, size_t size) override;
+
+  uint32_t CreateProgram(char *name) override;
 };
