@@ -25,3 +25,17 @@ struct DeviceDesc {
    */
   ApiDesc api;
 };
+
+enum BufferTypeDesc {
+  VertexBuffer,
+  IndexBuffer,
+  UniformBuffer,
+};
+
+struct BufferCreationDesc {
+  BufferTypeDesc purpose;
+  void* data;
+  size_t size;
+  // TODO: some mapping?
+  // TODO: some readonly?
+};

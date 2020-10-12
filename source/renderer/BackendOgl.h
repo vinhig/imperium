@@ -18,9 +18,10 @@ class BackendOgl : public Backend {
   BackendOgl() = default;
   ~BackendOgl() = default;
 
-  void Clear(uint32_t frambuffer) override;
+  void Clear(uint32_t framebuffer) override;
 
-  uint32_t CreateBuffer(void *data, size_t size) override;
+  GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) override;
 
-  uint32_t CreateProgram(char *name) override;
+  uint32_t CreateProgram(std::vector<uint32_t> vertexSource,
+                         std::vector<uint32_t> fragmentSource) override;
 };

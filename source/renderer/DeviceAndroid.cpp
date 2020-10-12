@@ -16,8 +16,23 @@ DeviceAndroid::DeviceAndroid(ApiDesc apiDesc) {
   }
 }
 
+void DeviceAndroid::Clear(RenderTarget renderTarget) { _backend->Clear(0); }
+
 bool DeviceAndroid::ShouldClose() { return false; }
 
 void DeviceAndroid::RequestAnimationFrame() {}
 
-void DeviceAndroid::Clear() { _backend->Clear(0); }
+uint32_t DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> buffer) {
+  return 0;
+}
+
+uint32_t DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> buffer) { return 0; }
+
+uint32_t DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> buffer) {
+  return 0;
+}
+
+void DeviceAndroid::SetFileReader(
+    std::function<const char*(std::string)> fileReader) {
+  _fileReader = fileReader;
+}

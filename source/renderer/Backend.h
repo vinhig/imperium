@@ -6,6 +6,12 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <string>
+#include <vector>
+
+#include "CPUResources.h"
+#include "Descriptions.h"
+#include "GPUResources.h"
 
 /**
  * Backend handles specific API calls.
@@ -26,12 +32,12 @@ class Backend {
    * @param size Size of data (in bytes)
    * @return GPU address of buffer
    */
-  virtual uint32_t CreateBuffer(void *data, size_t size) = 0;
-
+  virtual GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) = 0;
   /**
-   * Create a program from fragment and vertex shader name.
+   * Create a program from fragment and vertex shader binaries.
    * @param name
    * @return GPU address of program
    */
-  virtual uint32_t CreateProgram(char *name) = 0;
+  virtual uint32_t CreateProgram(std::vector<uint32_t> vertexSource,
+                                 std::vector<uint32_t> fragmentSource) = 0;
 };

@@ -6,19 +6,25 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.content.res.AssetManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 class RendererWrapper implements GLSurfaceView.Renderer {
     public static native void on_surface_created();
+
     public static native void on_surface_changed();
+
     public static native void on_draw_frame();
 
     @Override
@@ -40,6 +46,8 @@ class RendererWrapper implements GLSurfaceView.Renderer {
 public class MainActivity extends Activity {
     public GLSurfaceView glSurfaceView;
     public boolean rendererSet;
+
+    public static native void on_create(AssetManager assetManager);
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -71,13 +79,22 @@ public class MainActivity extends Activity {
         } else {
             // Should never be seen in production, since the manifest filters
             // unsupported devices.
-            Toast.makeText(this, "This device does not support OpenGL ES 2.0.",
+            Toast.makeText(this, "This device does not support OpenGL ES 3.0.",
                     Toast.LENGTH_LONG).show();
         }
 
-        // Example of a call to a native method
-        // TextView tv = findViewById(R.id.sample_text);
-        // tv.setText(stringFromJNI());
+        Log.println(Log.INFO, "native-lib", "Salut les petits gars");
+        try {
+            for (String assets : getAssets().list("/")) {
+                Log.println(Log.INFO, "native-lib", assets);
+            }
+            for (String assets : getAssets().list("assets/")) {
+                Log.println(Log.INFO, "native-lib", "Assets!:" + assets);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        on_create(getAssets());
     }
 
     @Override
