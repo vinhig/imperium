@@ -15,6 +15,15 @@ At the time being, this is just a skeleton of a multiplatform rendering engine.
 
 ## Building
 
+Before building on any platforms, make sure to fetch git submodules
+
+```
+git clone https://github.com/vinhig/Imperium
+cd Imperium
+git submodule init
+git submodule update
+```
+
 ### Android
 
 Make sure you've installed NDK and Android SDK.
@@ -29,7 +38,21 @@ GLFW3 is a mandatory dependence.
 mkdir build
 cd build
 cmake ..
-./Attempt
+./Imperium
+```
+
+### Windows
+
+vcpkg is used to retrieve dependencies.
+
+```
+vcpkg install glfw3
+# clone repo and fetch submodules
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE="C:\path\to\your\vcpkg\scripts\buildsystems\vcpkg.cmake"
+MSBuild.exe Imperium.sln
+./Debug/Imperium.exe
 ```
 
 ## Architecture
