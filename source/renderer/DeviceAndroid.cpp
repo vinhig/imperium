@@ -5,15 +5,16 @@
 #include "DeviceAndroid.h"
 
 #include <stdexcept>
+#include <utility>
 
 #include "BackendOglEs.h"
 
 DeviceAndroid::DeviceAndroid(ApiDesc apiDesc) {
-  if (apiDesc == ApiDesc::OpenGLES32) {
-    _backend = new BackendOglEs();
-  } else {
-    throw std::runtime_error("Incompatible API backend");
-  }
+    if (apiDesc == ApiDesc::OpenGLES32) {
+        _backend = new BackendOglEs();
+    } else {
+        throw std::runtime_error("Incompatible API backend");
+    }
 }
 
 void DeviceAndroid::Clear(RenderTarget renderTarget) { _backend->Clear(0); }
@@ -22,17 +23,50 @@ bool DeviceAndroid::ShouldClose() { return false; }
 
 void DeviceAndroid::RequestAnimationFrame() {}
 
-uint32_t DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> buffer) {
-  return 0;
+GPUBuffer DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> buffer) {
+    return GPUBuffer{};
 }
 
-uint32_t DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> buffer) { return 0; }
+GPUBuffer DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> buffer) { return GPUBuffer{}; }
 
-uint32_t DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> buffer) {
-  return 0;
+GPUBuffer DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> buffer) {
+    return GPUBuffer{};
 }
 
-void DeviceAndroid::SetFileReader(
-    std::function<const char*(std::string)> fileReader) {
-  _fileReader = fileReader;
+GPUProgram DeviceAndroid::CreateProgram(std::string name) {
+  // Read shaders spirv
+  auto fragmentSource = _fileReader(name + ".frag.glsl.spv");
+  auto vertexSource = _fileReader(name + ".vert.glsl.spv");
+
+  // Convert to uint32_t array
+    // Convert to uint32_t array
+    std::vector<uint32_t> vertexSpirv;
+    vertexSpirv.reserve(vertexSource.size() / 4);
+    for (int i = 0; i < vertexSource.size(); i += 4) {
+        uint32_t num = (uint32_t)vertexSource[i + 0] << 24 |
+                       (uint32_t)vertexSource[i + 1] << 16 |
+                       (uint32_t)vertexSource[i + 2] << 8 |
+                       (uint32_t)vertexSource[i + 3];
+        vertexSpirv.push_back(num);
+    }
+    std::vector<uint32_t> fragmentSpirv;
+    fragmentSpirv.reserve(fragmentSource.size() / 4);
+    for (int i = 0; i < fragmentSource.size(); i += 4) {
+        uint32_t num = (uint32_t)fragmentSource[i + 0] << 24 |
+                       (uint32_t)fragmentSource[i + 1] << 16 |
+                       (uint32_t)fragmentSource[i + 2] << 8 |
+                       (uint32_t)fragmentSource[i + 3];
+        fragmentSpirv.push_back(num);
+    }
+
+    // Spirv is ready to be compiled by the backend
+    auto program = _backend->CreateProgram(vertexSpirv, fragmentSpirv);
+
+    return {program};
+
+  return {0};
+}
+
+void DeviceAndroid::SetFileReader(std::function<std::vector<unsigned char>(std::string)> fileReader) {
+    _fileReader = std::move(fileReader);
 }

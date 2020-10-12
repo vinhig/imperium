@@ -62,6 +62,8 @@ public class MainActivity extends Activity {
                 = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
 
+        on_create(getAssets());
+
         final boolean supportsEs2 =
                 configurationInfo.reqGlEsVersion >= 0x30000;
 
@@ -94,7 +96,6 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        on_create(getAssets());
     }
 
     @Override

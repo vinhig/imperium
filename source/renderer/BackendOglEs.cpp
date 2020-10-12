@@ -12,8 +12,9 @@
 #include <glad/glad.h>
 
 #include <iostream>
-#include <spirv_glsl.hpp>
 #endif
+
+#include <spirv_glsl.hpp>
 
 float salut = 1.0f;
 
@@ -36,8 +37,8 @@ uint32_t SecretCompileShader(const char* source, GLenum shaderType) {
   if (infoLength > 0) {
     char* errorMsg = new char[infoLength + 1];
     glGetShaderInfoLog(shader, infoLength, nullptr, &errorMsg[0]);
-    std::cout << source << std::endl;
-    std::cout << errorMsg << std::endl;
+    // std::cout << source << std::endl;
+    // std::cout << errorMsg << std::endl;
     throw std::runtime_error(errorMsg);
   }
 

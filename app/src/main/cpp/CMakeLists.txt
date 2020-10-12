@@ -1,51 +1,42 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
-
-# Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.4.1)
+project(Imperium)
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+set(CMAKE_CXX_STANDARD 17)
 
-add_library( # Sets the name of the library.
+add_library(
         native-lib
 
-        # Sets the library as a shared library.
         SHARED
 
-        # Provides a relative path to your source file(s).
         native-lib.cpp
         ../../../../source/renderer/BackendOglEs.cpp
         ../../../../source/renderer/DeviceAndroid.cpp
-        )
+)
+
+# Sub-projects
+add_subdirectory(../../../../libraries/spirv-cross/ tmp-build)
 
 target_include_directories(native-lib PRIVATE ../../../../source/)
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
+find_library(log-lib log)
 
-find_library( # Sets the name of the path variable.
-        log-lib
+target_link_libraries(native-lib ${log-lib} -lGLESv3 -landroid)
+target_link_libraries(native-lib spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
-        # Specifies the name of the NDK library that
-        # you want CMake to locate.
-        log)
+# Compile and copy shaders
+file(GLOB_RECURSE GLSL_SOURCE_FILES "../../../../source/shaders/*.glsl")
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
+foreach (GLSL ${GLSL_SOURCE_FILES})
+    get_filename_component(FILE_NAME ${GLSL} NAME)
+    set(SPIRV "${CMAKE_CURRENT_SOURCE_DIR}/../../debug/assets/${FILE_NAME}.spv")
+    add_custom_command(
+            OUTPUT ${SPIRV}
+            COMMAND cmake -E make_directory "${CMAKE_CURRENT_SOURCE_DIR}/../../debug/assets/"
+            COMMAND glslangValidator -V ${GLSL} -o ${SPIRV}
+            DEPENDS ${GLSL})
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach ()
 
-target_link_libraries( # Specifies the target library.
-        native-lib
+add_custom_target(shaders DEPENDS ${SPIRV_BINARY_FILES})
 
-        # Links the target library to the log library
-        # included in the NDK.
-        ${log-lib}
-        -lGLESv3
-        -landroid )
+add_dependencies(native-lib shaders)

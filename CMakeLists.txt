@@ -40,7 +40,7 @@ endif (UNIX)
 # Assets compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")
 
-foreach(GLSL ${GLSL_SOURCE_FILES})
+foreach (GLSL ${GLSL_SOURCE_FILES})
     get_filename_component(FILE_NAME ${GLSL} NAME)
     set(SPIRV "${PROJECT_BINARY_DIR}/assets/${FILE_NAME}.spv")
     add_custom_command(
@@ -49,7 +49,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
             COMMAND glslangValidator -V ${GLSL} -o ${SPIRV}
             DEPENDS ${GLSL})
     list(APPEND SPIRV_BINARY_FILES ${SPIRV})
-endforeach()
+endforeach ()
 
 add_custom_target(shaders DEPENDS ${SPIRV_BINARY_FILES})
 
