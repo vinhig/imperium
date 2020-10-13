@@ -45,13 +45,15 @@ cmake ..
 
 vcpkg is used to retrieve dependencies.
 
+(DirectX SDK doesn't have a vpckg package. You'll have to install it manually.)
+
 ```
 vcpkg install glfw3
 # clone repo and fetch submodules
 mkdir build
 cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE="C:\path\to\your\vcpkg\scripts\buildsystems\vcpkg.cmake"
-MSBuild.exe Imperium.sln
+MSBuild.exe Imperium.sln /property:Configuration=Release /property:Platform=x64
 ./Debug/Imperium.exe
 ```
 

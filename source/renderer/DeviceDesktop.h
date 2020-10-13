@@ -22,6 +22,7 @@ class DeviceDesktop : public Device {
   Backend* _backend;
   GLFWwindow* _window;
   std::function<std::string(std::string)> _fileReader;
+  ApiDesc _api;
 
  public:
   explicit DeviceDesktop(DeviceDesc deviceDesc);

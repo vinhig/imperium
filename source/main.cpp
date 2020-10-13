@@ -16,7 +16,9 @@ int main(int argc, char **argv) {
 
   // Create a program
   // Some testing :)
-  device->CreateProgram("basic");
+  auto program = device->CreateProgram("basic");
+
+  std::cout << "I've created a program OMG!!! " << program.program << std::endl;
 
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});

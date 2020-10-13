@@ -18,6 +18,7 @@ add_subdirectory(libraries/spirv-cross)
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
+        source/renderer/BackendDx.cpp
 
         source/renderer/DeviceDesktop.cpp
 
@@ -33,9 +34,18 @@ target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
 # Platform dependent dependencies
-if (UNIX)
+if(UNIX)
     target_link_libraries(renderer -ldl -lGLESv2)
-endif (UNIX)
+endif(UNIX)
+
+if(WIN32)
+    # TODO: directx is linked in source code, maybe something cleaner than
+    # #pragma comment(lib, "d3d11.lib")
+    # #pragma comment(lib, "d3dx11.lib")
+    # #pragma comment(lib, "dxguid.lib")
+    # This doesn't work obviously
+    # target_link_libraries(renderer d3d11 d3dx11 dxguid)
+endif(WIN32)
 
 # Assets compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")
