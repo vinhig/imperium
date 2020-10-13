@@ -15,10 +15,18 @@ include_directories(libraries/GL/include/)
 # Sub-projects
 add_subdirectory(libraries/spirv-cross)
 
+if(WIN32)
+    set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
+    message("Salut")
+else()
+    set(WIN32_CPP_RENDERER "")
+endif(WIN32)
+
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
-        source/renderer/BackendDx.cpp
+        
+        ${WIN32_CPP_RENDERER}
 
         source/renderer/DeviceDesktop.cpp
 

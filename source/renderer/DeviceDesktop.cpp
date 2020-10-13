@@ -8,12 +8,12 @@
 #include <stdexcept>
 
 #include "../common/File.h"
-#include "BackendDx.h"
 #include "BackendOgl.h"
 #include "BackendOglEs.h"
 #include "Descriptions.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(WIN32)
+#include "BackendDx.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <d3d11.h>
@@ -23,7 +23,6 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DXGI.lib")
 #pragma comment(lib, "D3DCompiler.lib")
-
 #endif
 
 DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
@@ -76,7 +75,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       glClearColor(0.4f, 0.6f, 0.9f, 1.0f);  // perfectly illegal
       break;
     }
-#ifdef _WIN32
+#if defined(_WIN32) || defined(WIN32)
     case Directx11: {
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       // Create window
@@ -161,7 +160,9 @@ void DeviceDesktop::RequestAnimationFrame() {
   if (_api != ApiDesc::Directx11) {
     glfwSwapBuffers(_window);
   } else {
+#if defined(_WIN32) || defined(WIN32)
     ((BackendDx*)_backend)->Present();
+#endif
   }
 }
 
