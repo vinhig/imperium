@@ -7,7 +7,8 @@
 #include <cstdio>
 
 /**
- * CPUBuffer contains a bunch of data to be copied on the GPU memory and used in draw calls.
+ * CPUBuffer contains a bunch of data to be copied on the GPU memory and used in
+ * draw calls.
  * @tparam T Type of data handled by this buffer.
  */
 template <typename T>
@@ -19,7 +20,7 @@ struct CPUBuffer {
   /**
    * Number of elements in data.
    */
-  union Size {
+  union {
     int nbElements;
     size_t size;
   };

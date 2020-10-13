@@ -9,11 +9,63 @@
 #include <iostream>
 #include <spirv_glsl.hpp>
 
+#include "../common/Log.h"
+
 GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
-  return GPUBuffer{};
+  LOG_DEBUG("Creating buffer...")
+  GLenum bufferType;
+  GLenum bufferUsage;
+  switch (bufferCreationDesc.purpose) {
+    case VertexBuffer:
+      bufferType = GL_ARRAY_BUFFER;
+      break;
+    case IndexBuffer:
+      bufferType = GL_ELEMENT_ARRAY_BUFFER;
+      break;
+    case UniformBuffer:
+      bufferType = GL_UNIFORM_BUFFER;
+      break;
+  }
+  switch (bufferCreationDesc.usage) {
+    case StaticDraw:
+      bufferUsage = GL_STATIC_DRAW;
+      break;
+    case StaticRead:
+      bufferUsage = GL_STATIC_READ;
+      break;
+    case StaticCopy:
+      bufferUsage = GL_STATIC_COPY;
+      break;
+    case DynamicDraw:
+      bufferUsage = GL_STATIC_DRAW;
+      break;
+    case DynamicRead:
+      bufferUsage = GL_DYNAMIC_READ;
+      break;
+    case DynamicCopy:
+      bufferUsage = GL_DYNAMIC_COPY;
+      break;
+    case StreamDraw:
+      bufferUsage = GL_STREAM_DRAW;
+      break;
+    case StreamRead:
+      bufferUsage = GL_STREAM_READ;
+      break;
+    case StreamCopy:
+      bufferUsage = GL_STREAM_COPY;
+      break;
+  }
+  uint32_t buffer;
+  glGenBuffers(1, &buffer);
+  glBindBuffer(bufferType, buffer);
+  glBufferData(bufferType, bufferCreationDesc.size, bufferCreationDesc.data,
+               bufferUsage);
+  glBindBuffer(bufferType, 0);
+  return GPUBuffer{buffer};
 }
 
 uint32_t CompileShader(const char* source, GLenum shaderType) {
+  LOG_DEBUG("Compiling shader...")
   // Compile shader
   uint32_t shader = glCreateShader(shaderType);
   glShaderSource(shader, 1, &source, nullptr);
@@ -35,8 +87,9 @@ uint32_t CompileShader(const char* source, GLenum shaderType) {
   return shader;
 }
 
-uint32_t BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
-                                   std::vector<uint32_t> fragmentSource) {
+GPUProgram BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
+                                     std::vector<uint32_t> fragmentSource) {
+  LOG_DEBUG("Creating program...")
   // Transpile spirv to glsl 330
   std::string vertexSourceCode;
   std::string fragmentSourceCode;
@@ -76,10 +129,55 @@ uint32_t BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  return program;
+  return GPUProgram{program};
 }
 
 void BackendOgl::Clear(uint32_t framebuffer) {
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+GPUDrawInput BackendOgl::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+  LOG_DEBUG("Creating draw input...")
+  uint32_t vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inputLayoutDesc.indexBuffer.buffer);
+  for (auto const& entry : inputLayoutDesc.entries) {
+    glEnableVertexAttribArray(entry.index);
+    glBindBuffer(GL_ARRAY_BUFFER, entry.buffer.buffer);
+    GLenum subtype;
+    switch (entry.subtype) {
+      case Float:
+        subtype = GL_FLOAT;
+        break;
+      default:
+        throw std::runtime_error("Forbidden data type in a draw input.");
+    }
+    glVertexAttribPointer(entry.index, entry.size, subtype,
+                          entry.normalized ? GL_TRUE : GL_FALSE, entry.stride,
+                          entry.offset);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+  glBindVertexArray(0);
+
+  return GPUDrawInput{vao};
+}
+
+void BackendOgl::BindProgram(GPUProgram program) {
+  glUseProgram(program.program);
+}
+
+void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times,
+                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
+  glBindVertexArray(drawInput.vao);
+  for (int i = 0; i < nbUniformBuffers; ++i) {
+    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers->buffer);
+  }
+  if (times == 1) {
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+  } else {
+    glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
+                            times);
+  }
 }

@@ -22,6 +22,10 @@ else()
     set(WIN32_CPP_RENDERER "")
 endif(WIN32)
 
+add_library(common
+        source/common/File.cpp
+        )
+
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
@@ -30,13 +34,11 @@ add_library(renderer
 
         source/renderer/DeviceDesktop.cpp
 
-        source/common/File.cpp
-
         libraries/GL/src/glad.c)
 
 add_executable(Imperium source/main.cpp)
 
-target_link_libraries(Imperium renderer)
+target_link_libraries(Imperium renderer common)
 
 target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)

@@ -45,8 +45,8 @@ uint32_t SecretCompileShader(const char* source, GLenum shaderType) {
   return shader;
 }
 
-uint32_t BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
-                                     std::vector<uint32_t> fragmentSource) {
+GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
+                                       std::vector<uint32_t> fragmentSource) {
   // Transpile spirv to glsl 330
   std::string vertexSourceCode;
   std::string fragmentSourceCode;
@@ -87,7 +87,7 @@ uint32_t BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
-  return program;
+  return GPUProgram{program};
 }
 
 void BackendOglEs::Clear(uint32_t framebuffer) {
@@ -97,3 +97,14 @@ void BackendOglEs::Clear(uint32_t framebuffer) {
 
   salut *= 0.99f;
 }
+
+GPUDrawInput BackendOglEs::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+  return GPUDrawInput();
+}
+
+void BackendOglEs::BindProgram(GPUProgram program) {
+  glUseProgram(program.program);
+}
+
+void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
+                        GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {}

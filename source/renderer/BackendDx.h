@@ -32,7 +32,7 @@ class BackendDx : public Backend {
   // Resources are represented by a uint32_t
   std::unordered_map<uint32_t, std::pair<ComPtr<ID3D11VertexShader>, ComPtr<ID3D11PixelShader>>>
       _programs;
-  int _nbPrograms = 0;
+  uint32_t _nbPrograms = 0;
 
  public:
   BackendDx(ComPtr<ID3D11Device> device, ComPtr<ID3D11DeviceContext> context,
@@ -40,11 +40,14 @@ class BackendDx : public Backend {
   ~BackendDx() = default;
 
   void Clear(uint32_t framebuffer) override;
-
   GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) override;
-
-  uint32_t CreateProgram(std::vector<uint32_t> vertexSource,
+  GPUProgram CreateProgram(std::vector<uint32_t> vertexSource,
                          std::vector<uint32_t> fragmentSource) override;
+  GPUDrawInput CreateDrawInput(InputLayoutDesc inputLayoutDesc) override;
+
+  void BindProgram(GPUProgram program) override;
+  void Draw(GPUDrawInput drawInput, int count, int times, GPUBuffer* uniformBuffers,
+            size_t nbUniformBuffers) override;
 
   // Specific to this backend
   void Present();

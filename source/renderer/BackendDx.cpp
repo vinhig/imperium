@@ -51,8 +51,8 @@ ComPtr<ID3DBlob> DxCompileShader(const char* sourceCode, size_t length,
   return blob;
 }
 
-uint32_t BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
-                                  std::vector<uint32_t> fragmentSource) {
+GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
+                                    std::vector<uint32_t> fragmentSource) {
   // Compiling a shader for DirectX is a bit more verbose
   // than compiling one for OpenGL.
   // To solve that problem: https://getfedora.org
@@ -109,7 +109,16 @@ uint32_t BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
   _programs[_nbPrograms] = {vertexShader, pixelShader};
   _nbPrograms++;
 
-  return _nbPrograms-1;
+  return GPUProgram{_nbPrograms - 1};
 }
+
+GPUDrawInput BackendDx::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+  return GPUDrawInput();
+}
+
+void BackendDx::BindProgram(GPUProgram program) {}
+
+void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
+                     GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {}
 
 void BackendDx::Present() { _swapChain->Present(1, DXGI_PRESENT_DO_NOT_WAIT); }

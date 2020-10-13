@@ -25,6 +25,19 @@
 #pragma comment(lib, "D3DCompiler.lib")
 #endif
 
+static void GLAPIENTRY OglDebugOutput(GLenum source, GLenum type, GLuint id,
+                                      GLenum severity, GLsizei length,
+                                      const GLchar *message,
+                                      const void *userParam) {
+  if (type == GL_DEBUG_TYPE_ERROR) {
+    fprintf(stderr,
+            "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type,
+            severity, message);
+    throw std::runtime_error("An OpenGL occured. See logs above.");
+  }
+}
+
 DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
   if (!glfwInit()) {
     throw std::runtime_error("Unable to init glfw");
@@ -46,6 +59,9 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         throw std::runtime_error("Unable to load OpenGL 3.3 functions.");
       }
+      // Setup debug output
+      glEnable(GL_DEBUG_OUTPUT);
+      glDebugMessageCallback(OglDebugOutput, nullptr);
       // Init backend
       _backend = new BackendOgl();
       glClearColor(0.5f, 0.2f, 0.1f, 1.0f);  // perfectly illegal
@@ -153,6 +169,9 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
     }
   }
 }
+
+DeviceDesktop::~DeviceDesktop() = default;
+
 bool DeviceDesktop::ShouldClose() { return glfwWindowShouldClose(_window); }
 
 void DeviceDesktop::RequestAnimationFrame() {
@@ -161,23 +180,48 @@ void DeviceDesktop::RequestAnimationFrame() {
     glfwSwapBuffers(_window);
   } else {
 #if defined(_WIN32) || defined(WIN32)
-    ((BackendDx*)_backend)->Present();
+    ((BackendDx *)_backend)->Present();
 #endif
   }
 }
 
 void DeviceDesktop::Clear(RenderTarget renderTarget) { _backend->Clear(0); }
 
-GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> buffer) {
-  return GPUBuffer{};
+GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
+  // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::VertexBuffer;
+  desc.usage = BufferUsageDesc::StaticDraw;
+  desc.size = sizeof(float) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+
+  auto buffer = _backend->CreateBuffer(desc);
+
+  return buffer;
 }
 
-GPUBuffer DeviceDesktop::CreateIndexBuffer(CPUBuffer<int> buffer) {
-  return GPUBuffer{};
+GPUBuffer DeviceDesktop::CreateIndexBuffer(CPUBuffer<int> cpuBuffer) {
+  // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::IndexBuffer;
+  desc.usage = BufferUsageDesc::StaticDraw;
+  desc.size = sizeof(int) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+
+  auto buffer = _backend->CreateBuffer(desc);
+  return buffer;
 }
 
-GPUBuffer DeviceDesktop::CreateUniformBuffer(CPUBuffer<void> buffer) {
-  return GPUBuffer{};
+GPUBuffer DeviceDesktop::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
+  // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::UniformBuffer;
+  desc.usage = BufferUsageDesc::DynamicDraw;
+  desc.size = sizeof(int) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+
+  auto buffer = _backend->CreateBuffer(desc);
+  return buffer;
 }
 
 GPUProgram DeviceDesktop::CreateProgram(std::string name) {
@@ -212,4 +256,6 @@ GPUProgram DeviceDesktop::CreateProgram(std::string name) {
   return {program};
 }
 
-DeviceDesktop::~DeviceDesktop() = default;
+GPUDrawInput DeviceDesktop::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+  return _backend->CreateDrawInput(inputLayoutDesc);
+}

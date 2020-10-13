@@ -16,7 +16,6 @@
 /**
  * Backend handles specific API calls.
  * It doesn't create its context nor its window.
- * It's stateless (no bindSomething).
  */
 class Backend {
  public:
@@ -35,9 +34,33 @@ class Backend {
   virtual GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) = 0;
   /**
    * Create a program from fragment and vertex shader binaries.
-   * @param name
+   * @param vertexSource Binary vertex shader (spirv assembly).
+   * @param fragmentSource Binary fragment shader (spirv assembly).
    * @return GPU address of program
    */
-  virtual uint32_t CreateProgram(std::vector<uint32_t> vertexSource,
-                                 std::vector<uint32_t> fragmentSource) = 0;
+  virtual GPUProgram CreateProgram(std::vector<uint32_t> vertexSource,
+                                   std::vector<uint32_t> fragmentSource) = 0;
+  /**
+   * Create a draw input from vertex and index buffers.
+   * @param inputLayoutDesc Input layout description.
+   * @return GPU address of Draw input.
+   */
+  virtual GPUDrawInput CreateDrawInput(InputLayoutDesc inputLayoutDesc) = 0;
+
+  /**
+   * Specify active program to use for next draw calls.
+   * @param program Program to use.
+   */
+  virtual void BindProgram(GPUProgram program) = 0;
+
+  /**
+   * Launch a draw call.
+   * @param drawInput Structure of data to draw.
+   * @param count Number of elements index to draw.
+   * @param times Number of same draw calls to launch.
+   * @param uniformBuffers Uniform buffers to bind during draw call.
+   * @param nbUniformBuffers Number of uniform buffers.
+   */
+  virtual void Draw(GPUDrawInput drawInput, int count, int times,
+                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
 };

@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <cstdio>
 
+#include "Descriptions.h"
+
 struct RenderTarget {
   uint32_t depthBuffer;
   uint32_t *colorBuffers;
@@ -14,16 +16,34 @@ struct RenderTarget {
   uint32_t framebuffer;
 };
 
-struct GPUTexture {
-  uint32_t texture;
-  int width, height;
-};
-
+/**
+ * GPUBuffer represents a buffer containing data stored on the gpu.
+ */
+enum BufferTypeDesc; // C++ bad
 struct GPUBuffer {
   uint32_t buffer;
   BufferTypeDesc purpose;
 };
 
+/**
+ * GPUDrawInput stores how some specific buffers have to be structured for a
+ * draw call. It links an index buffer and multiple vertex buffers.
+ */
+struct GPUDrawInput {
+  uint32_t vao;
+};
+
+/**
+ * GPUProgram is the combination of a vertex and fragment shader.
+ */
 struct GPUProgram {
   uint32_t program;
+};
+
+/**
+ * GPUTexture is an image stored on the gpu.
+ */
+struct GPUTexture {
+  uint32_t texture;
+  int width, height;
 };

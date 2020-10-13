@@ -19,7 +19,6 @@
 
 class DeviceDesktop : public Device {
  private:
-  Backend* _backend;
   GLFWwindow* _window;
   std::function<std::string(std::string)> _fileReader;
   ApiDesc _api;
@@ -29,11 +28,14 @@ class DeviceDesktop : public Device {
   ~DeviceDesktop();
 
   void Clear(RenderTarget renderTarget) override;
-  GPUBuffer CreateVertexBuffer(CPUBuffer<float> buffer) override;
-  GPUBuffer CreateIndexBuffer(CPUBuffer<int> buffer) override;
-  GPUBuffer CreateUniformBuffer(CPUBuffer<void> buffer) override;
+  GPUBuffer CreateVertexBuffer(CPUBuffer<float> cpuBuffer) override;
+  GPUBuffer CreateIndexBuffer(CPUBuffer<int> cpuBuffer) override;
+  GPUBuffer CreateUniformBuffer(CPUBuffer<void> cpuBuffer) override;
   GPUProgram CreateProgram(std::string name) override;
+  GPUDrawInput CreateDrawInput(
+      InputLayoutDesc inputLayoutDesc) override;
 
   void RequestAnimationFrame() override;
   bool ShouldClose() override;
+  Backend* _backend;
 };
