@@ -15,16 +15,19 @@
  */
 class BackendOgl : public Backend {
  public:
-  BackendOgl() = default;
+  BackendOgl();
   ~BackendOgl() = default;
 
   void Clear(uint32_t framebuffer) override;
   GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) override;
   GPUProgram CreateProgram(std::vector<uint32_t> vertexSource,
-                         std::vector<uint32_t> fragmentSource) override;
-  GPUDrawInput CreateDrawInput(InputLayoutDesc inputLayoutDesc) override;
+                           std::vector<uint32_t> fragmentSource) override;
+  GPUDrawInput CreateDrawInput(GPUInputLayout inputLayout,
+                               const std::vector<GPUBuffer>& vertexBuffers,
+                               GPUBuffer indexBuffer) override;
+  GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
 
   void BindProgram(GPUProgram program) override;
-  void Draw(GPUDrawInput drawInput, int count, int times, GPUBuffer* uniformBuffers,
-            size_t nbUniformBuffers) override;
+  void Draw(GPUDrawInput drawInput, int count, int times,
+            GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
 };

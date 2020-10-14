@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "GPUResources.h"
-
 enum ApiDesc {
   OpenGL33,
   OpenGL46,
@@ -21,6 +19,11 @@ enum DataType {
   Mat4,
   Vec4,
   Vec3,
+};
+
+struct BackendDesc {
+  int width;
+  int height;
 };
 
 struct DeviceDesc {
@@ -70,12 +73,12 @@ struct InputLayoutEntryDesc {
   int size;
   bool normalized;
   size_t stride;
-  GPUBuffer buffer;
   DataType subtype;
   void* offset;
 };
 
+struct GPUProgram;
 struct InputLayoutDesc {
+  GPUProgram* program;
   std::vector<InputLayoutEntryDesc> entries;
-  GPUBuffer indexBuffer;
 };

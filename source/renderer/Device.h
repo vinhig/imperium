@@ -29,7 +29,10 @@ class Device {
   virtual GPUBuffer CreateIndexBuffer(CPUBuffer<int> buffer) = 0;
   virtual GPUBuffer CreateUniformBuffer(CPUBuffer<void> buffer) = 0;
   virtual GPUProgram CreateProgram(std::string name) = 0;
-  virtual GPUDrawInput CreateDrawInput(InputLayoutDesc inputLayoutDesc) = 0;
+  virtual GPUDrawInput CreateDrawInput(
+      GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
+      GPUBuffer indexBuffer) = 0;
+  virtual GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) = 0;
 
   // virtual void Draw() = 0;
 

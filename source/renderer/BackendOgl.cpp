@@ -11,6 +11,12 @@
 
 #include "../common/Log.h"
 
+BackendOgl::BackendOgl() {
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
+  glViewport(0, 0, 1024, 768);
+}
+
 GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
   LOG_DEBUG("Creating buffer...")
   GLenum bufferType;
@@ -137,15 +143,19 @@ void BackendOgl::Clear(uint32_t framebuffer) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-GPUDrawInput BackendOgl::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+GPUDrawInput BackendOgl::CreateDrawInput(
+    GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
+    GPUBuffer indexBuffer) {
   LOG_DEBUG("Creating draw input...")
   uint32_t vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, inputLayoutDesc.indexBuffer.buffer);
-  for (auto const& entry : inputLayoutDesc.entries) {
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
+  int index = 0;
+  for (auto const& entry : inputLayout.cpuInputLayout.entries) {
     glEnableVertexAttribArray(entry.index);
-    glBindBuffer(GL_ARRAY_BUFFER, entry.buffer.buffer);
+    auto b = vertexBuffers[index].buffer;
+    glBindBuffer(GL_ARRAY_BUFFER, b);
     GLenum subtype;
     switch (entry.subtype) {
       case Float:
@@ -158,10 +168,21 @@ GPUDrawInput BackendOgl::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
                           entry.normalized ? GL_TRUE : GL_FALSE, entry.stride,
                           entry.offset);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    index++;
   }
   glBindVertexArray(0);
 
-  return GPUDrawInput{vao};
+  // Again, referencing an inputLayout is just useful for the directx 11 backend
+  // We're passing a null value there
+  return GPUDrawInput{0, vao};
+}
+
+GPUInputLayout BackendOgl::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
+  // Creating an input layout doesn't do anything
+  // as it's represented by a vertex array object that links directly
+  // to vertex buffers and index buffer.
+  // We're just going to pass the InputLayoutDesc with a null value.
+  return GPUInputLayout{inputLayoutDesc, 0};
 }
 
 void BackendOgl::BindProgram(GPUProgram program) {

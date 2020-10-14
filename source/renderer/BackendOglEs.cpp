@@ -98,8 +98,15 @@ void BackendOglEs::Clear(uint32_t framebuffer) {
   salut *= 0.99f;
 }
 
-GPUDrawInput BackendOglEs::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
+GPUDrawInput BackendOglEs::CreateDrawInput(
+    GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
+    GPUBuffer indexBuffer) {
   return GPUDrawInput();
+}
+
+GPUInputLayout BackendOglEs::CreateInputLayout(
+    InputLayoutDesc inputLayoutDesc) {
+  return GPUInputLayout();
 }
 
 void BackendOglEs::BindProgram(GPUProgram program) {

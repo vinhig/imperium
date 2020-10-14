@@ -32,8 +32,10 @@ class DeviceDesktop : public Device {
   GPUBuffer CreateIndexBuffer(CPUBuffer<int> cpuBuffer) override;
   GPUBuffer CreateUniformBuffer(CPUBuffer<void> cpuBuffer) override;
   GPUProgram CreateProgram(std::string name) override;
-  GPUDrawInput CreateDrawInput(
-      InputLayoutDesc inputLayoutDesc) override;
+  GPUDrawInput CreateDrawInput(GPUInputLayout inputLayout,
+                               const std::vector<GPUBuffer>& vertexBuffers,
+                               GPUBuffer indexBuffer) override;
+  GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
 
   void RequestAnimationFrame() override;
   bool ShouldClose() override;

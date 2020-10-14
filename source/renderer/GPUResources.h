@@ -19,10 +19,14 @@ struct RenderTarget {
 /**
  * GPUBuffer represents a buffer containing data stored on the gpu.
  */
-enum BufferTypeDesc; // C++ bad
 struct GPUBuffer {
   uint32_t buffer;
   BufferTypeDesc purpose;
+};
+
+struct GPUInputLayout {
+  InputLayoutDesc cpuInputLayout;
+  uint32_t inputLayout;
 };
 
 /**
@@ -30,6 +34,7 @@ struct GPUBuffer {
  * draw call. It links an index buffer and multiple vertex buffers.
  */
 struct GPUDrawInput {
+  uint32_t inputLayout;
   uint32_t vao;
 };
 

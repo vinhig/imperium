@@ -130,7 +130,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       scd.SampleDesc.Quality = 0;
 
       scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-      scd.BufferCount = 3;
+      scd.BufferCount = 1;
       scd.OutputWindow = glfwGetWin32Window(_window);
       scd.Windowed = TRUE;
       scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -158,7 +158,8 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
             "to solve the problem");
       }
 
-      _backend = new BackendDx(device, context, swapChain);
+      _backend = new BackendDx({deviceDesc.width, deviceDesc.height}, device,
+                               context, swapChain);
       _api = ApiDesc::Directx11;
       break;
     }
@@ -256,6 +257,13 @@ GPUProgram DeviceDesktop::CreateProgram(std::string name) {
   return {program};
 }
 
-GPUDrawInput DeviceDesktop::CreateDrawInput(InputLayoutDesc inputLayoutDesc) {
-  return _backend->CreateDrawInput(inputLayoutDesc);
+GPUDrawInput DeviceDesktop::CreateDrawInput(
+    GPUInputLayout inputLayout, const std::vector<GPUBuffer> &vertexBuffers,
+    GPUBuffer indexBuffer) {
+  return _backend->CreateDrawInput(inputLayout, vertexBuffers, indexBuffer);
+}
+
+GPUInputLayout DeviceDesktop::CreateInputLayout(
+    InputLayoutDesc inputLayoutDesc) {
+  return _backend->CreateInputLayout(inputLayoutDesc);
 }

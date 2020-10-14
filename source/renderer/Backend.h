@@ -41,18 +41,27 @@ class Backend {
   virtual GPUProgram CreateProgram(std::vector<uint32_t> vertexSource,
                                    std::vector<uint32_t> fragmentSource) = 0;
   /**
-   * Create a draw input from vertex and index buffers.
+   * Create a draw input from vertex and index buffers structured by an input
+   * layout.
    * @param inputLayoutDesc Input layout description.
    * @return GPU address of Draw input.
    */
-  virtual GPUDrawInput CreateDrawInput(InputLayoutDesc inputLayoutDesc) = 0;
-
+  virtual GPUDrawInput CreateDrawInput(
+      GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
+      GPUBuffer indexBuffer) = 0;
+  /**
+   * Create an abstract way to structure buffers during a draw call.
+   * Creation of an input layout is separated from create of a draw input as
+   * there can be multiple identical input layout linked to different buffers.
+   * @param inputLayoutDesc
+   * @return Drawable structure of buffers.
+   */
+  virtual GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) = 0;
   /**
    * Specify active program to use for next draw calls.
    * @param program Program to use.
    */
   virtual void BindProgram(GPUProgram program) = 0;
-
   /**
    * Launch a draw call.
    * @param drawInput Structure of data to draw.
