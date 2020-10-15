@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <vector>
+
 enum ApiDesc {
   OpenGL33,
   OpenGL46,

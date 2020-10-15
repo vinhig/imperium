@@ -16,10 +16,12 @@
 
 #include <spirv_glsl.hpp>
 
-float salut = 1.0f;
+#include "../common/Log.h"
 
-GPUBuffer BackendOglEs::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
-  return GPUBuffer{};
+BackendOglEs::BackendOglEs() {
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
+  glViewport(0, 0, 1024, 768);
 }
 
 // TODO: okay we have two times the same compile shader function
@@ -43,6 +45,59 @@ uint32_t SecretCompileShader(const char* source, GLenum shaderType) {
   }
 
   return shader;
+}
+
+GPUBuffer BackendOglEs::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
+  LOG_DEBUG("Creating buffer...")
+  GLenum bufferType;
+  GLenum bufferUsage;
+  switch (bufferCreationDesc.purpose) {
+    case VertexBuffer:
+      bufferType = GL_ARRAY_BUFFER;
+      break;
+    case IndexBuffer:
+      bufferType = GL_ELEMENT_ARRAY_BUFFER;
+      break;
+    case UniformBuffer:
+      bufferType = GL_UNIFORM_BUFFER;
+      break;
+  }
+  switch (bufferCreationDesc.usage) {
+    case StaticDraw:
+      bufferUsage = GL_STATIC_DRAW;
+      break;
+    case StaticRead:
+      bufferUsage = GL_STATIC_READ;
+      break;
+    case StaticCopy:
+      bufferUsage = GL_STATIC_COPY;
+      break;
+    case DynamicDraw:
+      bufferUsage = GL_STATIC_DRAW;
+      break;
+    case DynamicRead:
+      bufferUsage = GL_DYNAMIC_READ;
+      break;
+    case DynamicCopy:
+      bufferUsage = GL_DYNAMIC_COPY;
+      break;
+    case StreamDraw:
+      bufferUsage = GL_STREAM_DRAW;
+      break;
+    case StreamRead:
+      bufferUsage = GL_STREAM_READ;
+      break;
+    case StreamCopy:
+      bufferUsage = GL_STREAM_COPY;
+      break;
+  }
+  uint32_t buffer;
+  glGenBuffers(1, &buffer);
+  glBindBuffer(bufferType, buffer);
+  glBufferData(bufferType, bufferCreationDesc.size, bufferCreationDesc.data,
+               bufferUsage);
+  glBindBuffer(bufferType, 0);
+  return GPUBuffer{buffer, bufferCreationDesc.stride};
 }
 
 GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
@@ -92,21 +147,47 @@ GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
 
 void BackendOglEs::Clear(uint32_t framebuffer) {
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-  glClearColor(salut, 1.0f - salut, salut, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  salut *= 0.99f;
 }
 
 GPUDrawInput BackendOglEs::CreateDrawInput(
     GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
     GPUBuffer indexBuffer) {
-  return GPUDrawInput();
+  LOG_DEBUG("Creating draw input...")
+  uint32_t vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.buffer);
+  int index = 0;
+  for (auto const& entry : inputLayout.cpuInputLayout.entries) {
+    glEnableVertexAttribArray(entry.index);
+    auto b = vertexBuffers[index].buffer;
+    glBindBuffer(GL_ARRAY_BUFFER, b);
+    GLenum subtype;
+    switch (entry.subtype) {
+      case Float:
+        subtype = GL_FLOAT;
+        break;
+      default:
+        throw std::runtime_error("Forbidden data type in a draw input.");
+    }
+    glVertexAttribPointer(entry.index, entry.size, subtype,
+                          entry.normalized ? GL_TRUE : GL_FALSE, entry.stride,
+                          entry.offset);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    index++;
+  }
+  glBindVertexArray(0);
+
+  // Again, referencing an inputLayout is just useful for the directx 11 backend
+  // We're passing a null value there
+  return GPUDrawInput{0, vao};
 }
 
 GPUInputLayout BackendOglEs::CreateInputLayout(
     InputLayoutDesc inputLayoutDesc) {
-  return GPUInputLayout();
+  // View remark on namesake method from the OpenGL 3.3 backend
+  return GPUInputLayout{inputLayoutDesc, 0};
 }
 
 void BackendOglEs::BindProgram(GPUProgram program) {
@@ -114,4 +195,15 @@ void BackendOglEs::BindProgram(GPUProgram program) {
 }
 
 void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
-                        GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {}
+                        GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
+  glBindVertexArray(drawInput.vao);
+  for (int i = 0; i < nbUniformBuffers; ++i) {
+    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers->buffer);
+  }
+  if (times == 1) {
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+  } else {
+    glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
+                            times);
+  }
+}
