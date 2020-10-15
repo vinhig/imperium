@@ -21,6 +21,7 @@ struct RenderTarget {
  */
 struct GPUBuffer {
   uint32_t buffer;
+  size_t stride;
   BufferTypeDesc purpose;
 };
 

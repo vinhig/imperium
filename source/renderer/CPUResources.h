@@ -18,6 +18,10 @@ struct CPUBuffer {
    */
   T* data;
   /**
+   * Number of elements in each entry.
+   */
+   int stride;
+  /**
    * Number of elements in data.
    */
   union {

@@ -91,7 +91,7 @@ BackendDx::BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,
 
   _context->RSSetViewports(1, &viewport);
 
-  D3D11_RASTERIZER_DESC rasterizerDesc;
+  D3D11_RASTERIZER_DESC rasterizerDesc = {};
   rasterizerDesc.FillMode = D3D11_FILL_SOLID;
   rasterizerDesc.CullMode = D3D11_CULL_NONE;
 
@@ -101,16 +101,18 @@ BackendDx::BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,
     std::string message = std::system_category().message(result);
     throw std::runtime_error("Unable to create rasterizer state.");
   }
+  _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(),
+                               _depthStencilView.Get());
+  _context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  _context->RSSetState(_rasterizerState.Get());
+  // _context->OMSetDepthStencilState(_depthStencilState.Get(), 0);
 }
-
-float caca = 0.01;
 
 void BackendDx::Clear(uint32_t framebuffer) {
   // Clear the backbuffer ?
   if (framebuffer == 0) {
-    float bgcolor[] = {1.0f, caca, 0.0f, 1.0f};
-    caca += 0.01;
-    _context->ClearRenderTargetView(_renderTargetView.Get(), bgcolor);
+    float bgColor[] = {1.0f, 0.61f, 1.0f, 1.0f};
+    _context->ClearRenderTargetView(_renderTargetView.Get(), bgColor);
     _context->ClearDepthStencilView(_depthStencilView.Get(),
                                     D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
                                     1.0f, 0);
@@ -186,7 +188,7 @@ GPUBuffer BackendDx::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
   _buffers[_nbBuffers] = buffer;
   _nbBuffers++;
 
-  return GPUBuffer{_nbBuffers - 1};
+  return GPUBuffer{_nbBuffers - 1, bufferCreationDesc.stride};
 }
 
 ComPtr<ID3DBlob> DxCompileShader(const char* sourceCode, size_t length,
@@ -353,23 +355,43 @@ void BackendDx::BindProgram(GPUProgram program) {
 
 void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
-  _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(),
-                               _depthStencilView.Get());
+  // TODO: we should bind all that stuff at the beginning of a frame
+
   _context->IASetInputLayout(_inputLayouts[drawInput.inputLayout].Get());
-  _context->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  _context->RSSetState(_rasterizerState.Get());
-  // _context->OMSetDepthStencilState(_depthStencilState.Get(), 0);
-  for (auto& entry : _vaos[drawInput.vao].first) {
-    // TODO: stride must change
-    unsigned int stride = sizeof(float) * 3;
-    unsigned int offset = 0;
-    _context->IASetVertexBuffers(0, 1, _buffers[entry.buffer].GetAddressOf(),
-                                 &stride, &offset);
+
+  unsigned int stride = 0;
+  unsigned int offset = 0;
+
+  // Set an array of vertex buffers
+  std::vector<ID3D11Buffer*> vertexBuffers(_vaos[drawInput.vao].first.size());
+  for (int i = 0; i < _vaos[drawInput.vao].first.size(); i++) {
+    // Get the corresponding buffer
+    // targeted by the index `_vaos[drawInput.vao].first[i].buffer`
+    // (a kinda awful line i know)
+    vertexBuffers[i] = _buffers[_vaos[drawInput.vao].first[i].buffer].Get();
+    stride += _vaos[drawInput.vao].first[i].stride;
   }
+  _context->IASetVertexBuffers(0, _vaos[drawInput.vao].first.size(),
+                               vertexBuffers.data(), &stride, &offset);
+
+  // Set an array of uniform buffers
+  // (they're called constant buffers in directx)
+  std::vector<ID3D11Buffer*> constantBuffers(nbUniformBuffers);
+  for (int j = 0; j < nbUniformBuffers; ++j) {
+    constantBuffers[j] = _buffers[uniformBuffers[j].buffer].Get();
+  }
+  _context->VSSetConstantBuffers(0, nbUniformBuffers, constantBuffers.data());
+
+  // Set the only index buffer
   _context->IASetIndexBuffer(_buffers[_vaos[drawInput.vao].second.buffer].Get(),
                              DXGI_FORMAT_R32_UINT, 0);
   // _context->DrawInstanced(count, times, 0, 0);
-  _context->DrawIndexed(count, 0, 0);
+
+  if (times == 1) {
+    _context->DrawIndexed(count, 0, 0);
+  } else {
+    _context->DrawIndexedInstanced(count, times, 0, 0, 0);
+  }
 }
 
 void BackendDx::Present() { _swapChain->Present(1, 0); }

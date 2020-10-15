@@ -64,6 +64,7 @@ struct BufferCreationDesc {
   BufferUsageDesc usage;
   void* data;
   size_t size;
+  size_t stride;
   // TODO: some mapping?
   // TODO: some readonly?
 };

@@ -67,7 +67,7 @@ GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
   glBufferData(bufferType, bufferCreationDesc.size, bufferCreationDesc.data,
                bufferUsage);
   glBindBuffer(bufferType, 0);
-  return GPUBuffer{buffer};
+  return GPUBuffer{buffer, bufferCreationDesc.stride};
 }
 
 uint32_t CompileShader(const char* source, GLenum shaderType) {

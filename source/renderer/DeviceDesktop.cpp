@@ -64,7 +64,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       glDebugMessageCallback(OglDebugOutput, nullptr);
       // Init backend
       _backend = new BackendOgl();
-      glClearColor(0.5f, 0.2f, 0.1f, 1.0f);  // perfectly illegal
+      glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
       break;
     }
     case OpenGL46: {
@@ -195,6 +195,7 @@ GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   desc.usage = BufferUsageDesc::StaticDraw;
   desc.size = sizeof(float) * cpuBuffer.nbElements;
   desc.data = (void *)cpuBuffer.data;
+  desc.stride = sizeof(float) * cpuBuffer.stride;
 
   auto buffer = _backend->CreateBuffer(desc);
 
@@ -208,6 +209,7 @@ GPUBuffer DeviceDesktop::CreateIndexBuffer(CPUBuffer<int> cpuBuffer) {
   desc.usage = BufferUsageDesc::StaticDraw;
   desc.size = sizeof(int) * cpuBuffer.nbElements;
   desc.data = (void *)cpuBuffer.data;
+  desc.stride = sizeof(int) * cpuBuffer.stride;
 
   auto buffer = _backend->CreateBuffer(desc);
   return buffer;
