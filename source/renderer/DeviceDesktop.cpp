@@ -88,7 +88,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       }
       // Init backend
       _backend = new BackendOglEs();
-      glClearColor(0.4f, 0.6f, 0.9f, 1.0f);  // perfectly illegal
+      glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
       break;
     }
 #if defined(_WIN32) || defined(WIN32)

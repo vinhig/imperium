@@ -10,11 +10,11 @@
 #include "BackendOglEs.h"
 
 DeviceAndroid::DeviceAndroid(ApiDesc apiDesc) {
-    if (apiDesc == ApiDesc::OpenGLES32) {
-        _backend = new BackendOglEs();
-    } else {
-        throw std::runtime_error("Incompatible API backend");
-    }
+  if (apiDesc == ApiDesc::OpenGLES32) {
+    _backend = new BackendOglEs();
+  } else {
+    throw std::runtime_error("Incompatible API backend");
+  }
 }
 
 void DeviceAndroid::Clear(RenderTarget renderTarget) { _backend->Clear(0); }
@@ -23,14 +23,43 @@ bool DeviceAndroid::ShouldClose() { return false; }
 
 void DeviceAndroid::RequestAnimationFrame() {}
 
-GPUBuffer DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> buffer) {
-    return GPUBuffer{};
+GPUBuffer DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
+  // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::VertexBuffer;
+  desc.usage = BufferUsageDesc::StaticDraw;
+  desc.size = sizeof(float) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+  desc.stride = sizeof(float) * cpuBuffer.stride;
+
+  auto buffer = _backend->CreateBuffer(desc);
+
+  return buffer;
 }
 
-GPUBuffer DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> buffer) { return GPUBuffer{}; }
+GPUBuffer DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> cpuBuffer) {
+  // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::IndexBuffer;
+  desc.usage = BufferUsageDesc::StaticDraw;
+  desc.size = sizeof(int) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+  desc.stride = sizeof(int) * cpuBuffer.stride;
 
-GPUBuffer DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> buffer) {
-    return GPUBuffer{};
+  auto buffer = _backend->CreateBuffer(desc);
+  return buffer;
+}
+
+GPUBuffer DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
+    // Describe and create buffer
+  BufferCreationDesc desc = {};
+  desc.purpose = BufferTypeDesc::UniformBuffer;
+  desc.usage = BufferUsageDesc::DynamicDraw;
+  desc.size = sizeof(int) * cpuBuffer.nbElements;
+  desc.data = (void *)cpuBuffer.data;
+
+  auto buffer = _backend->CreateBuffer(desc);
+  return buffer;
 }
 
 GPUProgram DeviceAndroid::CreateProgram(std::string name) {
@@ -39,34 +68,46 @@ GPUProgram DeviceAndroid::CreateProgram(std::string name) {
   auto vertexSource = _fileReader(name + ".vert.glsl.spv");
 
   // Convert to uint32_t array
-    // Convert to uint32_t array
-    std::vector<uint32_t> vertexSpirv;
-    vertexSpirv.reserve(vertexSource.size() / 4);
-    for (int i = 0; i < vertexSource.size(); i += 4) {
-        uint32_t num = (uint32_t)vertexSource[i + 0] << 24 |
-                       (uint32_t)vertexSource[i + 1] << 16 |
-                       (uint32_t)vertexSource[i + 2] << 8 |
-                       (uint32_t)vertexSource[i + 3];
-        vertexSpirv.push_back(num);
-    }
-    std::vector<uint32_t> fragmentSpirv;
-    fragmentSpirv.reserve(fragmentSource.size() / 4);
-    for (int i = 0; i < fragmentSource.size(); i += 4) {
-        uint32_t num = (uint32_t)fragmentSource[i + 0] << 24 |
-                       (uint32_t)fragmentSource[i + 1] << 16 |
-                       (uint32_t)fragmentSource[i + 2] << 8 |
-                       (uint32_t)fragmentSource[i + 3];
-        fragmentSpirv.push_back(num);
-    }
+  // Convert to uint32_t array
+  std::vector<uint32_t> vertexSpirv;
+  vertexSpirv.reserve(vertexSource.size() / 4);
+  for (int i = 0; i < vertexSource.size(); i += 4) {
+    uint32_t num = (uint32_t)vertexSource[i + 0] << 24 |
+                   (uint32_t)vertexSource[i + 1] << 16 |
+                   (uint32_t)vertexSource[i + 2] << 8 |
+                   (uint32_t)vertexSource[i + 3];
+    vertexSpirv.push_back(num);
+  }
+  std::vector<uint32_t> fragmentSpirv;
+  fragmentSpirv.reserve(fragmentSource.size() / 4);
+  for (int i = 0; i < fragmentSource.size(); i += 4) {
+    uint32_t num = (uint32_t)fragmentSource[i + 0] << 24 |
+                   (uint32_t)fragmentSource[i + 1] << 16 |
+                   (uint32_t)fragmentSource[i + 2] << 8 |
+                   (uint32_t)fragmentSource[i + 3];
+    fragmentSpirv.push_back(num);
+  }
 
-    // Spirv is ready to be compiled by the backend
-    auto program = _backend->CreateProgram(vertexSpirv, fragmentSpirv);
+  // Spirv is ready to be compiled by the backend
+  auto program = _backend->CreateProgram(vertexSpirv, fragmentSpirv);
 
-    return {program};
+  return {program};
 
   return {0};
 }
 
-void DeviceAndroid::SetFileReader(std::function<std::vector<unsigned char>(std::string)> fileReader) {
-    _fileReader = std::move(fileReader);
+GPUDrawInput DeviceAndroid::CreateDrawInput(
+    GPUInputLayout inputLayout, const std::vector<GPUBuffer> &vertexBuffers,
+    GPUBuffer indexBuffer) {
+  return _backend->CreateDrawInput(inputLayout, vertexBuffers, indexBuffer);
+}
+
+GPUInputLayout DeviceAndroid::CreateInputLayout(
+    InputLayoutDesc inputLayoutDesc) {
+  return _backend->CreateInputLayout(inputLayoutDesc);
+}
+
+void DeviceAndroid::SetFileReader(
+    std::function<std::vector<unsigned char>(std::string)> fileReader) {
+  _fileReader = std::move(fileReader);
 }

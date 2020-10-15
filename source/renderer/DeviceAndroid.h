@@ -14,7 +14,6 @@
 
 class DeviceAndroid : public Device {
  private:
-  Backend *_backend;
   std::function<std::vector<unsigned char>(std::string)> _fileReader;
 
  public:
@@ -22,13 +21,19 @@ class DeviceAndroid : public Device {
   ~DeviceAndroid() = default;
 
   void Clear(RenderTarget renderTarget) override;
-  GPUBuffer CreateVertexBuffer(CPUBuffer<float> buffer) override;
-  GPUBuffer CreateIndexBuffer(CPUBuffer<int> buffer) override;
-  GPUBuffer CreateUniformBuffer(CPUBuffer<void> buffer) override;
+  GPUBuffer CreateVertexBuffer(CPUBuffer<float> cpuBuffer) override;
+  GPUBuffer CreateIndexBuffer(CPUBuffer<int> cpuBuffer) override;
+  GPUBuffer CreateUniformBuffer(CPUBuffer<void> cpuBuffer) override;
   GPUProgram CreateProgram(std::string name) override;
+  GPUDrawInput CreateDrawInput(GPUInputLayout inputLayout,
+                               const std::vector<GPUBuffer> &vertexBuffers,
+                               GPUBuffer indexBuffer) override;
+  GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
 
   void RequestAnimationFrame() override;
   bool ShouldClose() override;
   void SetFileReader(
       std::function<std::vector<unsigned char>(std::string)> fileReader);
+
+  Backend *_backend;
 };

@@ -12,6 +12,8 @@
  */
 class BackendOglEs : public Backend {
  public:
+  BackendOglEs();
+  ~BackendOglEs() = default;
   void Clear(uint32_t framebuffer) override;
 
   GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) override;
