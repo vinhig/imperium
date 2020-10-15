@@ -14,7 +14,6 @@
 
 class DeviceAndroid : public Device {
  private:
-  Backend *_backend;
   std::function<std::vector<unsigned char>(std::string)> _fileReader;
 
  public:
@@ -35,4 +34,6 @@ class DeviceAndroid : public Device {
   bool ShouldClose() override;
   void SetFileReader(
       std::function<std::vector<unsigned char>(std::string)> fileReader);
+
+  Backend *_backend;
 };
