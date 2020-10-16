@@ -20,8 +20,9 @@
 
 BackendOglEs::BackendOglEs(BackendDesc backendDesc) {
   glClearColor(1.0f, 0.61f, 1.0f, 1.0f);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   if (backendDesc.width != 0 && backendDesc.height != 0) {
     glViewport(0, 0, backendDesc.width, backendDesc.height);
   }

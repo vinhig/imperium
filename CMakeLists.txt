@@ -10,26 +10,38 @@ find_package(glm REQUIRED)
 find_package(Threads REQUIRED)
 
 # 3rd party includes
+include_directories(libraries/)
 include_directories(libraries/GL/include/)
+include_directories(libraries/openfbx/src/)
 
 # Sub-projects
 add_subdirectory(libraries/spirv-cross)
 
-if(WIN32)
+if (WIN32)
     set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
     message("Salut")
-else()
+else ()
     set(WIN32_CPP_RENDERER "")
-endif(WIN32)
+endif (WIN32)
 
 add_library(common
         source/common/File.cpp
         )
 
+add_library(openfbx
+        libraries/openfbx/src/miniz.c libraries/openfbx/src/miniz.h
+        libraries/openfbx/src/ofbx.cpp libraries/openfbx/src/ofbx.h
+        )
+
+add_library(loader
+        source/loader/MeshLoader.cpp
+        source/loader/pch.cpp
+        )
+
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
-        
+
         ${WIN32_CPP_RENDERER}
 
         source/renderer/DeviceDesktop.cpp
@@ -38,24 +50,26 @@ add_library(renderer
 
 add_executable(Imperium source/main.cpp)
 
-target_link_libraries(Imperium renderer common)
+target_link_libraries(Imperium renderer common loader)
+
+target_link_libraries(loader openfbx)
 
 target_link_libraries(renderer glfw OpenGL::GL glm)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
 # Platform dependent dependencies
-if(UNIX)
+if (UNIX)
     target_link_libraries(renderer -ldl -lGLESv2)
-endif(UNIX)
+endif (UNIX)
 
-if(WIN32)
+if (WIN32)
     # TODO: directx is linked in source code, maybe something cleaner than
     # #pragma comment(lib, "d3d11.lib")
     # #pragma comment(lib, "d3dx11.lib")
     # #pragma comment(lib, "dxguid.lib")
     # This doesn't work obviously
     # target_link_libraries(renderer d3d11 d3dx11 dxguid)
-endif(WIN32)
+endif (WIN32)
 
 # Assets compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

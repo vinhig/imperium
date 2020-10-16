@@ -193,7 +193,7 @@ GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   BufferCreationDesc desc = {};
   desc.purpose = BufferTypeDesc::VertexBuffer;
   desc.usage = BufferUsageDesc::StaticDraw;
-  desc.size = sizeof(float) * cpuBuffer.nbElements;
+  desc.size = sizeof(float) * cpuBuffer.stride * cpuBuffer.nbElements;
   desc.data = (void *)cpuBuffer.data;
   desc.stride = sizeof(float) * cpuBuffer.stride;
 
