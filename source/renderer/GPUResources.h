@@ -27,6 +27,7 @@ struct GPUBuffer {
 
 struct GPUInputLayout {
   InputLayoutDesc cpuInputLayout;
+  size_t stride;
   uint32_t inputLayout;
 };
 

@@ -282,7 +282,26 @@ GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
 GPUDrawInput BackendDx::CreateDrawInput(
     GPUInputLayout inputLayout, const std::vector<GPUBuffer>& vertexBuffers,
     GPUBuffer indexBuffer) {
-  std::vector<GPUBuffer> _vertexBuffers = vertexBuffers;
+  // Remove double
+  std::vector<GPUBuffer> _vertexBuffers;
+
+  // For each given vertex buffers
+  for (int i = 0; i < vertexBuffers.size(); i++) {
+    bool contains = false;
+    // For each already registered vertex buffers
+    for (int j = 0; j < _vertexBuffers.size(); j++) {
+      // Check if we do not add an already added vertex buffers
+      // So check if they're the same
+      if (_vertexBuffers[j].buffer == vertexBuffers[i].buffer) {
+        contains = true;
+        break;
+      }
+    }
+    if (!contains) {
+      std::cout << "POUF" << std::endl;
+      _vertexBuffers.push_back(vertexBuffers[i]);
+    }
+  }
 
   _vaos[_nbVaos] = {_vertexBuffers, indexBuffer};
   _nbVaos++;
@@ -355,8 +374,6 @@ void BackendDx::BindProgram(GPUProgram program) {
 
 void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
-  // TODO: we should bind all that stuff at the beginning of a frame
-
   _context->IASetInputLayout(_inputLayouts[drawInput.inputLayout].Get());
 
   unsigned int stride = 0;

@@ -19,6 +19,7 @@
 #include "../common/Log.h"
 
 BackendOglEs::BackendOglEs(BackendDesc backendDesc) {
+  glClearColor(1.0f, 0.61f, 1.0f, 1.0f);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
   if (backendDesc.width != 0 && backendDesc.height != 0) {

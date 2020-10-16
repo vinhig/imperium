@@ -17,6 +17,7 @@ add_library(
 add_subdirectory(../../../../libraries/spirv-cross/ tmp-build)
 
 target_include_directories(native-lib PRIVATE ../../../../source/)
+target_include_directories(native-lib PRIVATE C:/Users/vinhi/source/repos/vcpkg/packages/glm_x64-windows/include/)
 
 find_library(log-lib log)
 

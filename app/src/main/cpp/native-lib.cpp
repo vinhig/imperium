@@ -7,6 +7,8 @@
 #include <renderer/DeviceAndroid.h>
 
 #include <cstdio>
+#include <glm/common.hpp>
+#include <glm/gtx/transform.hpp>
 #include <string>
 #include <thread>
 
@@ -25,9 +27,13 @@ GPUDrawInput drawInput;
 extern "C" JNIEXPORT void JNICALL
 Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
     JNIEnv *env, jclass clazz) {
+  // Get screen size
+  int sizes[4];
+  glGetIntegerv(GL_VIEWPORT, &sizes[0]);
+
   // OpenGL context created from activity
   // Create device
-  g_device = new DeviceAndroid(ApiDesc::OpenGLES32, 0, 0);
+  g_device = new DeviceAndroid(ApiDesc::OpenGLES32, sizes[2], sizes[3]);
 
   // Set file reader
   g_device->SetFileReader([](std::string path) -> std::vector<unsigned char> {
@@ -54,18 +60,30 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
   program = g_device->CreateProgram("basic");
 
   float vertices[] = {
-      .5f,  .5f,  .5f,  -.5f, .5f,  .5f,
-      -.5f, -.5f, .5f,  .5f,  -.5f, .5f,  // v0,v1,v2,v3 (front)
-      .5f,  .5f,  .5f,  .5f,  -.5f, .5f,
-      .5f,  -.5f, -.5f, .5f,  .5f,  -.5f,  // v0,v3,v4,v5 (right)
-      .5f,  .5f,  .5f,  .5f,  .5f,  -.5f,
-      -.5f, .5f,  -.5f, -.5f, .5f,  .5f,  // v0,v5,v6,v1 (top)
-      -.5f, .5f,  .5f,  -.5f, .5f,  -.5f,
-      -.5f, -.5f, -.5f, -.5f, -.5f, .5f,  // v1,v6,v7,v2 (left)
-      -.5f, -.5f, -.5f, .5f,  -.5f, -.5f,
-      .5f,  -.5f, .5f,  -.5f, -.5f, .5f,  // v7,v4,v3,v2 (bottom)
-      .5f,  -.5f, -.5f, -.5f, -.5f, -.5f,
-      -.5f, .5f,  -.5f, .5f,  .5f,  -.5f  // v4,v7,v6,v5 (back)
+      .5f,  .5f,  .5f,  1.0f, 0.2f, 0.3f,
+      -.5f, .5f,  .5f,  0.3f, 0.6f, 1.0f,  // position and color
+      -.5f, -.5f, .5f,  1.0f, 0.2f, 0.3f,
+      .5f,  -.5f, .5f,  0.3f, 0.6f, 1.0f,  // v0,v1,v2,v3 (front)
+      .5f,  .5f,  .5f,  1.0f, 0.2f, 0.3f,
+      .5f,  -.5f, .5f,  0.3f, 0.6f, 1.0f,  // position and color
+      .5f,  -.5f, -.5f, 1.0f, 0.2f, 0.3f,
+      .5f,  .5f,  -.5f, 0.3f, 0.6f, 1.0f,  // v0,v3,v4,v5 (right)
+      .5f,  .5f,  .5f,  1.0f, 0.2f, 0.3f,
+      .5f,  .5f,  -.5f, 0.3f, 0.6f, 1.0f,  // position and color
+      -.5f, .5f,  -.5f, 1.0f, 0.2f, 0.3f,
+      -.5f, .5f,  .5f,  0.3f, 0.6f, 1.0f,  // v0,v5,v6,v1 (top)
+      -.5f, .5f,  .5f,  1.0f, 0.2f, 0.3f,
+      -.5f, .5f,  -.5f, 0.3f, 0.6f, 1.0f,  // position and color
+      -.5f, -.5f, -.5f, 1.0f, 0.2f, 0.3f,
+      -.5f, -.5f, .5f,  0.3f, 0.6f, 1.0f,  // v1,v6,v7,v2 (left)
+      -.5f, -.5f, -.5f, 0.7f, 0.2f, 0.3f,
+      .5f,  -.5f, -.5f, 0.3f, 0.6f, 1.0f,  // position and color
+      .5f,  -.5f, .5f,  0.7f, 0.2f, 0.3f,
+      -.5f, -.5f, .5f,  0.3f, 0.6f, 1.0f,  // v7,v4,v3,v2 (bottom)
+      .5f,  -.5f, -.5f, 0.7f, 0.2f, 0.3f,
+      -.5f, -.5f, -.5f, 0.3f, 0.6f, 1.0f,  // position and color
+      -.5f, .5f,  -.5f, 0.7f, 0.2f, 0.3f,
+      .5f,  .5f,  -.5f, 0.3f, 0.6f, 1.0f,  // v4,v7,v6,v5 (back)
   };
 
   int indices[] = {
@@ -77,17 +95,30 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
       20, 21, 22, 22, 23, 20   // v4-v7-v6, v6-v5-v4 (back)
   };
 
+  // Is it a problem if i want to rotate my cute cubic cube ?
+  auto position = glm::vec3(3.0f, 3.0f, 3.0f);
+  auto lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
+
+  auto projection =
+      glm::perspective(70.0f, (float)sizes[2] / (float)sizes[3], 0.1f, 100.0f);
+  auto view = glm::lookAt(position, lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
+  auto model = glm::mat4(1.0f);
+
+  auto mvp = projection * view * model;
+
   struct Material {
     float colors[4];
+    float mvp[16];
   };
 
   Material material = {{0.2, 0.3, 0.4, 1.0}};
+  memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
 
   // Create vertex buffer
   CPUBuffer<float> cpuBuffer1 = {};
   cpuBuffer1.data = &vertices[0];
   cpuBuffer1.nbElements = 72;
-  cpuBuffer1.stride = 3;
+  cpuBuffer1.stride = 6;
   CPUBuffer<int> cpuBuffer2 = {};
   cpuBuffer2.data = &indices[0];
   cpuBuffer2.nbElements = 36;
@@ -104,13 +135,19 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
   // Specify how to draw data
   InputLayoutDesc inputLayoutDesc = {};
   inputLayoutDesc.program = &program;
-  inputLayoutDesc.entries.push_back(
-      {0, 3, false, sizeof(float) * 3, DataType::Float, nullptr});
+  inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 6,
+                                     DataType::Float,
+                                     (void *)(sizeof(float) * 0)});
+  inputLayoutDesc.entries.push_back({1, 3, false, sizeof(float) * 6,
+                                     DataType::Float,
+                                     (void *)(sizeof(float) * 3)});
+
   auto inputLayout = g_device->CreateInputLayout(inputLayoutDesc);
 
   // Specify what to draw
-  std::vector<GPUBuffer> buffers(1);
+  std::vector<GPUBuffer> buffers(2);
   buffers[0] = vertexBuffer;
+  buffers[1] = vertexBuffer;
   drawInput = g_device->CreateDrawInput(inputLayout, buffers, indexBuffer);
 }
 

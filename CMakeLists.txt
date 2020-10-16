@@ -40,7 +40,7 @@ add_executable(Imperium source/main.cpp)
 
 target_link_libraries(Imperium renderer common)
 
-target_link_libraries(renderer glfw OpenGL::GL)
+target_link_libraries(renderer glfw OpenGL::GL glm)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
 # Platform dependent dependencies
