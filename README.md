@@ -11,14 +11,14 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 * Cascaded Shadows
 * Basic skeleton animation
 
-(This repo is a Work-In-Progress. At the time being, we can barely draw a triangle lol.)
+(This repo is a Work-In-Progress. At the time being, we can barely draw a colored sphere.)
 
 ### API support
 
 |               | Linux | Windows | Android |
 |---------------|-------|---------|---------|
 | OpenGL ES 3.2 |   🚅   |    🚅   |    🚜   |
-| OpenGL 3.3    |   🚅   |    🚅   |    🚜   |
+| OpenGL 3.3    |   🚅   |    🚅   |    ❎   |
 | OpenGL 4.6    |   🚂   |    🚂   |    ❎   |
 | Vulkan        |   🚧   |    🚧   |    🚧   |
 | DirectX 11    |   ❎   |    🚅   |    ❎   |
@@ -83,6 +83,16 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE="C:\path\to\your\vcpkg\scripts\buildsystems\vcpk
 MSBuild.exe Imperium.sln /property:Configuration=Release /property:Platform=x64
 ./Debug/Imperium.exe
 ```
+
+## Third party
+
+This project makes heavy use of:
+
+* https://github.com/nem0/OpenFBX
+* https://github.com/g-truc/glm
+* https://github.com/Dav1dde/glad
+
+A big thanks to them.
 
 ## Architecture
 
