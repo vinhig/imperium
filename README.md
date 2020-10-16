@@ -19,10 +19,10 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 |---------------|-------|---------|---------|
 | OpenGL ES 3.2 |   🚅   |    🚅   |    🚜   |
 | OpenGL 3.3    |   🚅   |    🚅   |    🚜   |
-| OpenGL 4.6    |   🚂   |    🚅   |    ❎   |
+| OpenGL 4.6    |   🚂   |    🚂   |    ❎   |
 | Vulkan        |   🚧   |    🚧   |    🚧   |
 | DirectX 11    |   ❎   |    🚅   |    ❎   |
-| DirectX 12    |   🤞   |    🤞   |    ❎   |
+| DirectX 12    |   ❎   |    🤞   |    ❎   |
 
 * 🚅 Run and build like a charm.
 * 🚜 Run like a charm
