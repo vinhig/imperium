@@ -63,7 +63,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       glEnable(GL_DEBUG_OUTPUT);
       glDebugMessageCallback(OglDebugOutput, nullptr);
       // Init backend
-      _backend = new BackendOgl();
+      _backend = new BackendOgl({deviceDesc.width, deviceDesc.height});
       glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
       break;
     }
@@ -87,7 +87,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
         throw std::runtime_error("Unable to load OpenGLES 3.2 functions.");
       }
       // Init backend
-      _backend = new BackendOglEs();
+      _backend = new BackendOglEs({deviceDesc.width, deviceDesc.height});
       glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
       break;
     }

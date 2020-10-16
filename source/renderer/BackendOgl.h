@@ -15,7 +15,7 @@
  */
 class BackendOgl : public Backend {
  public:
-  BackendOgl();
+  BackendOgl(BackendDesc backendDesc);
   ~BackendOgl() = default;
 
   void Clear(uint32_t framebuffer) override;

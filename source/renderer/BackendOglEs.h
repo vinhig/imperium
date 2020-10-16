@@ -12,7 +12,7 @@
  */
 class BackendOglEs : public Backend {
  public:
-  BackendOglEs();
+  explicit BackendOglEs(BackendDesc backendDesc);
   ~BackendOglEs() = default;
   void Clear(uint32_t framebuffer) override;
 

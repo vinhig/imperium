@@ -18,10 +18,12 @@
 
 #include "../common/Log.h"
 
-BackendOglEs::BackendOglEs() {
+BackendOglEs::BackendOglEs(BackendDesc backendDesc) {
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  glViewport(0, 0, 1024, 768);
+  if (backendDesc.width != 0 && backendDesc.height != 0) {
+    glViewport(0, 0, backendDesc.width, backendDesc.height);
+  }
 }
 
 // TODO: okay we have two times the same compile shader function

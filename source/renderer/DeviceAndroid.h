@@ -17,7 +17,7 @@ class DeviceAndroid : public Device {
   std::function<std::vector<unsigned char>(std::string)> _fileReader;
 
  public:
-  explicit DeviceAndroid(ApiDesc apiDesc);
+  explicit DeviceAndroid(ApiDesc apiDesc, int width, int height);
   ~DeviceAndroid() = default;
 
   void Clear(RenderTarget renderTarget) override;

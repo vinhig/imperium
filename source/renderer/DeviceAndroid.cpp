@@ -9,9 +9,9 @@
 
 #include "BackendOglEs.h"
 
-DeviceAndroid::DeviceAndroid(ApiDesc apiDesc) {
+DeviceAndroid::DeviceAndroid(ApiDesc apiDesc, int width, int height) {
   if (apiDesc == ApiDesc::OpenGLES32) {
-    _backend = new BackendOglEs();
+    _backend = new BackendOglEs({width, height});
   } else {
     throw std::runtime_error("Incompatible API backend");
   }
@@ -51,7 +51,7 @@ GPUBuffer DeviceAndroid::CreateIndexBuffer(CPUBuffer<int> cpuBuffer) {
 }
 
 GPUBuffer DeviceAndroid::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
-    // Describe and create buffer
+  // Describe and create buffer
   BufferCreationDesc desc = {};
   desc.purpose = BufferTypeDesc::UniformBuffer;
   desc.usage = BufferUsageDesc::DynamicDraw;

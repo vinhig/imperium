@@ -11,10 +11,10 @@
 
 #include "../common/Log.h"
 
-BackendOgl::BackendOgl() {
+BackendOgl::BackendOgl(BackendDesc backendDesc) {
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  glViewport(0, 0, 1024, 768);
+  glViewport(0, 0, backendDesc.width, backendDesc.height);
 }
 
 GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {

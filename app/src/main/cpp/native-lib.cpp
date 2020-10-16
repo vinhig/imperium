@@ -27,7 +27,7 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
     JNIEnv *env, jclass clazz) {
   // OpenGL context created from activity
   // Create device
-  g_device = new DeviceAndroid(ApiDesc::OpenGLES32);
+  g_device = new DeviceAndroid(ApiDesc::OpenGLES32, 0, 0);
 
   // Set file reader
   g_device->SetFileReader([](std::string path) -> std::vector<unsigned char> {
