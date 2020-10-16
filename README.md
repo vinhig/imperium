@@ -56,7 +56,7 @@ GLFW3 and glslangValidator are mandatory dependencies.
 
 ```shell script
 sudo apt install libglfw-dev glslang-dev glslang-tools # ubuntu 20.04
-sudo pacman -S glfw                                    # arch linux/manjaro
+sudo pacman -S glfw glslang                            # arch linux/manjaro
 ```
 
 ```shell script
