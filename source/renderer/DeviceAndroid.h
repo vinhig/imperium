@@ -30,6 +30,8 @@ class DeviceAndroid : public Device {
                                GPUBuffer indexBuffer) override;
   GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
 
+  void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) override;
+
   void RequestAnimationFrame() override;
   bool ShouldClose() override;
   void SetFileReader(

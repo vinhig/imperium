@@ -28,7 +28,7 @@ GPUBuffer DeviceAndroid::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   BufferCreationDesc desc = {};
   desc.purpose = BufferTypeDesc::VertexBuffer;
   desc.usage = BufferUsageDesc::StaticDraw;
-  desc.size = sizeof(float) * cpuBuffer.nbElements;
+  desc.size = sizeof(float) * cpuBuffer.stride * cpuBuffer.nbElements;
   desc.data = (void *)cpuBuffer.data;
   desc.stride = sizeof(float) * cpuBuffer.stride;
 
@@ -105,6 +105,18 @@ GPUDrawInput DeviceAndroid::CreateDrawInput(
 GPUInputLayout DeviceAndroid::CreateInputLayout(
     InputLayoutDesc inputLayoutDesc) {
   return _backend->CreateInputLayout(inputLayoutDesc);
+}
+
+void DeviceAndroid::UpdateUniformBuffer(GPUBuffer buffer,
+                                        CPUBuffer<void> newData) {
+  // Describe how to modify
+  BufferUpdateDesc updateDesc = {};
+  updateDesc.buffer = &buffer;
+  updateDesc.data = newData.data;
+  updateDesc.size = newData.size;
+  updateDesc.offset = 0;
+
+  _backend->UpdateBuffer(updateDesc);
 }
 
 void DeviceAndroid::SetFileReader(

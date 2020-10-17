@@ -10,7 +10,13 @@
 #include <stdexcept>
 
 std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
-    const std::string& path) {
+    const std::string& path
+#ifdef __ANDROID__
+    ,
+    std::function<std::vector<unsigned char>(std::string)> fileReader
+#endif
+) {
+#ifndef __ANDROID__
   // Open file
   FILE* fp = fopen(path.c_str(), "rb");
   if (!fp) {
@@ -21,6 +27,11 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
   fseek(fp, 0, SEEK_SET);
   auto* content = new ofbx::u8[file_size];
   fread(content, 1, file_size, fp);
+#else
+auto vcontent = fileReader(path);
+auto content = vcontent.data();
+long file_size = vcontent.size();
+#endif
 
   // Load scene
   auto scene = ofbx::load((ofbx::u8*)content, file_size,

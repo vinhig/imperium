@@ -43,8 +43,9 @@ uint32_t SecretCompileShader(const char* source, GLenum shaderType) {
   if (infoLength > 0) {
     char* errorMsg = new char[infoLength + 1];
     glGetShaderInfoLog(shader, infoLength, nullptr, &errorMsg[0]);
-    std::cout << source << std::endl;
-    throw std::runtime_error(errorMsg);
+    // std::cout << errorMsg << std::endl;
+    // std::cout << source << std::endl;
+    throw std::runtime_error(std::string(errorMsg));
   }
 
   return shader;
