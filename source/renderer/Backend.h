@@ -72,4 +72,10 @@ class Backend {
    */
   virtual void Draw(GPUDrawInput drawInput, int count, int times,
                     GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
+
+  /**
+   * Replace a part of data stored in a buffer. Part of this buffer is specified
+   * by an offset and a size.
+   */
+   virtual void UpdateBuffer(BufferUpdateDesc updateDesc) = 0;
 };

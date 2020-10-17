@@ -193,8 +193,8 @@ void BackendOgl::BindProgram(GPUProgram program) {
 void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times,
                       GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
   glBindVertexArray(drawInput.vao);
-  for (int i = 0; i < nbUniformBuffers; ++i) {
-    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers->buffer);
+  for (int i = 0; i < nbUniformBuffers; i++) {
+    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers[i].buffer);
   }
   if (times == 1) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
@@ -202,4 +202,13 @@ void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times,
     glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
                             times);
   }
+}
+
+void BackendOgl::UpdateBuffer(BufferUpdateDesc updateDesc) {
+  // Vertex and index buffer can't be modified (at the time being)
+  // We can bind it as an Uniform Buffer
+  glBindBuffer(GL_UNIFORM_BUFFER, updateDesc.buffer->buffer);
+  glBufferSubData(GL_UNIFORM_BUFFER, updateDesc.offset, updateDesc.size,
+                  updateDesc.data);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

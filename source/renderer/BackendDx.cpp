@@ -38,7 +38,7 @@ BackendDx::BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,
     throw std::runtime_error("Unable to create renderTargetView.");
   }
 
-  D3D11_TEXTURE2D_DESC depthStencilDesc;
+  D3D11_TEXTURE2D_DESC depthStencilDesc = {};
   depthStencilDesc.Width = backendDesc.width;
   depthStencilDesc.Height = backendDesc.height;
   depthStencilDesc.MipLevels = 1;
@@ -123,7 +123,7 @@ GPUBuffer BackendDx::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
   auto bufferUsage = D3D11_USAGE_DEFAULT;
   auto cpuAccess = 0;
   // TODO: make a correct switch that set correct cpuAccess value
-  switch (bufferCreationDesc.usage) {
+  /*switch (bufferCreationDesc.usage) {
     case StaticDraw:
       bufferUsage = D3D11_USAGE_IMMUTABLE;
       break;
@@ -153,7 +153,7 @@ GPUBuffer BackendDx::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
     case StreamCopy:
       bufferUsage = D3D11_USAGE_DEFAULT;
       break;
-  }
+  }*/
   unsigned int bindFlags;
   switch (bufferCreationDesc.purpose) {
     case VertexBuffer:
@@ -411,4 +411,14 @@ void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
   }
 }
 
-void BackendDx::Present() { _swapChain->Present(1, 0); }
+void BackendDx::UpdateBuffer(BufferUpdateDesc updateDesc) {
+  // We don't care about nature of buffer
+  auto buffer = _buffers[updateDesc.buffer->buffer].Get();
+  _context->UpdateSubresource(buffer, 0, nullptr, updateDesc.data, 0, 0);
+}
+
+void BackendDx::Present() {
+  _swapChain->Present(1, 0);
+  _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(),
+                               _depthStencilView.Get());
+}

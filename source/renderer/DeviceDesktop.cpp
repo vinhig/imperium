@@ -130,10 +130,10 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       scd.SampleDesc.Quality = 0;
 
       scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-      scd.BufferCount = 1;
+      scd.BufferCount = 3;
       scd.OutputWindow = glfwGetWin32Window(_window);
       scd.Windowed = TRUE;
-      scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+      scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
       scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
       ComPtr<IDXGIDevice3> dxgiDevice;
@@ -157,6 +157,8 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
             "Failed to create swapChain. Go to https://getfedora.org "
             "to solve the problem");
       }
+
+      std::cout << "CreateSwapChain" << std::endl;
 
       _backend = new BackendDx({deviceDesc.width, deviceDesc.height}, device,
                                context, swapChain);
@@ -268,4 +270,16 @@ GPUDrawInput DeviceDesktop::CreateDrawInput(
 GPUInputLayout DeviceDesktop::CreateInputLayout(
     InputLayoutDesc inputLayoutDesc) {
   return _backend->CreateInputLayout(inputLayoutDesc);
+}
+
+void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,
+                                        CPUBuffer<void> newData) {
+  // Describe how to modify
+  BufferUpdateDesc updateDesc = {};
+  updateDesc.buffer = &buffer;
+  updateDesc.data = newData.data;
+  updateDesc.size = newData.size;
+  updateDesc.offset = 0;
+
+  _backend->UpdateBuffer(updateDesc);
 }

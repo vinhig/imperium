@@ -30,4 +30,6 @@ class BackendOgl : public Backend {
   void BindProgram(GPUProgram program) override;
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+
+  void UpdateBuffer(BufferUpdateDesc updateDesc) override;
 };

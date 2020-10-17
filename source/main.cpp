@@ -15,7 +15,7 @@
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGLES32});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::Directx11});
 
   // Create a program
   // Some testing :)
@@ -77,13 +77,21 @@ int main(int argc, char **argv) {
 
   struct Material {
     float colors[4];
-    // float ambient;
-    // float specular;
     float mvp[16];
+    float model[16];
+    float ambient;
+    float specular;
   };
 
-  Material material = {{0.2, 0.3, 0.4, 1.0}};
+  Material material = {};
+  material.colors[0] = 0.8;
+  material.colors[1] = 0.8;
+  material.colors[2] = 0.0;
+  material.colors[3] = 1.0;
+  material.ambient = 0.1;
+  material.specular = 0.1;
   memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
+  memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
 
   // Create vertex buffer
   // CPUBuffer<float> cpuBuffer1 = {};
@@ -127,30 +135,47 @@ int main(int argc, char **argv) {
 
   // Let's light it up
   // - Lux, 2020
-  // struct Lights {
-  //   float camera[3];
-  //   float positions[3][3];
-  // };
-  //
-  // Lights lights = {{3.0f, 3.0f, 3.0f},
-  //                  {
-  //                      {4.0f, 0.0f, 0.0f},
-  //                      {0.0f, 4.0f, 0.0f},
-  //                      {0.0f, 0.0f, 4.0f},
-  //                  }};
-  //
-  // CPUBuffer<void> cpuBuffer4 = {};
-  // cpuBuffer4.data = (void *)&lights;
-  // cpuBuffer4.size = sizeof(Lights);
+  struct Lights {
+    float camera[4]; // vec3 have the same width as vec4
+    float positions[3][3];
+  };
 
-  // auto uniformBuffer2 = device->CreateUniformBuffer(cpuBuffer4);
+  Lights lights = {};
 
-  GPUBuffer uniformBuffers[1] = {uniformBuffer1 /*, uniformBuffer2*/};
+  lights.camera[0] = 3.0f;
+  lights.camera[1] = 3.0f;
+  lights.camera[2] = 3.0f;
 
+  lights.positions[0][0] = 1.0f;
+  lights.positions[0][1] = 0.0f;
+  lights.positions[0][2] = 0.0f;
+
+  CPUBuffer<void> cpuBuffer4 = {};
+  cpuBuffer4.data = (void *)&lights;
+  cpuBuffer4.size = sizeof(Lights);
+
+  auto uniformBuffer2 = device->CreateUniformBuffer(cpuBuffer4);
+
+  GPUBuffer uniformBuffers[2] = {uniformBuffer1, uniformBuffer2};
+  std::cout << "salut" << std::endl;
+  float caca = 0.0f;
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});
+    // Update light position
+    lights.positions[0][0] = cos(caca) * 3;
+    lights.positions[0][1] = sin(caca) * 3;
+    lights.positions[0][2] = sin(caca) * 3;
+    device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
+
+    model = glm::translate(glm::vec3(cos(caca), 0.0f, 0.0f));
+    mvp = projection * view * model;
+    memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
+    memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
+    device->UpdateUniformBuffer(uniformBuffer1, cpuBuffer3);
+
     device->_backend->BindProgram(program);
-    device->_backend->Draw(drawInput, nbIndices, 1, &uniformBuffers[0], 1);
+    device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 2);
+    caca += 0.05f;
     device->RequestAnimationFrame();
   }
 }

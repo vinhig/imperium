@@ -71,6 +71,14 @@ struct BufferCreationDesc {
   // TODO: some readonly?
 };
 
+struct GPUBuffer;  // C++ bad
+struct BufferUpdateDesc {
+  GPUBuffer* buffer;
+  void* data;
+  size_t size;
+  size_t offset;
+};
+
 struct InputLayoutEntryDesc {
   unsigned int index;
   int size;

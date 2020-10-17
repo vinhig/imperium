@@ -34,6 +34,13 @@ class Device {
       GPUBuffer indexBuffer) = 0;
   virtual GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) = 0;
 
+  /**
+   * Completely replace data stored in GPU buffer.
+   * @param buffer GPUBuffer to modify.
+   * @param newData CPUBuffer containing the new data to store.
+   */
+  virtual void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) = 0;
+
   // virtual void Draw() = 0;
 
   virtual void RequestAnimationFrame() = 0;
