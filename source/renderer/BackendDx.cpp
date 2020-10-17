@@ -233,7 +233,6 @@ GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
     hlsl.set_hlsl_options(options);
 
     vertexSourceCode = hlsl.compile();
-    std::cout << "Vertex Shader:\n" << vertexSourceCode << std::endl;
   }
   {
     spirv_cross::CompilerHLSL hlsl(std::move(fragmentSource));
@@ -243,7 +242,6 @@ GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
     hlsl.set_hlsl_options(options);
 
     fragmentSourceCode = hlsl.compile();
-    std::cout << "Fragment Shader:\n" << fragmentSourceCode << std::endl;
   }
 
   // Compile shader using D3DCompiler
@@ -298,7 +296,6 @@ GPUDrawInput BackendDx::CreateDrawInput(
       }
     }
     if (!contains) {
-      std::cout << "POUF" << std::endl;
       _vertexBuffers.push_back(vertexBuffers[i]);
     }
   }
@@ -324,7 +321,6 @@ GPUInputLayout BackendDx::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
           format = DXGI_FORMAT_R32G32_FLOAT;
           break;
         case 3:
-          std::cout << "good" << std::endl;
           format = DXGI_FORMAT_R32G32B32_FLOAT;
           break;
         case 4:
@@ -343,7 +339,6 @@ GPUInputLayout BackendDx::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
                          (unsigned int)entry.offset,
                          D3D11_INPUT_PER_VERTEX_DATA,
                          0};
-    std::cout << "Coucou" << std::endl;
     index++;
   }
   // Create input layout from vertex shader

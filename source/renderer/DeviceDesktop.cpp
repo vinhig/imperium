@@ -158,8 +158,6 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
             "to solve the problem");
       }
 
-      std::cout << "CreateSwapChain" << std::endl;
-
       _backend = new BackendDx({deviceDesc.width, deviceDesc.height}, device,
                                context, swapChain);
       _api = ApiDesc::Directx11;

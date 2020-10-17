@@ -40,9 +40,6 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
     int vertexCount = mesh->getGeometry()->getVertexCount();
     int indexCount = mesh->getGeometry()->getIndexCount();
 
-    std::cout << "vertexCount = " << vertexCount << std::endl;
-    std::cout << "indexCount = " << indexCount << std::endl;
-
     // Extract vertex data
     auto position = mesh->getGeometry()->getVertices();
     auto normals = mesh->getGeometry()->getNormals();

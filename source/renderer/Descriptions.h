@@ -6,6 +6,9 @@
 
 #include <vector>
 
+/**
+ * Give a human readable name to each API.
+ */
 enum ApiDesc {
   OpenGL33,
   OpenGL46,
@@ -13,6 +16,9 @@ enum ApiDesc {
   Directx11,
 };
 
+/**
+ * Give a human readable name to each data type.
+ */
 enum DataType {
   Float,
   Int,
@@ -23,11 +29,23 @@ enum DataType {
   Vec3,
 };
 
+/**
+ * Describe backend before his creation.
+ */
 struct BackendDesc {
+  /**
+   * Width of the previously created window.
+   */
   int width;
+  /**
+   * Width of the previously created window.
+   */
   int height;
 };
 
+/**
+ * Describe device before his creation.
+ */
 struct DeviceDesc {
   /**
    * Width of the window.
@@ -43,12 +61,26 @@ struct DeviceDesc {
   ApiDesc api;
 };
 
+/**
+ * Characterize how the buffer will be used.
+ */
 enum BufferTypeDesc {
+  /**
+   * Contains vertices from a mesh.
+   */
   VertexBuffer,
+  /**
+   * contains indices targeting vertices from another buffer. Indices aren't
+   * pointer but unsigned int. They act like array indices.
+   */
   IndexBuffer,
   UniformBuffer,
 };
 
+/**
+ * Describe future data manipulation on this buffer.
+ * (This enum is just used in the OpenGLs backend.)
+ */
 enum BufferUsageDesc {
   StaticDraw,
   StaticRead,
@@ -61,16 +93,21 @@ enum BufferUsageDesc {
   StreamCopy,
 };
 
+/**
+ * Raw description of a CPUBuffer before his upload on the GPU.
+ */
 struct BufferCreationDesc {
   BufferTypeDesc purpose;
   BufferUsageDesc usage;
   void* data;
   size_t size;
   size_t stride;
-  // TODO: some mapping?
-  // TODO: some readonly?
 };
 
+/**
+ * Raw description of a manipulation of data that will be applied on a
+ * GPUBuffer.
+ */
 struct GPUBuffer;  // C++ bad
 struct BufferUpdateDesc {
   GPUBuffer* buffer;
@@ -79,6 +116,19 @@ struct BufferUpdateDesc {
   size_t offset;
 };
 
+/**
+ * Entry of an input layout. We cannot make more explicit than "entry".
+ * Vertices from buffer are split into multiple "entries".
+ * Vertices: 1.0 1.0 1.0 0.2 0.3 0.5 0.2 0.3 ...
+ * With three entries: position[size=3, index=0, stride=8]
+ *                     normal  [size=3, index=1, stride=8]
+ *                     uv      [size=2, index=2, stride=8]
+ * Vertex Shader will be fed with
+ *     [binding=0] position = vec3(1.0, 1.0, 1.0)
+ *     [binding=1] normal   = vec3(0.2, 0.3, 0.5)
+ *     [binding=2] uv       = vec2(0.2, 0.3)
+ * for each vertex.
+ */
 struct InputLayoutEntryDesc {
   unsigned int index;
   int size;
@@ -88,6 +138,10 @@ struct InputLayoutEntryDesc {
   void* offset;
 };
 
+/**
+ * List of input layout entries linked to a program (to a vertex shader more
+ * precisely).
+ */
 struct GPUProgram;
 struct InputLayoutDesc {
   GPUProgram* program;
