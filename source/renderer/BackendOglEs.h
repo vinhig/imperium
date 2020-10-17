@@ -28,5 +28,5 @@ class BackendOglEs : public Backend {
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
 
-  void UpdateBuffer(BufferUpdateDesc updateDesc) override {};
+  void UpdateBuffer(BufferUpdateDesc updateDesc) override;
 };

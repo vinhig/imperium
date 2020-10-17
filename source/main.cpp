@@ -15,7 +15,7 @@
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::Directx11});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGL33});
 
   // Create a program
   // Some testing :)

@@ -113,7 +113,7 @@ GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
     spirv_cross::CompilerGLSL glsl(std::move(vertexSource));
 
     spirv_cross::CompilerGLSL::Options options;
-    options.version = 300;
+    options.version = 320;
     options.es = true;
     glsl.set_common_options(options);
 
@@ -123,7 +123,7 @@ GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
     spirv_cross::CompilerGLSL glsl(std::move(fragmentSource));
 
     spirv_cross::CompilerGLSL::Options options;
-    options.version = 300;
+    options.version = 320;
     options.es = true;
     glsl.set_common_options(options);
 
@@ -201,8 +201,8 @@ void BackendOglEs::BindProgram(GPUProgram program) {
 void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
                         GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
   glBindVertexArray(drawInput.vao);
-  for (int i = 0; i < nbUniformBuffers; ++i) {
-    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers->buffer);
+  for (int i = 0; i < nbUniformBuffers; i++) {
+    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers[i].buffer);
   }
   if (times == 1) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
@@ -210,4 +210,13 @@ void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
     glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
                             times);
   }
+}
+
+void BackendOglEs::UpdateBuffer(BufferUpdateDesc updateDesc) {
+  // Vertex and index buffer can't be modified (at the time being)
+  // We can bind it as an Uniform Buffer
+  glBindBuffer(GL_UNIFORM_BUFFER, updateDesc.buffer->buffer);
+  glBufferSubData(GL_UNIFORM_BUFFER, updateDesc.offset, updateDesc.size,
+                  updateDesc.data);
+  glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
