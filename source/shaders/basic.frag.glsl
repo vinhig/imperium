@@ -2,6 +2,10 @@
 
 layout(location=0) out vec4 color;
 
+layout(binding = 0) uniform sampler2D diffuseTexture;
+layout(binding = 1) uniform sampler2D normalTexture;
+
+
 layout(location=0) in FragIn {
     vec4 o_color;
     float o_ambient;
@@ -10,6 +14,7 @@ layout(location=0) in FragIn {
     vec3 o_light_position[3];
     vec3 o_normal;
     vec3 o_frag_pos;
+    vec2 o_uv;
 } fragIn;
 
 void main() {
@@ -17,6 +22,8 @@ void main() {
     // light position
     vec3 ambient = vec3(1.0, 1.0, 1.0) * fragIn.o_ambient;
     vec3 normal = normalize(fragIn.o_normal);
+    vec3 textureColor = texture(diffuseTexture, fragIn.o_uv).xyz;
+
     for (int i = 0; i < 3; i++) {
         // Get direction of light
         int light_n = 0;
@@ -33,7 +40,7 @@ void main() {
         float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 256);
         vec3 specular = fragIn.o_specular * spec  * vec3(1.0, 1.0, 1.0);
 
-        color = vec4((ambient + diffuse + specular) * vec3(1.0, 0.0, 0.0), 1.0);
+        color = vec4((ambient + diffuse + specular) * textureColor, 1.0);
 
         break;
     }

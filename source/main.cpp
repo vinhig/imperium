@@ -9,13 +9,14 @@
 #include <string>
 
 #include "loader/MeshLoader.h"
+#include "loader/TextureLoader.h"
 #include "renderer/BackendOgl.h"
 #include "renderer/DeviceDesktop.h"
 
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGLES32});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGL33});
 
   // Create a program
   // Some testing :)
@@ -89,7 +90,7 @@ int main(int argc, char **argv) {
   // Let's light it up
   // - Lux, 2020
   struct Lights {
-    float camera[4]; // vec3 have the same width as vec4
+    float camera[4];  // vec3 have the same width as vec4
     float positions[3][3];
   };
 
@@ -111,6 +112,17 @@ int main(int argc, char **argv) {
 
   GPUBuffer uniformBuffers[2] = {uniformBuffer1, uniformBuffer2};
 
+  // Some fucking good texturing
+  auto textureLoader = new TextureLoader();
+  // Diffuse stuff
+  auto diffuseCpuTexture = textureLoader->Load("../assets/Diffuse.png");
+  auto diffuseTexture = device->CreateTextureFromData(diffuseCpuTexture);
+  textureLoader->Link("../assets/Diffuse.png", diffuseTexture.texture);
+  // Normal stuff
+  auto normalCpuTexture = textureLoader->Load("../assets/Normal.png");
+  auto normalTexture = device->CreateTextureFromData(normalCpuTexture);
+  textureLoader->Link("../assets/Normal.png", diffuseTexture.texture);
+
   float caca = 0.0f;
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});
@@ -127,6 +139,8 @@ int main(int argc, char **argv) {
     device->UpdateUniformBuffer(uniformBuffer1, cpuBuffer3);
 
     device->_backend->BindProgram(program);
+    device->_backend->BindTexture(diffuseTexture, 0);
+    device->_backend->BindTexture(normalTexture, 1);
     device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 2);
     caca += 0.05f;
     device->RequestAnimationFrame();

@@ -11,7 +11,7 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 * Cascaded Shadows
 * Basic skeleton animation
 
-(This repo is a Work-In-Progress. At the time being, we can barely draw a colored sphere.)
+(This repo is a Work-In-Progress. At the time being, we can barely draw a textured sphere.)
 
 ### API support
 

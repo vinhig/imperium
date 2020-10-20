@@ -70,8 +70,12 @@ class BackendDx : public Backend {
                                const std::vector<GPUBuffer>& vertexBuffers,
                                GPUBuffer indexBuffer) override;
   GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
+  GPUTexture CreateTexture(TextureCreationDesc textureCreationDesc) override;
 
   void BindProgram(GPUProgram program) override;
+  void BindTexture(GPUTexture texture, int index) override;
+  void BindTextures(const std::vector<GPUTexture>& texture, int index) override;
+
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
 

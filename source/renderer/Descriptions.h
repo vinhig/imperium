@@ -29,11 +29,24 @@ enum DataType {
   Vec3,
 };
 
+/**
+ * Describe channels of a texture.
+ * Eg: RGBA -> the image has three channels red/green/blue/alpha
+ *     RG   -> the image has two channels red/green
+ *     (...)
+ */
 enum TextureFormat {
   R,
   RG,
   RGB,
   RGBA,
+  DEPTH,
+};
+
+enum TextureWrap {
+  Repeat,
+  MirrorRepeat,
+  ClampToEdge,
 };
 
 /**
@@ -109,6 +122,17 @@ struct BufferCreationDesc {
   void* data;
   size_t size;
   size_t stride;
+};
+
+/**
+ * Raw description of a CPUTexture before his upload on the GPU.
+ */
+struct TextureCreationDesc {
+  unsigned char* data;
+  int width;
+  int height;
+  TextureFormat format;
+  TextureWrap wrap;
 };
 
 /**

@@ -36,7 +36,7 @@ uint32_t TextureLoader::Get(const std::string& path) {
   return texture;
 }
 
-CPUTexture TextureLoader::Load(const std::string& path, uint32_t texture) {
+CPUTexture TextureLoader::Load(const std::string& path) {
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(true);
 
@@ -57,6 +57,7 @@ CPUTexture TextureLoader::Load(const std::string& path, uint32_t texture) {
   switch (nrChannels) {
     case 4:
       cpuTexture.format = TextureFormat::RGBA;
+      std::cout << "TextureFormat::RGBA" << std::endl;
       break;
     case 3:
       cpuTexture.format = TextureFormat::RGB;
@@ -74,9 +75,12 @@ CPUTexture TextureLoader::Load(const std::string& path, uint32_t texture) {
 
   // Register textures data
   _data.push_back(data);
-  _textures[path] = texture;
 
   return cpuTexture;
+}
+
+void TextureLoader::Link(const std::string& path, uint32_t texture) {
+  _textures[path] = texture;
 }
 
 int TextureLoader::Size() { return _textures.size(); }

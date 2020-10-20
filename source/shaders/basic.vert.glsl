@@ -12,6 +12,7 @@ layout(location=0) out FragIn {
     vec3 o_light_position[3];
     vec3 o_normal;
     vec3 o_frag_pos;
+    vec2 o_uv;
 } fragIn;
 
 layout(std140, binding=0) uniform Material {
@@ -37,5 +38,6 @@ void main() {
     fragIn.o_light_position[2] = light_position[2];
     fragIn.o_normal = mat3(transpose(inverse(model))) * normal;
     fragIn.o_frag_pos = vec3(model * vec4(position, 1.0));
+    fragIn.o_uv = uv;
     gl_Position = mvp * vec4(position, 1.0);
 }

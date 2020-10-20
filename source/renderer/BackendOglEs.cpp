@@ -194,9 +194,22 @@ GPUInputLayout BackendOglEs::CreateInputLayout(
   return GPUInputLayout{inputLayoutDesc, 0};
 }
 
+GPUTexture BackendOglEs::CreateTexture(
+    TextureCreationDesc textureCreationDesc) {
+  return GPUTexture();
+}
+
 void BackendOglEs::BindProgram(GPUProgram program) {
   glUseProgram(program.program);
 }
+
+void BackendOglEs::BindTexture(GPUTexture texture, int index) {
+  glActiveTexture(GL_TEXTURE0 + index);
+  glBindTexture(GL_TEXTURE_2D, texture.texture);
+}
+
+void BackendOglEs::BindTextures(const std::vector<GPUTexture>& texture,
+                                int index) {}
 
 void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
                         GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {

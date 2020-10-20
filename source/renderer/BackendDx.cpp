@@ -361,11 +361,19 @@ GPUInputLayout BackendDx::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
   return GPUInputLayout{inputLayoutDesc, _nbInputLayouts - 1};
 }
 
+GPUTexture BackendDx::CreateTexture(TextureCreationDesc textureCreationDesc) {
+  return GPUTexture();
+}
+
 void BackendDx::BindProgram(GPUProgram program) {
   auto shaders = _programs[program.program];
   _context->VSSetShader(shaders.first.Get(), nullptr, 0);
   _context->PSSetShader(shaders.second.Get(), nullptr, 0);
 }
+
+void BackendDx::BindTexture(GPUTexture texture, int index) {}
+
+void BackendDx::BindTextures(const std::vector<GPUTexture>& texture, int index) {}
 
 void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {

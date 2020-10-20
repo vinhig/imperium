@@ -48,7 +48,15 @@ class TextureLoader {
    * @param path Path to texture.
    * @param texture GPU texture.
    */
-  CPUTexture Load(const std::string& path, uint32_t texture);
+  CPUTexture Load(const std::string& path);
+
+  /**
+   * Link a texture name and his already loaded correspondent. You should link
+   * every texture you load to avoid creation of duplicates.
+   * @param path Path to texture texture.
+   * @param texture GPU address of the texture.
+   */
+  void Link(const std::string& path, uint32_t texture);
 
   /**
    * Number of textures loaded.

@@ -89,6 +89,23 @@ class Device {
   virtual GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) = 0;
 
   /**
+   * Create an empty texture with given characteristics.
+   * @param format Describe color channels of the new texture.
+   * @param wrap Behaviour of the sampler in case of out of range.
+   * @param width Width of the texture.
+   * @param height Height of the texture
+   * @return GPUTexture created with those information and completely empty.
+   */
+  virtual GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap, int width, int height) = 0;
+
+  /**
+   * Create a texture by uploading content loaded from a TextureLoader.
+   * @param cpuTexture Texture loaded on the CPU.
+   * @return GPUTexture containing corresponding to given CPUTexture.
+   */
+  virtual GPUTexture CreateTextureFromData(CPUTexture cpuTexture) = 0;
+
+  /**
    * Completely replace data stored in GPU buffer.
    * @param buffer GPUBuffer to modify.
    * @param newData CPUBuffer containing the new data to store.

@@ -28,8 +28,7 @@ class Backend {
 
   /**
    * Create some fucking good buffer of data.
-   * @param data Data to upload on GPU
-   * @param size Size of data (in bytes)
+   * @param BufferCreationDesc Description of the new buffer.
    * @return GPU address of buffer
    */
   virtual GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) = 0;
@@ -63,10 +62,38 @@ class Backend {
   virtual GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) = 0;
 
   /**
+   * Create a texture from a description (optionally from given data).
+   * @param textureCreationDesc Description of the texture.
+   * @return GPU address of texture and some useful information.
+   */
+  virtual GPUTexture CreateTexture(TextureCreationDesc textureCreationDesc) = 0;
+
+  /**
    * Specify active program to use for next draw calls.
    * @param program Program to use.
    */
   virtual void BindProgram(GPUProgram program) = 0;
+
+  /**
+   * Bind a texture to a specific index. This method is only implemented for non
+   * bindless backend. Can and has to be called even if it's not implemented to
+   * ensure the cross-platform character of this engine.
+   * @param texture GPUTexture to use for future draw calls.
+   * @param index Index of the texture in program. Defined in
+   * `layout(binding=index)` from shader source code.
+   */
+  virtual void BindTexture(GPUTexture texture, int index) = 0;
+
+  /**
+   * Bind multiple textures. This method is only implemented for bindless
+   * backend as it require texture to be texture handle. Can and has to be
+   * called even if it's not implemented to ensure the cross-platform character
+   * of this engine.
+   * @param textures List of textures handle to bind.
+   * @param binding Index of the textures structure in the shader.
+   */
+  virtual void BindTextures(const std::vector<GPUTexture>& textures,
+                            int index) = 0;
 
   /**
    * Launch a draw call.
@@ -83,5 +110,5 @@ class Backend {
    * Replace a part of data stored in a buffer. Part of this buffer is specified
    * by an offset and a size.
    */
-   virtual void UpdateBuffer(BufferUpdateDesc updateDesc) = 0;
+  virtual void UpdateBuffer(BufferUpdateDesc updateDesc) = 0;
 };
