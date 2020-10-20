@@ -29,6 +29,13 @@ enum DataType {
   Vec3,
 };
 
+enum TextureFormat {
+  R,
+  RG,
+  RGB,
+  RGBA,
+};
+
 /**
  * Describe backend before his creation.
  */

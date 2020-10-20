@@ -6,6 +6,8 @@
 
 #include <cstdio>
 
+#include "../renderer/Descriptions.h"
+
 /**
  * CPUBuffer contains a bunch of data to be copied on the GPU memory and used in
  * draw calls.
@@ -20,7 +22,7 @@ struct CPUBuffer {
   /**
    * Number of elements in each entry.
    */
-   int stride;
+  int stride;
   /**
    * Number of elements in data.
    */
@@ -28,4 +30,11 @@ struct CPUBuffer {
     int nbElements;
     size_t size;
   };
+};
+
+struct CPUTexture {
+  unsigned char* data;
+  int width;
+  int height;
+  TextureFormat format;
 };
