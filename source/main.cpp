@@ -16,7 +16,7 @@
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGLES32});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::Directx11});
 
   // Create a program
   // Some testing :)
@@ -47,9 +47,9 @@ int main(int argc, char **argv) {
   };
 
   Material material = {};
-  material.colors[0] = 0.8;
-  material.colors[1] = 0.8;
-  material.colors[2] = 0.0;
+  material.colors[0] = 1.0;
+  material.colors[1] = 1.0;
+  material.colors[2] = 1.0;
   material.colors[3] = 1.0;
   material.ambient = 0.1;
   material.specular = 0.1;
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   // - Lux, 2020
   struct Lights {
     float camera[4];  // vec3 have the same width as vec4
-    float positions[3][3];
+    float positions[3];
   };
 
   Lights lights = {};
@@ -100,9 +100,9 @@ int main(int argc, char **argv) {
   lights.camera[1] = 3.0f;
   lights.camera[2] = 3.0f;
 
-  lights.positions[0][0] = 1.0f;
-  lights.positions[0][1] = 0.0f;
-  lights.positions[0][2] = 0.0f;
+  lights.positions[0] = 1.0f;
+  lights.positions[1] = 0.0f;
+  lights.positions[2] = 0.0f;
 
   CPUBuffer<void> cpuBuffer4 = {};
   cpuBuffer4.data = (void *)&lights;
@@ -127,10 +127,10 @@ int main(int argc, char **argv) {
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});
     // Update light position
-    lights.positions[0][0] = cos(caca) * 3;
+    /*lights.positions[0][0] = cos(caca) * 3;
     lights.positions[0][1] = sin(caca) * 3;
-    lights.positions[0][2] = sin(caca) * 3;
-    device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
+    lights.positions[0][2] = sin(caca) * 3;*/
+    // device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
 
     model = glm::translate(glm::vec3(cos(caca), 0.0f, 0.0f));
     mvp = projection * view * model;
@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 
     device->_backend->BindProgram(program);
     device->_backend->BindTexture(diffuseTexture, 0);
-    device->_backend->BindTexture(normalTexture, 1);
+    // device->_backend->BindTexture(normalTexture, 1);
     device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 2);
     caca += 0.05f;
     device->RequestAnimationFrame();

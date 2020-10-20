@@ -30,9 +30,9 @@ class BackendDx : public Backend {
 
   // Swapchain backbuffers
   ComPtr<ID3D11RenderTargetView> _renderTargetView;
-    ComPtr<ID3D11Texture2D> _depthStencilBuffer;
-    ComPtr<ID3D11DepthStencilState> _depthStencilState;
-    ComPtr<ID3D11DepthStencilView> _depthStencilView;
+  ComPtr<ID3D11Texture2D> _depthStencilBuffer;
+  ComPtr<ID3D11DepthStencilState> _depthStencilState;
+  ComPtr<ID3D11DepthStencilView> _depthStencilView;
   ComPtr<ID3D11RasterizerState> _rasterizerState;
 
   // OpenGLified resources
@@ -55,6 +55,15 @@ class BackendDx : public Backend {
 
   std::unordered_map<uint32_t, ComPtr<ID3D11Buffer>> _buffers;
   uint32_t _nbBuffers = 0;
+
+  struct DxTexture {
+    ComPtr<ID3D11Texture2D> texture;
+    ComPtr<ID3D11SamplerState> samplerState;
+    ComPtr<ID3D11ShaderResourceView> shaderResource;
+  };
+
+  std::unordered_map<uint32_t, DxTexture> _textures;
+  uint32_t _nbTextures = 0;
 
  public:
   BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,

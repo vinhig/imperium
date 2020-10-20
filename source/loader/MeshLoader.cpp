@@ -28,9 +28,9 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
   auto* content = new ofbx::u8[file_size];
   fread(content, 1, file_size, fp);
 #else
-auto vcontent = fileReader(path);
-auto content = vcontent.data();
-long file_size = vcontent.size();
+  auto vcontent = fileReader(path);
+  auto content = vcontent.data();
+  long file_size = vcontent.size();
 #endif
 
   // Load scene

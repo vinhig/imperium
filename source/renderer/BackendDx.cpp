@@ -12,6 +12,8 @@
 #include <system_error>
 #include <utility>
 
+#include "../common/File.h"
+
 BackendDx::BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,
                      ComPtr<ID3D11DeviceContext> context,
                      ComPtr<IDXGISwapChain> swapChain) {
@@ -198,7 +200,7 @@ ComPtr<ID3DBlob> DxCompileShader(const char* sourceCode, size_t length,
   HRESULT hr =
       D3DCompile(sourceCode, length, nullptr, nullptr, nullptr, "main", target,
 #if _DEBUG
-                 D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG,
+                 D3DCOMPILE_DEBUG,
 #else
                  D3DCOMPILE_OPTIMIZATION_LEVEL3,
 #endif
@@ -244,11 +246,14 @@ GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
     fragmentSourceCode = hlsl.compile();
   }
 
+  std::cout << "// VertexSourceCode:" << vertexSourceCode << std::endl;
+  std::cout << "// FragmentSourceCode:" << fragmentSourceCode << std::endl;
+
   // Compile shader using D3DCompiler
-  ComPtr<ID3DBlob> fragmentBlob = DxCompileShader(
-      fragmentSourceCode.c_str(), fragmentSourceCode.length(), "ps_5_0");
   ComPtr<ID3DBlob> vertexBlob = DxCompileShader(
       vertexSourceCode.c_str(), vertexSourceCode.length(), "vs_5_0");
+  ComPtr<ID3DBlob> fragmentBlob = DxCompileShader(
+      fragmentSourceCode.c_str(), fragmentSourceCode.length(), "ps_5_0");
 
   // From that point pixel shader == fragment shader
   ComPtr<ID3D11PixelShader> pixelShader;
@@ -362,7 +367,98 @@ GPUInputLayout BackendDx::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
 }
 
 GPUTexture BackendDx::CreateTexture(TextureCreationDesc textureCreationDesc) {
-  return GPUTexture();
+  ComPtr<ID3D11Texture2D> texture;
+  ComPtr<ID3D11SamplerState> samplerState;
+  ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+
+  auto format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  auto pitch = 4;
+  switch (textureCreationDesc.format) {
+    case R:
+      format = DXGI_FORMAT_R8_UNORM;
+      pitch = 1;
+      break;
+    case RG:
+      format = DXGI_FORMAT_R8G8_UNORM;
+      pitch = 2;
+      break;
+    case RGB:
+      // oh fuck
+      // where is my DXGI_FORMAT_R8G8B8_UNORM ?
+      format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      pitch = 3;
+      break;
+    case RGBA:
+      format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      pitch = 4;
+      break;
+    case DEPTH:
+      break;
+  }
+
+  D3D11_TEXTURE2D_DESC desc = {};
+  desc.Width = textureCreationDesc.width;
+  desc.Height = textureCreationDesc.height;
+  desc.MipLevels = 1;
+  desc.ArraySize = 1;
+  desc.Format = format;
+  desc.Usage = D3D11_USAGE_DYNAMIC;
+  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+  desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  desc.MiscFlags = 0;
+  desc.SampleDesc = {};
+  desc.SampleDesc.Count = 1;
+
+  D3D11_SAMPLER_DESC sampDesc = {};
+  sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+  sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+  sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+  sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+  sampDesc.MinLOD = 0;
+  sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+  D3D11_SUBRESOURCE_DATA textureData = {};
+  textureData.pSysMem = textureCreationDesc.data;
+  textureData.SysMemPitch = textureCreationDesc.width * 4;
+  textureData.SysMemSlicePitch =
+      textureCreationDesc.width * textureCreationDesc.height * 4;
+  assert(textureCreationDesc.data != nullptr);
+
+  // D3D11_SHADER_RESOURCE_VIEW_DESC* shaderResourceViewDesc = {};
+  // shaderResourceViewDesc->Format = format;
+
+  HRESULT result = _device->CreateTexture2D(&desc, &textureData, &texture);
+  if (FAILED(result)) {
+    std::string message = std::system_category().message(result);
+    std::cout << message << std::endl;
+    throw std::runtime_error("Unable to create texture.");
+  }
+  result = _device->CreateSamplerState(&sampDesc, &samplerState);
+  if (FAILED(result)) {
+    std::string message = std::system_category().message(result);
+    std::cout << message << std::endl;
+    throw std::runtime_error("Unable to create sampler.");
+  }
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+  srvDesc.Format = format;
+  srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  srvDesc.Texture2D.MipLevels = 1;
+
+  result = _device->CreateShaderResourceView(texture.Get(), &srvDesc,
+                                             shaderResourceView.GetAddressOf());
+  if (FAILED(result)) {
+    std::string message = std::system_category().message(result);
+    std::cout << message << std::endl;
+    throw std::runtime_error("Unable to create shader resource view.");
+  }
+
+  _textures[_nbTextures] = {texture, samplerState, shaderResourceView};
+  _nbTextures++;
+
+  return GPUTexture{_nbTextures - 1, textureCreationDesc.width,
+                    textureCreationDesc.height};
 }
 
 void BackendDx::BindProgram(GPUProgram program) {
@@ -371,9 +467,15 @@ void BackendDx::BindProgram(GPUProgram program) {
   _context->PSSetShader(shaders.second.Get(), nullptr, 0);
 }
 
-void BackendDx::BindTexture(GPUTexture texture, int index) {}
+void BackendDx::BindTexture(GPUTexture texture, int index) {
+  _context->PSSetShaderResources(
+      index, 1, _textures[texture.texture].shaderResource.GetAddressOf());
+  _context->PSSetSamplers(
+      index, 1, _textures[texture.texture].samplerState.GetAddressOf());
+}
 
-void BackendDx::BindTextures(const std::vector<GPUTexture>& texture, int index) {}
+void BackendDx::BindTextures(const std::vector<GPUTexture>& texture,
+                             int index) {}
 
 void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {

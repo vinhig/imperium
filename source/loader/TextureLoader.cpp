@@ -50,9 +50,9 @@ CPUTexture TextureLoader::Load(const std::string& path) {
   // Invoke stb_image
   // https://github.com/nothings/stb
   unsigned char* data =
-      stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+      stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
 
-  CPUTexture cpuTexture = {data, width, height, TextureFormat::RGB};
+  CPUTexture cpuTexture = {data, width, height, TextureFormat::RGBA};
 
   switch (nrChannels) {
     case 4:
