@@ -196,7 +196,52 @@ GPUInputLayout BackendOglEs::CreateInputLayout(
 
 GPUTexture BackendOglEs::CreateTexture(
     TextureCreationDesc textureCreationDesc) {
-  return GPUTexture();
+  uint32_t texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  auto wrap = GL_MIRRORED_REPEAT;
+  switch (textureCreationDesc.wrap) {
+    case Repeat:
+      wrap = GL_REPEAT;
+      break;
+    case MirrorRepeat:
+      wrap = GL_MIRRORED_REPEAT;
+      break;
+    case ClampToEdge:
+      wrap = GL_CLAMP_TO_EDGE;
+      break;
+  }
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  auto format = GL_RGB;
+  switch (textureCreationDesc.format) {
+    case R:
+      format = GL_R;
+      break;
+    case RG:
+      format = GL_RG;
+      break;
+    case RGB:
+      format = GL_RGB;
+      break;
+    case RGBA:
+      format = GL_RGBA;
+      break;
+    case DEPTH:
+      break;
+  }
+  // Upload
+  glTexImage2D(GL_TEXTURE_2D, 0, format, textureCreationDesc.width,
+               textureCreationDesc.height, 0, format, GL_UNSIGNED_BYTE,
+               textureCreationDesc.data);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  return GPUTexture{texture, textureCreationDesc.width,
+                    textureCreationDesc.height};
 }
 
 void BackendOglEs::BindProgram(GPUProgram program) {
