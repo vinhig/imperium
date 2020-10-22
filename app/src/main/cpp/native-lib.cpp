@@ -238,7 +238,7 @@ Java_com_warnengine_imperium_RendererWrapper_on_1draw_1frame(JNIEnv *env,
   g_device->UpdateUniformBuffer(uniformBuffers[0], cpuBuffer3);
 
   g_device->_backend->BindProgram(program);
-  // g_device->_backend->BindTexture(diffuseTexture, 0);
+  g_device->_backend->BindTexture(diffuseTexture, 0);
   g_device->_backend->Draw(drawInput, 960, 1, uniformBuffers, 2);
   caca += 0.05f;
   g_device->RequestAnimationFrame();
