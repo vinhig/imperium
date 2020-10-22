@@ -12,6 +12,8 @@ add_library(
         ../../../../source/renderer/BackendOglEs.cpp
         ../../../../source/renderer/DeviceAndroid.cpp
         ../../../../source/loader/MeshLoader.cpp
+        ../../../../source/loader/TextureLoader.cpp
+        ../../../../source/loader/pch.cpp
 
         ../../../../libraries/openfbx/src/miniz.c
         ../../../../libraries/openfbx/src/ofbx.cpp
@@ -22,6 +24,7 @@ add_subdirectory(../../../../libraries/spirv-cross/ tmp-build)
 
 target_include_directories(native-lib PRIVATE ../../../../source/)
 target_include_directories(native-lib PRIVATE ../../../../libraries/openfbx/src/)
+target_include_directories(native-lib PRIVATE ../../../../libraries/)
 target_include_directories(native-lib PRIVATE C:/Users/vinhi/source/repos/vcpkg/packages/glm_x64-windows/include/)
 
 find_library(log-lib log)

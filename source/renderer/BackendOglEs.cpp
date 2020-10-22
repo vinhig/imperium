@@ -220,8 +220,7 @@ GPUTexture BackendOglEs::CreateTexture(
   auto format = GL_RGB;
   switch (textureCreationDesc.format) {
     case R:
-      format = GL_R;
-      break;
+      throw std::runtime_error("TextureFormat::R not supported on OpenGLES");
     case RG:
       format = GL_RG;
       break;

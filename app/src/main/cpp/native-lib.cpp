@@ -4,6 +4,7 @@
 #include <android/log.h>
 #include <jni.h>
 #include <loader/MeshLoader.h>
+#include <loader/TextureLoader.h>
 #include <ofbx.h>
 #include <renderer/Descriptions.h>
 #include <renderer/DeviceAndroid.h>
@@ -31,6 +32,8 @@ GPUBuffer uniformBuffers[2];
 
 CPUBuffer<void> cpuBuffer3;
 CPUBuffer<void> cpuBuffer4;
+
+GPUTexture diffuseTexture;
 
 glm::mat4 projection, view, model, mvp;
 
@@ -201,6 +204,13 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
 
   uniformBuffers[0] = uniformBuffer1;
   uniformBuffers[1] = uniformBuffer2;
+
+  // Some fucking good texturing
+  auto textureLoader = new TextureLoader();
+  // Diffuse stuff
+  auto diffuseCpuTexture = textureLoader->Load("Diffuse.png", fileReader);
+  diffuseTexture = g_device->CreateTextureFromData(diffuseCpuTexture);
+  textureLoader->Link("Diffuse.png", diffuseTexture.texture);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -228,6 +238,7 @@ Java_com_warnengine_imperium_RendererWrapper_on_1draw_1frame(JNIEnv *env,
   g_device->UpdateUniformBuffer(uniformBuffers[0], cpuBuffer3);
 
   g_device->_backend->BindProgram(program);
+  // g_device->_backend->BindTexture(diffuseTexture, 0);
   g_device->_backend->Draw(drawInput, 960, 1, uniformBuffers, 2);
   caca += 0.05f;
   g_device->RequestAnimationFrame();

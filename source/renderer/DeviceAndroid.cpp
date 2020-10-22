@@ -107,6 +107,35 @@ GPUInputLayout DeviceAndroid::CreateInputLayout(
   return _backend->CreateInputLayout(inputLayoutDesc);
 }
 
+GPUTexture DeviceAndroid::CreateEmptyTexture(TextureFormat format,
+                                             TextureWrap wrap, int width,
+                                             int height) {
+  // Call the same backend method as CreateTextureFromData
+  // but pass a null pointer, forcing it to upload nothing
+  TextureCreationDesc textureCreationDesc = {};
+  textureCreationDesc.data = nullptr;
+  textureCreationDesc.width = width;
+  textureCreationDesc.height = height;
+  textureCreationDesc.format = format;
+  textureCreationDesc.wrap = wrap;
+
+  return _backend->CreateTexture(textureCreationDesc);
+}
+
+GPUTexture DeviceAndroid::CreateTextureFromData(CPUTexture cpuTexture) {
+  // By creating a texture from data we assume that user load an image from
+  // disk. Therefore, some value are set by default as the texture will be used
+  // to color some meshes.
+  TextureCreationDesc textureCreationDesc = {};
+  textureCreationDesc.data = cpuTexture.data;
+  textureCreationDesc.width = cpuTexture.width;
+  textureCreationDesc.height = cpuTexture.height;
+  textureCreationDesc.format = cpuTexture.format;
+  textureCreationDesc.wrap = TextureWrap::Repeat;
+
+  return _backend->CreateTexture(textureCreationDesc);
+}
+
 void DeviceAndroid::UpdateUniformBuffer(GPUBuffer buffer,
                                         CPUBuffer<void> newData) {
   // Describe how to modify

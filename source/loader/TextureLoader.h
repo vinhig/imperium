@@ -48,7 +48,13 @@ class TextureLoader {
    * @param path Path to texture.
    * @param texture GPU texture.
    */
-  CPUTexture Load(const std::string& path);
+  CPUTexture Load(
+      const std::string& path
+#ifdef __ANDROID__
+      ,
+      std::function<std::vector<unsigned char>(std::string)> fileReader
+#endif
+  );
 
   /**
    * Link a texture name and his already loaded correspondent. You should link

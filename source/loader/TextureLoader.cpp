@@ -36,11 +36,23 @@ uint32_t TextureLoader::Get(const std::string& path) {
   return texture;
 }
 
-CPUTexture TextureLoader::Load(const std::string& path) {
+CPUTexture TextureLoader::Load(
+    const std::string& path
+#ifdef __ANDROID__
+    ,
+    std::function<std::vector<unsigned char>(std::string)> fileReader
+#endif
+) {
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(true);
 
-  // Check if file exists
+#ifdef __ANDROID__
+  auto vcontent = fileReader(path);
+  auto content = vcontent.data();
+  long file_size = vcontent.size();
+
+  unsigned char* data = stbi_load_from_memory(content, file_size, &width, &height, &nrChannels, 4);
+#else
   FILE* file = fopen(path.c_str(), "r");
   if (!file) {
     throw std::runtime_error("Unable to open texture: " + path);
@@ -51,6 +63,7 @@ CPUTexture TextureLoader::Load(const std::string& path) {
   // https://github.com/nothings/stb
   unsigned char* data =
       stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
+#endif
 
   CPUTexture cpuTexture = {data, width, height, TextureFormat::RGBA};
 
