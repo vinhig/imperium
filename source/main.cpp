@@ -52,45 +52,65 @@ int main(int argc, char **argv) {
   auto mvp = projection * view * model;
 
   struct Material {
-    float mvp[16];
-    float model[16];
     float ambient;
     float specular;
-    int texture;
+    float texture;
+    float dumb;  // TODO: opengl glsl compiler seems to convert this to vec3,
+                 // therefore we're in a stride of 4, so if we do not have this
+                 // dumb variable, nothing work
   };
 
-  Material material = {};
+  Material materials[3] = {
+      {1.0, 1.0, 1.0},
+      {1.0, 1.0, 0.0},
+      {1.0, 1.0, 0.0}
+  };
 
-  memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
-  memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
+  CPUBuffer<void> cpuBuffer5 = {};
+  cpuBuffer5.data = (void *)&materials;
+  cpuBuffer5.size = sizeof(Material[3]);
+  auto uniformBuffer3 = device->CreateUniformBuffer(cpuBuffer5);
+
+  struct Object {
+    float mvp[16];
+    float model[16];
+  };
+
+  Object obj = {};
+  memcpy(&obj.mvp[0], &mvp[0][0], 16 * sizeof(float));
+  memcpy(&obj.model[0], &model[0][0], 16 * sizeof(float));
 
   auto b = sizeof(double);
 
   CPUBuffer<void> cpuBuffer3 = {};
-  cpuBuffer3.data = (void *)&material;
-  cpuBuffer3.size = sizeof(Material);
+  cpuBuffer3.data = (void *)&obj;
+  cpuBuffer3.size = sizeof(Object);
   auto uniformBuffer1 = device->CreateUniformBuffer(cpuBuffer3);
 
   // Specify how to draw data
   InputLayoutDesc inputLayoutDesc = {};
   inputLayoutDesc.program = &program;
-  inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 8,
+  inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 9,
                                      DataType::Float,
                                      (void *)(sizeof(float) * 0)});
-  inputLayoutDesc.entries.push_back({1, 3, false, sizeof(float) * 8,
+  inputLayoutDesc.entries.push_back({1, 3, false, sizeof(float) * 9,
                                      DataType::Float,
                                      (void *)(sizeof(float) * 3)});
-  inputLayoutDesc.entries.push_back({2, 2, false, sizeof(float) * 8,
+  inputLayoutDesc.entries.push_back({2, 2, false, sizeof(float) * 9,
                                      DataType::Float,
                                      (void *)(sizeof(float) * 6)});
+  inputLayoutDesc.entries.push_back({3, 1, false, sizeof(float) * 9,
+                                     DataType::Float,
+                                     (void *)(sizeof(float) * 8)});
 
   auto inputLayout = device->CreateInputLayout(inputLayoutDesc);
 
   // Specify what to draw
-  std::vector<GPUBuffer> buffers(3);
+  std::vector<GPUBuffer> buffers(4);
   buffers[0] = vertexBuffer;
   buffers[1] = vertexBuffer;
   buffers[2] = vertexBuffer;
+  buffers[3] = vertexBuffer;
   auto drawInput = device->CreateDrawInput(inputLayout, buffers, indexBuffer);
 
   // Let's light it up
@@ -106,9 +126,9 @@ int main(int argc, char **argv) {
   lights.camera[1] = 3.0f;
   lights.camera[2] = 3.0f;
 
-  lights.positions[0] = 1.0f;
+  lights.positions[0] = 0.0f;
   lights.positions[1] = 0.0f;
-  lights.positions[2] = 0.0f;
+  lights.positions[2] = 1.0f;
 
   CPUBuffer<void> cpuBuffer4 = {};
   cpuBuffer4.data = (void *)&lights;
@@ -116,7 +136,8 @@ int main(int argc, char **argv) {
 
   auto uniformBuffer2 = device->CreateUniformBuffer(cpuBuffer4);
 
-  GPUBuffer uniformBuffers[2] = {uniformBuffer1, uniformBuffer2};
+  GPUBuffer uniformBuffers[3] = {uniformBuffer1, uniformBuffer2,
+                                 uniformBuffer3};
 
   // Some fucking good texturing
   auto textureLoader = new TextureLoader();
@@ -133,25 +154,25 @@ int main(int argc, char **argv) {
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});
     // Update light position
-    /*lights.positions[0][0] = cos(caca) * 3;
-    lights.positions[0][1] = sin(caca) * 3;
-    lights.positions[0][2] = sin(caca) * 3;*/
-    // device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
+    /*lights.positions[0] = cos(caca) * 4;
+    lights.positions[1] = sin(caca) * 4;
+    lights.positions[2] = sin(caca) * 4;
+    device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);*/
 
-    model = glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)) *
-            glm::translate(glm::vec3(cos(caca), 0.0f, 0.0f));
+    model = glm::rotate(caca, glm::vec3(0.0f, 1.0f, 0.0f)) *
+            glm::scale(glm::vec3(0.01f, 0.01f, 0.01f));
     mvp = projection * view * model;
-    memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
-    memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
+    memcpy(&obj.mvp[0], &mvp[0][0], 16 * sizeof(float));
+    memcpy(&obj.model[0], &model[0][0], 16 * sizeof(float));
     device->UpdateUniformBuffer(uniformBuffer1, cpuBuffer3);
 
     device->_backend->BindProgram(program);
-    device->_backend->BindTexture(diffuseTexture, 0);
+    device->_backend->BindTexture(normalTexture, 0);
     device->_backend->BindTexture(diffuseTexture, 1);
-    // device->_backend->BindTexture(normalTexture, 1);
-    device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 2);
+    // device->_backend->BindTexture(normalTexture, 2);
+    device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 3);
 
-    caca += 0.05f;
+    caca += 0.02f;
     device->RequestAnimationFrame();
   }
 }

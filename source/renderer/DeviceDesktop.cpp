@@ -200,6 +200,8 @@ GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   assert(desc.size != 0);
   assert(desc.data != nullptr);
 
+  std::cout << "Stttride:" << desc.stride << std::endl;
+
   auto buffer = _backend->CreateBuffer(desc);
 
   return buffer;
@@ -223,7 +225,7 @@ GPUBuffer DeviceDesktop::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
   BufferCreationDesc desc = {};
   desc.purpose = BufferTypeDesc::UniformBuffer;
   desc.usage = BufferUsageDesc::DynamicDraw;
-  desc.size = sizeof(int) * cpuBuffer.nbElements;
+  desc.size = cpuBuffer.size;
   desc.data = (void *)cpuBuffer.data;
 
   auto buffer = _backend->CreateBuffer(desc);

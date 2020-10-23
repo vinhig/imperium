@@ -15,11 +15,28 @@ layout(location=1) in VertOut {
     vec3 camera_position;
     vec3 light_position;
     vec3 normal;
-    vec3 fragPos;
+    vec4 frag_pos;
 } vertOut;
 
-layout(binding = 0) uniform sampler2D diffuseTexture;
+layout(location=9) flat in int texture_id;
+
+layout(binding = 0) uniform sampler2D diffuseTexture[3];
 
 void main() {
-    color = texture(diffuseTexture, vertOut.uv);
+    vec3 ambient = vec3(1.0, 1.0, 1.0) * vertOut.ambient;
+    vec3 normal = normalize(vertOut.normal);
+    vec3 textureColor = texture(diffuseTexture[texture_id], vertOut.uv).xyz;
+
+    vec3 light_dir = normalize(vertOut.light_position - vertOut.frag_pos.xyz);
+
+    float diff = max(dot(normal, light_dir), 0.0);
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+
+    vec3 view_dir = normalize(vertOut.camera_position - vertOut.frag_pos.xyz);
+    vec3 reflect_dir = reflect(-light_dir, normal);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
+    vec3 specular = vertOut.specular * spec * vec3(1.0, 1.0, 1.0);
+
+    color = vec4((ambient + diffuse + specular) * textureColor, 1.0);
+    // color = vec4(vertOut.color, 1.0);
 }

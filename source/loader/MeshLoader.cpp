@@ -43,8 +43,8 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
       scene->getMeshCount());
 
   // TODO: we'll need tangents and other stuff
-  int stride = (3 + 3 + 2);
-  // positions + normals + uvs
+  int stride = (3 + 3 + 2 + 1);
+  // positions + normals + uvs + material
   // 3+3+2
   for (int i = 0; i < scene->getMeshCount(); ++i) {
     auto mesh = scene->getMesh(i);
@@ -78,6 +78,8 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
 
       verticesBuffer.data[j * stride + 6] = (float)uvs[j].x;
       verticesBuffer.data[j * stride + 7] = (float)uvs[j].y;
+
+      verticesBuffer.data[j * stride + 8] = (float)i;
     }
 
     // Copy indices

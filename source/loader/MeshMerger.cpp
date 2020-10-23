@@ -49,6 +49,8 @@ std::vector<IndexRange> MeshMerger::Merge(
 
       data[j * stride + 6 + lastSize] = buffer.first.data[j * stride + 6];
       data[j * stride + 7 + lastSize] = buffer.first.data[j * stride + 7];
+
+      data[j * stride + 8 + lastSize] = buffer.first.data[j * stride + 8];
       /*memcpy(&vertices->data[lastSize], buffer.first.data,
              bufferSize * sizeof(float));*/
     }
@@ -58,7 +60,6 @@ std::vector<IndexRange> MeshMerger::Merge(
   // Indices should be modified by adding an offset
   std::vector<IndexRange> ranges;
   int offset = 0;
-  int k = 0;
   for (const auto &buffer : buffers) {
     int nbIndices = buffer.second.nbElements;
     for (int i = 0; i < nbIndices; i++) {
