@@ -35,6 +35,7 @@ add_library(openfbx
 
 add_library(loader
         source/loader/MeshLoader.cpp
+        source/loader/MeshMerger.cpp
         source/loader/TextureLoader.cpp
         source/loader/pch.cpp
         )

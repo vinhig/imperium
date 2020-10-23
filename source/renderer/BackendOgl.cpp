@@ -109,6 +109,7 @@ GPUProgram BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
     glsl.set_common_options(options);
 
     vertexSourceCode = glsl.compile();
+    std::cout << vertexSourceCode << std::endl;
   }
   {
     spirv_cross::CompilerGLSL glsl(std::move(fragmentSource));
@@ -119,6 +120,7 @@ GPUProgram BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
     glsl.set_common_options(options);
 
     fragmentSourceCode = glsl.compile();
+    std::cout << fragmentSourceCode << std::endl;
   }
   // Compile shaders
   auto vertexShader = CompileShader(vertexSourceCode.c_str(), GL_VERTEX_SHADER);

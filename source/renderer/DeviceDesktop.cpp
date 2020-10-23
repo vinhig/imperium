@@ -197,6 +197,9 @@ GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   desc.data = (void *)cpuBuffer.data;
   desc.stride = sizeof(float) * cpuBuffer.stride;
 
+  assert(desc.size != 0);
+  assert(desc.data != nullptr);
+
   auto buffer = _backend->CreateBuffer(desc);
 
   return buffer;

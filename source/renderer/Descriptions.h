@@ -124,6 +124,11 @@ struct BufferCreationDesc {
   size_t stride;
 };
 
+struct IndexRange {
+  int start;
+  int end;
+};
+
 /**
  * Raw description of a CPUTexture before his upload on the GPU.
  */

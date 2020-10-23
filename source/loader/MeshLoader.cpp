@@ -7,7 +7,9 @@
 #include <ofbx.h>
 
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
     const std::string& path

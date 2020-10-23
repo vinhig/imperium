@@ -9,6 +9,7 @@
 #include <string>
 
 #include "loader/MeshLoader.h"
+#include "loader/MeshMerger.h"
 #include "loader/TextureLoader.h"
 #include "renderer/BackendOgl.h"
 #include "renderer/DeviceDesktop.h"
@@ -16,17 +17,29 @@
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGLES32});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGL33});
 
   // Create a program
   // Some testing :)
   auto program = device->CreateProgram("basic");
 
+  // Load robot mesh
+  // Merge all its sub-meshes into one
   auto meshLoader = new MeshLoader();
-  auto sphere = meshLoader->Load("../assets/sphere.fbx");
+  auto meshMerger = new MeshMerger();
+  auto robot = meshLoader->Load("../assets/robot.fbx");
+
+  CPUBuffer<float> vertices = {};
+  CPUBuffer<int> indices = {};
+  meshMerger->Merge(robot, &vertices, &indices);
+  std::cout << "SSize: " << vertices.nbElements << std::endl;
+
+  // Create data to draw
+  auto vertexBuffer = device->CreateVertexBuffer(vertices);
+  auto indexBuffer = device->CreateIndexBuffer(indices);
 
   // Not very clean; but we have to know how many indices to draw
-  auto nbIndices = sphere[0].second.nbElements;
+  auto nbIndices = indices.nbElements;
 
   // Is it a problem if i want to rotate my cute cubic cube ?
   auto position = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -39,30 +52,23 @@ int main(int argc, char **argv) {
   auto mvp = projection * view * model;
 
   struct Material {
-    float colors[4];
     float mvp[16];
     float model[16];
     float ambient;
     float specular;
+    int texture;
   };
 
   Material material = {};
-  material.colors[0] = 1.0;
-  material.colors[1] = 1.0;
-  material.colors[2] = 1.0;
-  material.colors[3] = 1.0;
-  material.ambient = 0.1;
-  material.specular = 0.1;
+
   memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
   memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
+
+  auto b = sizeof(double);
 
   CPUBuffer<void> cpuBuffer3 = {};
   cpuBuffer3.data = (void *)&material;
   cpuBuffer3.size = sizeof(Material);
-
-  // Create data to draw
-  auto vertexBuffer = device->CreateVertexBuffer(sphere[0].first);
-  auto indexBuffer = device->CreateIndexBuffer(sphere[0].second);
   auto uniformBuffer1 = device->CreateUniformBuffer(cpuBuffer3);
 
   // Specify how to draw data
@@ -115,13 +121,13 @@ int main(int argc, char **argv) {
   // Some fucking good texturing
   auto textureLoader = new TextureLoader();
   // Diffuse stuff
-  auto diffuseCpuTexture = textureLoader->Load("../assets/Diffuse.png");
+  auto diffuseCpuTexture = textureLoader->Load("../assets/Robots.png");
   auto diffuseTexture = device->CreateTextureFromData(diffuseCpuTexture);
-  textureLoader->Link("../assets/Diffuse.png", diffuseTexture.texture);
+  textureLoader->Link("../assets/Robots.png", diffuseTexture.texture);
   // Normal stuff
-  auto normalCpuTexture = textureLoader->Load("../assets/Normal.png");
+  auto normalCpuTexture = textureLoader->Load("../assets/Wheels.png");
   auto normalTexture = device->CreateTextureFromData(normalCpuTexture);
-  textureLoader->Link("../assets/Normal.png", diffuseTexture.texture);
+  textureLoader->Link("../assets/Wheels.png", normalTexture.texture);
 
   float caca = 0.0f;
   while (!device->ShouldClose()) {
@@ -132,7 +138,8 @@ int main(int argc, char **argv) {
     lights.positions[0][2] = sin(caca) * 3;*/
     // device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
 
-    model = glm::translate(glm::vec3(cos(caca), 0.0f, 0.0f));
+    model = glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)) *
+            glm::translate(glm::vec3(cos(caca), 0.0f, 0.0f));
     mvp = projection * view * model;
     memcpy(&material.mvp[0], &mvp[0][0], 16 * sizeof(float));
     memcpy(&material.model[0], &model[0][0], 16 * sizeof(float));
@@ -140,8 +147,10 @@ int main(int argc, char **argv) {
 
     device->_backend->BindProgram(program);
     device->_backend->BindTexture(diffuseTexture, 0);
+    device->_backend->BindTexture(diffuseTexture, 1);
     // device->_backend->BindTexture(normalTexture, 1);
     device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 2);
+
     caca += 0.05f;
     device->RequestAnimationFrame();
   }
