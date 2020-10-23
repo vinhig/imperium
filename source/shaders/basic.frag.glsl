@@ -12,8 +12,8 @@ layout(location=1) in VertOut {
     vec3 color;
     float ambient;
     float specular;
-    vec3 camera_position;
-    vec3 light_position;
+    vec4 camera_position;
+    vec4 light_position;
     vec3 normal;
     vec4 frag_pos;
 } vertOut;

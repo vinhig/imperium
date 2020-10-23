@@ -23,7 +23,7 @@ layout(std140, binding=0) uniform Object {
 layout(std140, binding=1) uniform Lights {
     vec4 camera_position;
     vec4 light_position;
-};
+} lights;
 
 layout(std140, binding=2) uniform Material {
     float ambient;
@@ -37,8 +37,8 @@ void main() {
     vertOut.color = vec3(1.0, 1.0, 1.0);
     vertOut.normal = mat3(transpose(inverse(object.model))) * normal;;
 
-    vertOut.camera_position = camera_position;
-    vertOut.light_position = light_position;
+    vertOut.camera_position = lights.camera_position;
+    vertOut.light_position = lights.light_position;
     vertOut.frag_pos = object.mvp * vec4(position, 1.0);
 
     vertOut.ambient = material.ambient;
