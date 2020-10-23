@@ -17,7 +17,7 @@
 // Entry point for desktop platform
 int main(int argc, char **argv) {
   // Create device
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGL33});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::Directx11});
 
   // Create a program
   // Some testing :)
@@ -29,17 +29,15 @@ int main(int argc, char **argv) {
   auto meshMerger = new MeshMerger();
   auto robot = meshLoader->Load("../assets/robot.fbx");
 
-  CPUBuffer<float> vertices = {};
-  CPUBuffer<int> indices = {};
-  meshMerger->Merge(robot, &vertices, &indices);
-  std::cout << "SSize: " << vertices.nbElements << std::endl;
-
   // Create data to draw
-  auto vertexBuffer = device->CreateVertexBuffer(vertices);
-  auto indexBuffer = device->CreateIndexBuffer(indices);
-
-  // Not very clean; but we have to know how many indices to draw
-  auto nbIndices = indices.nbElements;
+  std::vector<GPUBuffer> vertexBuffers;
+  std::vector<GPUBuffer> indexBuffers;
+  std::vector<int> nbElements;
+  for (const auto &submesh : robot) {
+    vertexBuffers.push_back(device->CreateVertexBuffer(submesh.first));
+    indexBuffers.push_back(device->CreateIndexBuffer(submesh.second));
+    nbElements.push_back(submesh.second.nbElements);
+  }
 
   // Is it a problem if i want to rotate my cute cubic cube ?
   auto position = glm::vec3(3.0f, 3.0f, 3.0f);
@@ -54,21 +52,15 @@ int main(int argc, char **argv) {
   struct Material {
     float ambient;
     float specular;
-    float texture;
-    float dumb;  // TODO: opengl glsl compiler seems to convert this to vec3,
-                 // therefore we're in a stride of 4, so if we do not have this
-                 // dumb variable, nothing work
+    float something;
+    float dumb;
   };
 
-  Material materials[3] = {
-      {1.0, 1.0, 1.0},
-      {1.0, 1.0, 0.0},
-      {1.0, 1.0, 0.0}
-  };
+  Material materials = {0.4, 1.0};
 
   CPUBuffer<void> cpuBuffer5 = {};
   cpuBuffer5.data = (void *)&materials;
-  cpuBuffer5.size = sizeof(Material[3]);
+  cpuBuffer5.size = sizeof(Material);
   auto uniformBuffer3 = device->CreateUniformBuffer(cpuBuffer5);
 
   struct Object {
@@ -85,6 +77,7 @@ int main(int argc, char **argv) {
   CPUBuffer<void> cpuBuffer3 = {};
   cpuBuffer3.data = (void *)&obj;
   cpuBuffer3.size = sizeof(Object);
+  std::cout << "sizeof(Object) == " << sizeof(Object) << std::endl;
   auto uniformBuffer1 = device->CreateUniformBuffer(cpuBuffer3);
 
   // Specify how to draw data
@@ -99,25 +92,26 @@ int main(int argc, char **argv) {
   inputLayoutDesc.entries.push_back({2, 2, false, sizeof(float) * 9,
                                      DataType::Float,
                                      (void *)(sizeof(float) * 6)});
-  inputLayoutDesc.entries.push_back({3, 1, false, sizeof(float) * 9,
-                                     DataType::Float,
-                                     (void *)(sizeof(float) * 8)});
 
   auto inputLayout = device->CreateInputLayout(inputLayoutDesc);
 
   // Specify what to draw
-  std::vector<GPUBuffer> buffers(4);
-  buffers[0] = vertexBuffer;
-  buffers[1] = vertexBuffer;
-  buffers[2] = vertexBuffer;
-  buffers[3] = vertexBuffer;
-  auto drawInput = device->CreateDrawInput(inputLayout, buffers, indexBuffer);
+  std::vector<GPUDrawInput> drawInputs;
+  for (int i = 0; i < robot.size(); i++) {
+    std::vector<GPUBuffer> buffers(3);
+    buffers[0] = vertexBuffers[i];
+    buffers[1] = vertexBuffers[i];
+    buffers[2] = vertexBuffers[i];
+    auto drawInput =
+        device->CreateDrawInput(inputLayout, buffers, indexBuffers[i]);
+    drawInputs.push_back(drawInput);
+  }
 
   // Let's light it up
   // - Lux, 2020
   struct Lights {
     float camera[4];  // vec3 have the same width as vec4
-    float positions[3];
+    float positions[4];
   };
 
   Lights lights = {};
@@ -125,10 +119,12 @@ int main(int argc, char **argv) {
   lights.camera[0] = 3.0f;
   lights.camera[1] = 3.0f;
   lights.camera[2] = 3.0f;
+  lights.camera[3] = 1.0f;
 
-  lights.positions[0] = 0.0f;
+  lights.positions[0] = 4.0f;
   lights.positions[1] = 0.0f;
-  lights.positions[2] = 1.0f;
+  lights.positions[2] = 0.0f;
+  lights.positions[3] = 1.0f;
 
   CPUBuffer<void> cpuBuffer4 = {};
   cpuBuffer4.data = (void *)&lights;
@@ -167,10 +163,18 @@ int main(int argc, char **argv) {
     device->UpdateUniformBuffer(uniformBuffer1, cpuBuffer3);
 
     device->_backend->BindProgram(program);
-    device->_backend->BindTexture(normalTexture, 0);
-    device->_backend->BindTexture(diffuseTexture, 1);
+    device->_backend->BindTexture(diffuseTexture, 0);
     // device->_backend->BindTexture(normalTexture, 2);
-    device->_backend->Draw(drawInput, nbIndices, 1, uniformBuffers, 3);
+    int i = 0;
+    for (const auto &draw : drawInputs) {
+      if (i == 0) {
+        device->_backend->BindTexture(diffuseTexture, 0);
+      } else {
+        device->_backend->BindTexture(normalTexture, 0);
+      }
+      device->_backend->Draw(draw, nbElements[i], 1, uniformBuffers, 3);
+      i++;
+    }
 
     caca += 0.02f;
     device->RequestAnimationFrame();

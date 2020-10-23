@@ -228,6 +228,8 @@ GPUBuffer DeviceDesktop::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
   desc.size = cpuBuffer.size;
   desc.data = (void *)cpuBuffer.data;
 
+  assert(desc.size % 16 == 0);
+
   auto buffer = _backend->CreateBuffer(desc);
   return buffer;
 }

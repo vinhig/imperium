@@ -40,6 +40,10 @@ add_library(loader
         source/loader/pch.cpp
         )
 
+add_library(logic
+        sourcE/logic/Game.cpp
+        )
+
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
