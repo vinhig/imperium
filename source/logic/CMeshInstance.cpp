@@ -6,9 +6,10 @@
 
 #include "../loader/MeshLoader.h"
 
-CMeshInstance::CMeshInstance(Entity* owner, Device* device,
-                             const std::string& path)
-    : IComponentDrawable(owner, device) {
+CMeshInstance::CMeshInstance(Entity* owner, void* args)
+    : IComponent(owner) {
+  std::string path = *((std::string*)args);
+  auto device = GetEntity()->GetSystem()->GetDevice();
   // Specify how to draw data
   InputLayoutDesc inputLayoutDesc = {};
   // TODO: this shit will just work on opengl
@@ -45,8 +46,9 @@ CMeshInstance::CMeshInstance(Entity* owner, Device* device,
     _drawInputs.push_back(drawInput);
     i++;
   }
+
+  // It's mandatory to have a CTransform
+  _transform = GetEntity()->GetOrCreate<CTransform>(nullptr);
 }
 
-DrawCall CMeshInstance::Draw() {
-  return DrawCall{_drawInputs, _counts, 1};
-}
+DrawCall CMeshInstance::Draw() { return DrawCall{_drawInputs, _counts, 1}; }

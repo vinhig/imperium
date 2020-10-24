@@ -35,7 +35,7 @@ class Game {
 
  public:
   explicit Game(Device* device);
-  Game();
+  Game() = default;
   ~Game() = default;
 
   // Logic methods

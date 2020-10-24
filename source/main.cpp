@@ -15,37 +15,43 @@
 
 class MyGame : public Game {
  private:
-  CTransform* _transform;
-  CMeshInstance* _mesh;
+  System* system;
+  Entity* plant;
+  // CTransform* _transform;
+  // CMeshInstance* _mesh;
   float _caca = 0.0f;
 
  public:
   explicit MyGame(Device* device) : Game(device) {}
 
   void Load(Device* device) override {
-    _transform = new CTransform(nullptr, device);
-    _mesh = new CMeshInstance(nullptr, device, "../assets/indoor-plant.fbx");
+    // _transform = new CTransform(nullptr, device);
+    // _mesh = new CMeshInstance(nullptr, device, "../assets/indoor-plant.fbx");
+    system = new System(device);
+    plant = new Entity(system, 0);
+    std::string path = "../assets/indoor-plant.fbx";
+    auto mesh = plant->GetOrCreate<CMeshInstance>((void*)&path);
   };
 
   void LogicalUpdate(TryHarder* tryHarder) override {
-    _transform->SetRotation(glm::vec3(_caca, 0.0f, 0.0f));
-    tryHarder->Register(_transform->Logic());
+    // _transform->SetRotation(glm::vec3(_caca, 0.0f, 0.0f));
+    // tryHarder->Register(_transform->Logic());
     _caca += 0.01f;
   };
 
   void ResourceUpdate(Device* device) override {
-    auto resourceChange = _transform->Resource();
-    if (resourceChange.enable) {
-      device->UpdateUniformBuffer(resourceChange.dest, resourceChange.from);
-    }
+    // auto resourceChange = _transform->Resource();
+    // if (resourceChange.enable) {
+      // device->UpdateUniformBuffer(resourceChange.dest, resourceChange.from);
+    //}
   };
 
   void Draw(Device* device) override {
-    auto d = _mesh->Draw();
+    /*auto d = _mesh->Draw();
     for (int i = 0; i < d.drawInputs.size(); i++) {
       ((DeviceDesktop*)device)
           ->_backend->Draw(d.drawInputs[i], d.counts[i], d.times, nullptr, 0);
-    }
+    }*/
   };
 };
 

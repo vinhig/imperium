@@ -6,8 +6,8 @@
 
 #include <iostream>
 
-CTransform::CTransform(Entity* owner, Device* device)
-    : IComponentLogic(owner), IComponentResource(owner, device) {
+CTransform::CTransform(Entity* owner, void* args) : IComponent(owner) {
+  auto device = ((IComponent*)this)->GetEntity()->GetSystem()->GetDevice();
   _position = glm::vec3(0.0f, 0.0f, 0.0f);
   _rotation = glm::vec3(0.0f, 0.0f, 0.0f);
   _scale = glm::vec3(0.0f, 0.0f, 0.0f);

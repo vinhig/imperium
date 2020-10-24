@@ -8,7 +8,9 @@
 
 #include "Ecs.h"
 
-class CTransform : public IComponentLogic, public IComponentResource {
+class CTransform : public IComponent,
+                   public IComponentLogic,
+                   public IComponentResource {
  private:
   struct Matrices {
     float mvp[16];
@@ -28,13 +30,14 @@ class CTransform : public IComponentLogic, public IComponentResource {
   bool _update;
 
  public:
-  explicit CTransform(Entity* owner, Device* device);
+  explicit CTransform(Entity* owner, void* args);
 
   void UpdateMvp();
 
   LogicCall Logic() override;
 
-  int UUID() override { return 1; }
+  int UUID() override { return 1; };
+  static const int Uuid = 1;
 
   const glm::vec3& GetPosition() const { return _position; }
   void SetPosition(const glm::vec3& position) {
@@ -52,3 +55,6 @@ class CTransform : public IComponentLogic, public IComponentResource {
     _update = true;
   }
 };
+
+template <>
+CTransform* Entity::GetOrCreate<CTransform>(void*);
