@@ -12,8 +12,70 @@
 #include "Actions.h"
 #include "TryHarder.h"
 
-class System;
 class Game;  // c++ bad;
+class IComponent;
+class Entity;
+
+class System {
+ private:
+  std::unordered_map<int, std::vector<IComponent*>> _components;
+
+  Device* _device;
+
+ public:
+  System(Device* device) { _device = device; };
+  ~System() = default;
+
+  Device* GetDevice() { return _device; }
+
+  /**
+   * Ask components to load themselves.
+   */
+  void Load(Device* device){
+      // Fake lol
+      // Each time you create a component, it's loaded by its constructor
+  };
+
+  /**
+   * Ask components to update logically themselves.
+   */
+  void LogicalUpdate(TryHarder* tryHarder){
+
+  };
+
+  /**
+   * Ask components to update their underlying resources.
+   */
+  void ResourceUpdate(Device* device){
+
+  };
+
+  /**
+   * Ask components to draw themselves.
+   */
+  void Draw(Device* device){
+
+  };
+
+  /**
+   * Search for a component with a T type owned by a specific entity.
+   * @tparam T Type of component to retrieve.
+   * @param entity Owner of the component to retrieve.
+   * @return T* reference to found component. nullptr if no components
+   * correspond.
+   */
+  template <typename T>
+  T* Get(Entity* entity);
+
+  /**
+   * Register a created component owned by a specific entity.
+   * @tparam T Type of component to register.
+   * @param entity
+   * @param component
+   */
+  template <typename T>
+  void Create(Entity* entity, void* args);
+};
 
 class Entity {
  private:
@@ -131,83 +193,32 @@ class IComponentResource {
   void ForceUpdate() { _update = true; }
 };
 
-class System {
- private:
-  std::unordered_map<int, std::vector<IComponent*>> _components;
+#ifndef ECS_IMPLEMENTATION
+#define ECS_IMPLEMENTATION
 
-  Device* _device;
-
- public:
-  System(Device* device) { _device = device; };
-  ~System() = default;
-
-  Device* GetDevice() { return _device; }
-
-  /**
-   * Ask components to load themselves.
-   */
-  void Load(Device* device){
-      // Fake lol
-      // Each time you create a component, it's loaded by its constructor
-  };
-
-  /**
-   * Ask components to update logically themselves.
-   */
-  void LogicalUpdate(TryHarder* tryHarder){
-
-  };
-
-  /**
-   * Ask components to update their underlying resources.
-   */
-  void ResourceUpdate(Device* device){
-
-  };
-
-  /**
-   * Ask components to draw themselves.
-   */
-  void Draw(Device* device){
-
-  };
-
-  /**
-   * Search for a component with a T type owned by a specific entity.
-   * @tparam T Type of component to retrieve.
-   * @param entity Owner of the component to retrieve.
-   * @return T* reference to found component. nullptr if no components
-   * correspond.
-   */
-  template <typename T>
-  T* Get(Entity* entity) {
-    // Get all components owned by this entity
-    auto comp = _components[entity->GetId()];
-    if (comp != _components.end() || comp.size() != 0) {
-      for (int i = 0; i < comp.size(); i++) {
-        if (comp[i]->UUID() == T::Uuid) {
-          return comp[i];
-        }
+template <typename T>
+T* System::Get(Entity* entity) {
+  // Get all components owned by this entity
+  std::unordered_map<int, std::vector<IComponent *>>::iterator comp = _components.find(entity->GetId());
+  if (comp != _components.end() || comp->second.size() != 0) {
+    for (int i = 0; i < comp->second.size(); i++) {
+      if (comp->second[i]->UUID() == T::Uuid) {
+        return comp->second[i];
       }
     }
-    // Sad, we don't found any component
-    return nullptr
-  };
-
-  /**
-   * Register a created component owned by a specific entity.
-   * @tparam T Type of component to register.
-   * @param entity
-   * @param component
-   */
-  template <typename T>
-  void Create(Entity* entity, void* args) {
-    assert(entity != nullptr && component != nullptr);
-    auto comp = _components[entity->GetId()];
-    if (comp == _components.end()) {
-      // If this entity isn't registered
-      _components[entity->GetId()];
-    }
-    _components[entity->GetId()].push_back(new T(args));
   }
+  // Sad, we don't found any component
+  return nullptr;
 };
+
+template <typename T>
+void System::Create(Entity* entity, void* args) {
+  std::unordered_map<int, std::vector<IComponent *>>::iterator comp = _components.find(entity->GetId());
+  if (comp == _components.end()) {
+    // If this entity isn't registered
+    _components[entity->GetId()];
+  }
+  _components[entity->GetId()].push_back(new T(args));
+};
+
+#endif // ECS_IMPLEMENTATION
