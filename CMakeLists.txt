@@ -41,7 +41,10 @@ add_library(loader
         )
 
 add_library(logic
-        sourcE/logic/Game.cpp
+        source/logic/Game.cpp
+        source/logic/TryHarder.cpp
+        source/logic/CTransform.cpp
+        source/logic/CMeshInstance.cpp
         )
 
 add_library(renderer
@@ -56,11 +59,13 @@ add_library(renderer
 
 add_executable(Imperium source/main.cpp)
 
-target_link_libraries(Imperium renderer common loader)
+target_link_libraries(Imperium renderer common loader logic)
 
 target_link_libraries(loader openfbx)
 
-target_link_libraries(renderer glfw OpenGL::GL glm)
+target_link_libraries(logic glm)
+
+target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
 # Platform dependent dependencies
