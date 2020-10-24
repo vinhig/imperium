@@ -51,7 +51,8 @@ CPUTexture TextureLoader::Load(
   auto content = vcontent.data();
   long file_size = vcontent.size();
 
-  unsigned char* data = stbi_load_from_memory(content, file_size, &width, &height, &nrChannels, 4);
+  unsigned char* data = stbi_load_from_memory(content, file_size, &width,
+                                              &height, &nrChannels, 4);
 #else
   FILE* file = fopen(path.c_str(), "r");
   if (!file) {
@@ -61,8 +62,14 @@ CPUTexture TextureLoader::Load(
 
   // Invoke stb_image
   // https://github.com/nothings/stb
-  unsigned char* data =
-      stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
+  stbi_info(path.c_str(), &width, &height, &nrChannels);
+  unsigned char* data;
+  if (nrChannels == 3) {
+    data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
+    nrChannels = 4;
+  } else {
+    data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
+  }
 #endif
 
   CPUTexture cpuTexture = {data, width, height, TextureFormat::RGBA};

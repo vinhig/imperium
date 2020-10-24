@@ -19,6 +19,7 @@ layout(location=1) in VertOut {
 } vertOut;
 
 layout(binding = 0) uniform sampler2D diffuseTexture;
+layout(binding = 1) uniform sampler2D normalTexture;
 
 void main() {
     vec3 ambient = vec3(1.0, 1.0, 1.0) * vertOut.ambient;

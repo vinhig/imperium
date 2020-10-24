@@ -26,14 +26,15 @@ int main(int argc, char **argv) {
   // Load robot mesh
   // Merge all its sub-meshes into one
   auto meshLoader = new MeshLoader();
-  auto meshMerger = new MeshMerger();
-  auto robot = meshLoader->Load("../assets/robot.fbx");
+  // auto meshMerger = new MeshMerger();
+  auto plant = meshLoader->Load("../assets/indoor-plant.fbx");
+  // auto bench = meshLoader->Load("../assets/bench.fbx");
 
   // Create data to draw
   std::vector<GPUBuffer> vertexBuffers;
   std::vector<GPUBuffer> indexBuffers;
   std::vector<int> nbElements;
-  for (const auto &submesh : robot) {
+  for (const auto &submesh : plant) {
     vertexBuffers.push_back(device->CreateVertexBuffer(submesh.first));
     indexBuffers.push_back(device->CreateIndexBuffer(submesh.second));
     nbElements.push_back(submesh.second.nbElements);
@@ -97,7 +98,7 @@ int main(int argc, char **argv) {
 
   // Specify what to draw
   std::vector<GPUDrawInput> drawInputs;
-  for (int i = 0; i < robot.size(); i++) {
+  for (int i = 0; i < plant.size(); i++) {
     std::vector<GPUBuffer> buffers(3);
     buffers[0] = vertexBuffers[i];
     buffers[1] = vertexBuffers[i];
@@ -138,11 +139,12 @@ int main(int argc, char **argv) {
   // Some fucking good texturing
   auto textureLoader = new TextureLoader();
   // Diffuse stuff
-  auto diffuseCpuTexture = textureLoader->Load("../assets/Robots.png");
+  auto diffuseCpuTexture =
+      textureLoader->Load("../assets/indoor-plant-diffuse.jpg");
   auto diffuseTexture = device->CreateTextureFromData(diffuseCpuTexture);
-  textureLoader->Link("../assets/Robots.png", diffuseTexture.texture);
+  textureLoader->Link("../assets/indoor-plant-diffuse.png", diffuseTexture.texture);
   // Normal stuff
-  auto normalCpuTexture = textureLoader->Load("../assets/Wheels.png");
+  auto normalCpuTexture = textureLoader->Load("../assets/indoor-plant-normal.png");
   auto normalTexture = device->CreateTextureFromData(normalCpuTexture);
   textureLoader->Link("../assets/Wheels.png", normalTexture.texture);
 
@@ -150,13 +152,14 @@ int main(int argc, char **argv) {
   while (!device->ShouldClose()) {
     device->Clear(RenderTarget{});
     // Update light position
-    /*lights.positions[0] = cos(caca) * 4;
+    lights.positions[0] = cos(caca) * 4;
     lights.positions[1] = sin(caca) * 4;
     lights.positions[2] = sin(caca) * 4;
-    device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);*/
+    device->UpdateUniformBuffer(uniformBuffer2, cpuBuffer4);
 
-    model = glm::rotate(caca, glm::vec3(0.0f, 1.0f, 0.0f)) *
-            glm::scale(glm::vec3(0.01f, 0.01f, 0.01f));
+    model = glm::translate(glm::vec3(0.0f, -1.5f, 0.0f)) *
+            glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+            glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
     mvp = projection * view * model;
     memcpy(&obj.mvp[0], &mvp[0][0], 16 * sizeof(float));
     memcpy(&obj.model[0], &model[0][0], 16 * sizeof(float));
@@ -164,14 +167,10 @@ int main(int argc, char **argv) {
 
     device->_backend->BindProgram(program);
     device->_backend->BindTexture(diffuseTexture, 0);
-    // device->_backend->BindTexture(normalTexture, 2);
+    device->_backend->BindTexture(normalTexture, 1);
+    device->_backend->BindTexture(diffuseTexture, 0);
     int i = 0;
     for (const auto &draw : drawInputs) {
-      if (i == 0) {
-        device->_backend->BindTexture(diffuseTexture, 0);
-      } else {
-        device->_backend->BindTexture(normalTexture, 0);
-      }
       device->_backend->Draw(draw, nbElements[i], 1, uniformBuffers, 3);
       i++;
     }
