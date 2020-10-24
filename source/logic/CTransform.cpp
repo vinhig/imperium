@@ -4,6 +4,7 @@
 
 #include "CTransform.h"
 
+#include <cstring>
 #include <iostream>
 
 CTransform::CTransform(Entity* owner, void* args) : IComponent(owner) {
