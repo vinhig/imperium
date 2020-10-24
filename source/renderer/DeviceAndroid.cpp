@@ -148,6 +148,16 @@ void DeviceAndroid::UpdateUniformBuffer(GPUBuffer buffer,
   _backend->UpdateBuffer(updateDesc);
 }
 
+void DeviceAndroid::BindProgram(GPUProgram program) {
+  _backend->BindProgram(program);
+}
+
+void DeviceAndroid::Draw(GPUDrawInput drawInput, int count, int times,
+                         GPUBuffer *uniformBuffers, size_t nbUniformBuffers) {
+  _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);
+}
+
+
 void DeviceAndroid::SetFileReader(
     std::function<std::vector<unsigned char>(std::string)> fileReader) {
   _fileReader = std::move(fileReader);

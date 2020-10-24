@@ -266,6 +266,7 @@ void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times,
 void BackendOgl::UpdateBuffer(BufferUpdateDesc updateDesc) {
   // Vertex and index buffer can't be modified (at the time being)
   // We can bind it as an Uniform Buffer
+  assert(updateDesc.data != nullptr);
   glBindBuffer(GL_UNIFORM_BUFFER, updateDesc.buffer->buffer);
   glBufferSubData(GL_UNIFORM_BUFFER, updateDesc.offset, updateDesc.size,
                   updateDesc.data);

@@ -45,6 +45,11 @@ class CTransform : public IComponent,
     _update = true;
   }
   const glm::vec3& GetRotation() const { return _rotation; }
+
+  /**
+   * Set rotation. Angles are in degrees.
+   * @param rotation New rotation.
+   */
   void SetRotation(const glm::vec3& rotation) {
     _rotation = rotation;
     _update = true;

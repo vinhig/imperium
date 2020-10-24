@@ -96,8 +96,7 @@ class Backend {
                             int index) = 0;
 
   /**
-   * Launch a draw call. Can draw from a whole index buffer by setting `start`
-   * and `end` to 0.
+   * Launch a draw call.
    * @param drawInput Structure of data to draw.
    * @param count Number of elements index to draw.
    * @param times Number of same draw calls to launch.

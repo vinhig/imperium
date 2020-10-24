@@ -56,7 +56,7 @@ void CTransform::UpdateMvp() {
 
     // Push modification to cpu buffer
     auto uniform = (Matrices*)GetCPUBuffer()->data;
-    memcpy(&uniform->model[0], &_model[0][0], 16 * sizeof(float));
+    memcpy(&uniform->mvp[0], &_mvp[0][0], 16 * sizeof(float));
     memcpy(&uniform->model[0], &_model[0][0], 16 * sizeof(float));
 
     ForceUpdate();

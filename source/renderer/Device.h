@@ -96,7 +96,8 @@ class Device {
    * @param height Height of the texture
    * @return GPUTexture created with those information and completely empty.
    */
-  virtual GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap, int width, int height) = 0;
+  virtual GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap,
+                                        int width, int height) = 0;
 
   /**
    * Create a texture by uploading content loaded from a TextureLoader.
@@ -113,7 +114,22 @@ class Device {
   virtual void UpdateUniformBuffer(GPUBuffer buffer,
                                    CPUBuffer<void> newData) = 0;
 
-  // virtual void Draw() = 0;
+  /**
+   * Specify active program to use for next draw calls.
+   * @param program Program to use.
+   */
+  virtual void BindProgram(GPUProgram program) = 0;
+
+  /**
+   * Launch a draw call.
+   * @param drawInput Structure of data to draw.
+   * @param count Number of elements index to draw.
+   * @param times Number of same draw calls to launch.
+   * @param uniformBuffers Uniform buffers to bind during draw call.
+   * @param nbUniformBuffers Number of uniform buffers.
+   */
+  virtual void Draw(GPUDrawInput drawInput, int count, int times,
+                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
 
   /**
    * Ask underlying backend to swap buffers. Swapping buffers means showing the

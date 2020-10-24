@@ -91,7 +91,15 @@ class IComponentResource {
 
 class System {
  private:
-  std::unordered_map<int, std::vector<IComponent*>> _components;
+  // Components for entity
+  // int: id of the entity
+  // std::vector<IComponent*>: components owned by this entity
+  std::unordered_map<int, std::vector<IComponent*>> _componentsForEntity;
+
+  // Components for type
+  // int: uuid of the component
+  // std::vector<IComponent*>: components of this type
+  std::unordered_map<int, std::vector<IComponent*>> _componentsForType;
 
   Device* _device;
 
@@ -99,51 +107,11 @@ class System {
   System(Device* device) { _device = device; };
   ~System() = default;
 
-  Device* GetDevice() { return _device; }
+  Device* GetDevice() { return _device; };
 
-  /**
-   * Ask components to load themselves.
-   */
-  void Load(Device* device){
-      // Fake lol
-      // Each time you create a component, it's loaded by its constructor
+  std::vector<IComponent*> Components(int uuid) {
+    return _componentsForType[uuid];
   };
-
-  /**
-   * Ask components to update logically themselves.
-   */
-  void LogicalUpdate(TryHarder* tryHarder){
-
-  };
-
-  /**
-   * Ask components to update their underlying resources.
-   */
-  void ResourceUpdate(Device* device){
-
-  };
-
-  /**
-   * Ask components to draw themselves.
-   */
-  void Draw(Device* device) {
-    for (const auto& component : _components) {
-      for (const auto& comp : component.second) {
-        // TODO: should based drawing on flag and not on uuid
-        if (comp->UUID() == 2) {
-          // TODO: should register draw in a Frame object
-          auto draw = ((IComponentDrawable*)comp)->Draw();
-          assert(draw.nbResources != 0);
-          // TODO: wtf !? Should use more high level method
-          for (int i = 0; i < draw.nbResources; i++) {
-            ((DeviceDesktop*)device)
-                ->_backend->Draw(draw.drawInputs[i], draw.counts[i], draw.times,
-                                 draw.uniforms, draw.nbUniforms);
-          }
-        }
-      }
-    }
-  }
 
   /**
    * Search for a component with a T type owned by a specific entity.
@@ -217,8 +185,8 @@ template <typename T>
 T* System::Get(Entity* entity) {
   // Get all components owned by this entity
   std::unordered_map<int, std::vector<IComponent*>>::iterator comp =
-      _components.find(entity->GetId());
-  if (comp != _components.end()) {
+      _componentsForEntity.find(entity->GetId());
+  if (comp != _componentsForEntity.end()) {
     if (comp->second.size() != 0) {
       for (int i = 0; i < comp->second.size(); i++) {
         if (comp->second[i]->UUID() == T::Uuid) {
@@ -233,13 +201,16 @@ T* System::Get(Entity* entity) {
 
 template <typename T>
 void System::Create(Entity* entity, void* args) {
+  std::cout << "Creating " << T::Uuid << std::endl;
   std::unordered_map<int, std::vector<IComponent*>>::iterator comp =
-      _components.find(entity->GetId());
-  if (comp == _components.end()) {
+      _componentsForEntity.find(entity->GetId());
+  if (comp == _componentsForEntity.end()) {
     // If this entity isn't registered
-    _components[entity->GetId()];
+    _componentsForEntity[entity->GetId()];
   }
-  _components[entity->GetId()].push_back(new T(entity, args));
+  auto newComp = new T(entity, args);
+  _componentsForEntity[entity->GetId()].push_back(newComp);
+  _componentsForType[newComp->UUID()].push_back(newComp);
 }
 
 #endif  // ECS_IMPLEMENTATION

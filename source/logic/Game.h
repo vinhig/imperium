@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../renderer/Device.h"
+#include "Ecs.h"
 #include "TryHarder.h"
 
 /**
@@ -13,6 +14,7 @@
  */
 class Game {
  private:
+  GPUProgram basic;
   /**
    * Call public LogicalUpdate and dispatch registered jobs to workers.
    */
@@ -24,6 +26,10 @@ class Game {
   void SysResourceUpdate();
 
   /**
+   * Draw whole system then call public Draw.
+   */
+  void SysDraw();
+  /**
    * Call public _Load. Initialize resources helper.
    */
   void SysLoad();
@@ -31,11 +37,10 @@ class Game {
   Device* _device;
   TryHarder* _tryHarder;
 
-
+  System* _system;
 
  public:
   explicit Game(Device* device);
-  Game() = default;
   ~Game() = default;
 
   // Logic methods
@@ -67,4 +72,6 @@ class Game {
    * Launch the game.
    */
   void Run();
+
+  System* GetSystem();
 };

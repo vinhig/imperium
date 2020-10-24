@@ -13,10 +13,9 @@
 
 class MyGame : public Game {
  private:
-  System* system;
-  Entity* plant;
   // CTransform* _transform;
   // CMeshInstance* _mesh;
+  Entity* plant;
   float _caca = 0.0f;
 
  public:
@@ -25,10 +24,13 @@ class MyGame : public Game {
   void Load(Device* device) override {
     // _transform = new CTransform(nullptr, device);
     // _mesh = new CMeshInstance(nullptr, device, "../assets/indoor-plant.fbx");
-    system = new System(device);
-    plant = new Entity(system, 0);
+    plant = new Entity(GetSystem(), 0);
     std::string path = "../assets/indoor-plant.fbx";
     auto mesh = plant->GetOrCreate<CMeshInstance>((void*)&path);
+    plant->Get<CTransform>()->SetRotation(
+        glm::vec3(-90.0f, 0.0f, 0.0f));
+    plant->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -1.5f, 0.0f));
+    plant->Get<CTransform>()->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
   };
 
   void LogicalUpdate(TryHarder* tryHarder) override {
@@ -37,12 +39,7 @@ class MyGame : public Game {
     _caca += 0.01f;
   };
 
-  void ResourceUpdate(Device* device) override{
-      // auto resourceChange = _transform->Resource();
-      // if (resourceChange.enable) {
-      // device->UpdateUniformBuffer(resourceChange.dest, resourceChange.from);
-      //}
-  };
+  void ResourceUpdate(Device* device) override{};
 
-  void Draw(Device* device) override { system->Draw(device); };
+  void Draw(Device* device) override{};
 };

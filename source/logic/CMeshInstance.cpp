@@ -53,7 +53,6 @@ CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
 }
 
 DrawCall CMeshInstance::Draw() {
-  std::cout << "DRAW DRAW" << std::endl;
   return DrawCall{_drawInputs.data(),
                   _uniforms.data(),
                   (int)_uniforms.size(),
