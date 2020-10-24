@@ -157,6 +157,10 @@ void DeviceAndroid::Draw(GPUDrawInput drawInput, int count, int times,
   _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);
 }
 
+GPUProgram DeviceAndroid::GetCurrentProgram() {
+  return _currentProgram;
+}
+
 
 void DeviceAndroid::SetFileReader(
     std::function<std::vector<unsigned char>(std::string)> fileReader) {

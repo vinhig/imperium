@@ -319,6 +319,7 @@ void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,
 }
 
 void DeviceDesktop::BindProgram(GPUProgram program) {
+  _currentProgram = program;
   _backend->BindProgram(program);
 }
 
@@ -326,3 +327,5 @@ void DeviceDesktop::Draw(GPUDrawInput drawInput, int count, int times,
                          GPUBuffer *uniformBuffers, size_t nbUniformBuffers) {
   _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);
 }
+
+GPUProgram DeviceDesktop::GetCurrentProgram() { return _currentProgram; }

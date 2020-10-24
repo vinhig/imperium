@@ -11,8 +11,8 @@ CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
   auto device = GetEntity()->GetSystem()->GetDevice();
   // Specify how to draw data
   InputLayoutDesc inputLayoutDesc = {};
-  // TODO: this shit will just work on opengl
-  // inputLayoutDesc.program = &program;
+  auto program = GetEntity()->GetSystem()->GetDevice()->GetCurrentProgram();
+  inputLayoutDesc.program = &program;
   inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 9,
                                      DataType::Float,
                                      (void*)(sizeof(float) * 0)});

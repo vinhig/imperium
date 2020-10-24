@@ -39,6 +39,8 @@ class DeviceAndroid : public Device {
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer *uniformBuffers, size_t nbUniformBuffers) override;
 
+  GPUProgram GetCurrentProgram() override;
+
   void RequestAnimationFrame() override;
   bool ShouldClose() override;
   void SetFileReader(

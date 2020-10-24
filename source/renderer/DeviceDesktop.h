@@ -23,6 +23,8 @@ class DeviceDesktop : public Device {
   std::function<std::string(std::string)> _fileReader;
   ApiDesc _api;
 
+  GPUProgram _currentProgram;
+
  public:
   explicit DeviceDesktop(DeviceDesc deviceDesc);
   ~DeviceDesktop();
@@ -45,6 +47,8 @@ class DeviceDesktop : public Device {
   void BindProgram(GPUProgram program) override;
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+
+  GPUProgram GetCurrentProgram() override;
 
   void RequestAnimationFrame() override;
   bool ShouldClose() override;

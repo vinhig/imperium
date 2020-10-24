@@ -35,6 +35,7 @@ void Game::SysResourceUpdate() {
 void Game::SysLoad() {
   // TODO: Load LOADING PLS WAIT texture
   // Dummy shader
+  // Has to be used to create input layout with the directx backend
   basic = _device->CreateProgram("basic");
   _device->BindProgram(basic);
   Load(_device);

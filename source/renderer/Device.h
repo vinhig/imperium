@@ -139,6 +139,12 @@ class Device {
   virtual void RequestAnimationFrame() = 0;
 
   /**
+   * Get current active program.
+   * @return GPUProgram that will be used to achieve draw calls.
+   */
+  virtual GPUProgram GetCurrentProgram() = 0;
+
+  /**
    * Check if the device should close.
    * @return True if the device should close.
    */
