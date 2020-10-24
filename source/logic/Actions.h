@@ -10,9 +10,12 @@
 #include "../renderer/GPUResources.h"
 
 struct DrawCall {
-  std::vector<GPUDrawInput> drawInputs;
-  std::vector<int> counts;
+  GPUDrawInput* drawInputs;
+  GPUBuffer* uniforms;
+  int nbUniforms;
+  int* counts;
   int times;
+  int nbResources;
 };
 
 struct LogicCall {

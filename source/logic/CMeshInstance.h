@@ -11,13 +11,14 @@
 
 class CMeshInstance : public IComponent, public IComponentDrawable {
  private:
-  // Store reference to resource even if...
+  // Store references to resources even if...
   std::vector<GPUBuffer> _vertexBuffers;
   std::vector<GPUBuffer> _indexBuffers;
   std::vector<int> _counts;
 
   // ... we just need this little guy
   std::vector<GPUDrawInput> _drawInputs;
+  std::vector<GPUBuffer> _uniforms;
 
   CTransform* _transform;
 
@@ -30,5 +31,4 @@ class CMeshInstance : public IComponent, public IComponentDrawable {
   static const int Uuid = 2;
 };
 
-template <>
-CMeshInstance* Entity::GetOrCreate<CMeshInstance>(void*);
+template CMeshInstance* Entity::GetOrCreate<CMeshInstance>(void*);

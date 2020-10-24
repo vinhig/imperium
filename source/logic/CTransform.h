@@ -56,5 +56,4 @@ class CTransform : public IComponent,
   }
 };
 
-template <>
-CTransform* Entity::GetOrCreate<CTransform>(void*);
+template CTransform* Entity::GetOrCreate<CTransform>(void*);

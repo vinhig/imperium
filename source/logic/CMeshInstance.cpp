@@ -6,8 +6,7 @@
 
 #include "../loader/MeshLoader.h"
 
-CMeshInstance::CMeshInstance(Entity* owner, void* args)
-    : IComponent(owner) {
+CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
   std::string path = *((std::string*)args);
   auto device = GetEntity()->GetSystem()->GetDevice();
   // Specify how to draw data
@@ -48,7 +47,17 @@ CMeshInstance::CMeshInstance(Entity* owner, void* args)
   }
 
   // It's mandatory to have a CTransform
+  // And we need its corresponding GPUBuffer as a uniform buffer
   _transform = GetEntity()->GetOrCreate<CTransform>(nullptr);
+  _uniforms.push_back(_transform->GetGPUBuffer());
 }
 
-DrawCall CMeshInstance::Draw() { return DrawCall{_drawInputs, _counts, 1}; }
+DrawCall CMeshInstance::Draw() {
+  std::cout << "DRAW DRAW" << std::endl;
+  return DrawCall{_drawInputs.data(),
+                  _uniforms.data(),
+                  (int)_uniforms.size(),
+                  _counts.data(),
+                  1,
+                  (int)_drawInputs.size()};
+}
