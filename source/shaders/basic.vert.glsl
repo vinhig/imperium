@@ -20,15 +20,15 @@ layout(std140, binding=0) uniform Object {
     mat4 model;
 } object;
 
-layout(std140, binding=1) uniform Lights {
+layout(std140, binding=2) uniform Lights {
     vec4 camera_position;
     vec4 light_position;
 } lights;
 
-layout(std140, binding=2) uniform Material {
+layout(std140, binding=1) uniform Material {
     float ambient;
     float specular;
-    float something;
+    vec4 color;
 } material;
 
 void main() {

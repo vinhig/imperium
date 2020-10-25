@@ -225,10 +225,12 @@ GPUBuffer DeviceDesktop::CreateUniformBuffer(CPUBuffer<void> cpuBuffer) {
   BufferCreationDesc desc = {};
   desc.purpose = BufferTypeDesc::UniformBuffer;
   desc.usage = BufferUsageDesc::DynamicDraw;
-  desc.size = cpuBuffer.size;
+  desc.size = cpuBuffer.size + (cpuBuffer.size % 16);
   desc.data = (void *)cpuBuffer.data;
 
-  assert(desc.size % 16 == 0);
+  // Uniform buffer size has to be multiple of 16
+  // But we prefer allocating some memory instead of requiring specific size
+  // assert(desc.size % 16 == 0);
 
   auto buffer = _backend->CreateBuffer(desc);
   return buffer;
@@ -321,6 +323,12 @@ void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,
 void DeviceDesktop::BindProgram(GPUProgram program) {
   _currentProgram = program;
   _backend->BindProgram(program);
+}
+
+void DeviceDesktop::BindTextures(GPUTexture *textures, int nbTextures) {
+  for (int i = 0; i < nbTextures; i++) {
+    _backend->BindTexture(textures[i], i);
+  }
 }
 
 void DeviceDesktop::Draw(GPUDrawInput drawInput, int count, int times,

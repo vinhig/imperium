@@ -12,7 +12,9 @@
 struct DrawCall {
   GPUDrawInput* drawInputs;
   GPUBuffer* uniforms;
+  GPUTexture* textures;
   int nbUniforms;
+  int nbTextures;
   int* counts;
   int times;
   int nbResources;

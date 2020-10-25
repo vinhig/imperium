@@ -45,6 +45,7 @@ add_library(logic
         source/logic/TryHarder.cpp
         source/logic/CTransform.cpp
         source/logic/CMeshInstance.cpp
+        source/logic/CMaterial.cpp
         )
 
 add_library(renderer

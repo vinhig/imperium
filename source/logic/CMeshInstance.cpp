@@ -50,12 +50,18 @@ CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
   // And we need its corresponding GPUBuffer as a uniform buffer
   _transform = GetEntity()->GetOrCreate<CTransform>(nullptr);
   _uniforms.push_back(_transform->GetGPUBuffer());
+
+  // How to draw this? Only the CMaterial component will say
+  _material = GetEntity()->GetOrCreate<CMaterial>(nullptr);
+  _uniforms.push_back(_material->GetGPUBuffer());
 }
 
 DrawCall CMeshInstance::Draw() {
   return DrawCall{_drawInputs.data(),
                   _uniforms.data(),
+                  _material->GetTextures(),
                   (int)_uniforms.size(),
+                  _material->NbTextures(),
                   _counts.data(),
                   1,
                   (int)_drawInputs.size()};

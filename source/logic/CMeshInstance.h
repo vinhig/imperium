@@ -6,6 +6,7 @@
 
 #include "../renderer/CPUResources.h"
 #include "../renderer/GPUResources.h"
+#include "CMaterial.h"
 #include "CTransform.h"
 #include "Ecs.h"
 
@@ -21,6 +22,7 @@ class CMeshInstance : public IComponent, public IComponentDrawable {
   std::vector<GPUBuffer> _uniforms;
 
   CTransform* _transform;
+  CMaterial* _material;
 
  public:
   CMeshInstance(Entity* owner, void* args);

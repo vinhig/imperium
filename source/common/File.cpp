@@ -38,3 +38,6 @@ std::function<std::vector<unsigned char>(std::string)> File::FileReader =
     [](std::string path) -> std::vector<unsigned char> {
   throw std::runtime_error("Setup your android file reader or i kill you.");
 };
+
+TextureLoader File::textureLoader;
+MeshLoader File::meshLoader;

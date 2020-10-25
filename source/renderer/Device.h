@@ -121,6 +121,13 @@ class Device {
   virtual void BindProgram(GPUProgram program) = 0;
 
   /**
+   * Specify which textures to use for next draw calls.
+   * @param textures Array of textures to use.
+   * @param nbTextures Number of textures in given array.
+   */
+   virtual void BindTextures(GPUTexture* textures, int nbTextures) = 0;
+
+  /**
    * Launch a draw call.
    * @param drawInput Structure of data to draw.
    * @param count Number of elements index to draw.

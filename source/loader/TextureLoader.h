@@ -2,11 +2,14 @@
 // Created by vincent on 20.09.20.
 //
 
+#pragma once
+
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "../renderer/CPUResources.h"
+#include "../renderer/GPUResources.h"
 
 /**
  * Load textures from disk. Register their data and GPU pointer. Free data on
@@ -15,7 +18,7 @@
 class TextureLoader {
  private:
   std::vector<unsigned char*> _data;
-  std::unordered_map<std::string, uint32_t> _textures;
+  std::unordered_map<std::string, GPUTexture> _textures;
 
  public:
   TextureLoader();
@@ -40,7 +43,7 @@ class TextureLoader {
    * Get previously loaded texture. Return 0 if the texture doesnt' exist.
    *
    */
-  uint32_t Get(const std::string& path);
+  GPUTexture Get(const std::string& path);
 
   /**
    * Load a texture from disk. Register texture. Doesn't check if the texture
@@ -62,7 +65,7 @@ class TextureLoader {
    * @param path Path to texture texture.
    * @param texture GPU address of the texture.
    */
-  void Link(const std::string& path, uint32_t texture);
+  void Link(const std::string& path, GPUTexture texture);
 
   /**
    * Number of textures loaded.

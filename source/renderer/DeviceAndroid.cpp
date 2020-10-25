@@ -152,6 +152,12 @@ void DeviceAndroid::BindProgram(GPUProgram program) {
   _backend->BindProgram(program);
 }
 
+void DeviceAndroid::BindTextures(GPUTexture *textures, int nbTextures) {
+  for (int i = 0; i < nbTextures; i++) {
+    _backend->BindTexture(textures[i], i);
+  }
+}
+
 void DeviceAndroid::Draw(GPUDrawInput drawInput, int count, int times,
                          GPUBuffer *uniformBuffers, size_t nbUniformBuffers) {
   _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);

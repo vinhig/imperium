@@ -47,6 +47,7 @@ void Game::SysDraw() {
     auto comp = _system->Components(2)[i];
     auto draw = ((CMeshInstance*)comp)->Draw();
     assert(draw.nbResources != 0);
+    _device->BindTextures(draw.textures, draw.nbTextures);
     for (int j = 0; j < draw.nbResources; j++) {
       _device->Draw(draw.drawInputs[j], draw.counts[j], draw.times,
                     draw.uniforms, draw.nbUniforms);

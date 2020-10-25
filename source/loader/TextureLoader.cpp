@@ -28,8 +28,9 @@ bool TextureLoader::IsLoaded(const std::string& path) {
   return !(_textures.find(path) == _textures.end());
 }
 
-uint32_t TextureLoader::Get(const std::string& path) {
-  uint32_t texture = 0;
+GPUTexture TextureLoader::Get(const std::string& path) {
+  GPUTexture texture = {};
+  texture.texture = 0;
   if (IsLoaded(path)) {
     texture = _textures[path];
   }
@@ -99,7 +100,7 @@ CPUTexture TextureLoader::Load(
   return cpuTexture;
 }
 
-void TextureLoader::Link(const std::string& path, uint32_t texture) {
+void TextureLoader::Link(const std::string& path, GPUTexture texture) {
   _textures[path] = texture;
 }
 

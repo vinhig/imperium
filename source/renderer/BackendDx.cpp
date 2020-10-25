@@ -246,9 +246,6 @@ GPUProgram BackendDx::CreateProgram(std::vector<uint32_t> vertexSource,
     fragmentSourceCode = hlsl.compile();
   }
 
-  std::cout << "// VertexSourceCode:" << vertexSourceCode << std::endl;
-  std::cout << "// FragmentSourceCode:" << fragmentSourceCode << std::endl;
-
   // Compile shader using D3DCompiler
   ComPtr<ID3DBlob> vertexBlob = DxCompileShader(
       vertexSourceCode.c_str(), vertexSourceCode.length(), "vs_5_0");

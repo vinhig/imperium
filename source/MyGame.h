@@ -34,6 +34,8 @@ class MyGame : public Game {
         glm::vec3(-90.0f, 0.0f, 0.0f));
     plant->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -1.5f, 0.0f));
     plant->Get<CTransform>()->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    plant->Get<CMaterial>()->SetDiffuseTexture("../assets/indoor-plant-diffuse.jpg");
+    plant->Get<CMaterial>()->SetNormalTexture("../assets/indoor-plant-normal.jpg");
   };
 
   void LogicalUpdate(TryHarder* tryHarder) override {
