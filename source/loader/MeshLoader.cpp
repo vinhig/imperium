@@ -6,17 +6,16 @@
 
 #include <ofbx.h>
 
-#include <iostream>
-#include <sstream>
 #include <stdexcept>
-#include <string>
+
+#include "../common/File.h"
 
 std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
     const std::string& path
-#ifdef __ANDROID__
-    ,
-    std::function<std::vector<unsigned char>(std::string)> fileReader
-#endif
+//#ifdef __ANDROID__
+//    ,
+//    std::function<std::vector<unsigned char>(std::string)> fileReader
+//#endif
 ) {
 #ifndef __ANDROID__
   // Open file
@@ -30,7 +29,7 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
   auto* content = new ofbx::u8[file_size];
   fread(content, 1, file_size, fp);
 #else
-  auto vcontent = fileReader(path);
+  auto vcontent = File::FileReader(path);
   auto content = vcontent.data();
   long file_size = vcontent.size();
 #endif

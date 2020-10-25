@@ -20,9 +20,9 @@ class MeshLoader {
    */
   std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> Load(
       const std::string& path
-#ifdef __ANDROID__
-      ,
-      std::function<std::vector<unsigned char>(std::string)> fileReader
-#endif
-  );
+//#ifdef __ANDROID__
+//      ,
+//      std::function<std::vector<unsigned char>(std::string)> fileReader
+//#endif
+      );
 };

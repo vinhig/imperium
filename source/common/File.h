@@ -5,12 +5,15 @@
 #pragma once
 
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
 
 class File {
  public:
+  static std::function<std::vector<unsigned char>(std::string)> FileReader;
+
   /**
    * Read text from file specified by path.
    * @param path Path to file to read.

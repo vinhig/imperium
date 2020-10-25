@@ -14,5 +14,7 @@ int main(int argc, char** argv) {
 
   auto myGame = new MyGame(device);
 
-  myGame->Run();
+  while(!myGame->ShouldClose()) {
+    myGame->Process();
+  }
 }

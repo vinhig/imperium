@@ -9,7 +9,6 @@
 #include "logic/CTransform.h"
 #include "logic/Ecs.h"
 #include "logic/Game.h"
-#include "renderer/DeviceDesktop.h"
 
 class MyGame : public Game {
  private:
@@ -25,7 +24,11 @@ class MyGame : public Game {
     // _transform = new CTransform(nullptr, device);
     // _mesh = new CMeshInstance(nullptr, device, "../assets/indoor-plant.fbx");
     plant = new Entity(GetSystem(), 0);
+#if __ANDROID__
+    std::string path = "indoor-plant.fbx";
+#else
     std::string path = "../assets/indoor-plant.fbx";
+#endif
     auto mesh = plant->GetOrCreate<CMeshInstance>((void*)&path);
     plant->Get<CTransform>()->SetRotation(
         glm::vec3(-90.0f, 0.0f, 0.0f));

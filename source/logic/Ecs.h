@@ -9,7 +9,6 @@
 #include <unordered_map>
 
 #include "../renderer/Device.h"
-#include "../renderer/DeviceDesktop.h"
 #include "Actions.h"
 #include "TryHarder.h"
 

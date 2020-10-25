@@ -16,6 +16,8 @@ class DeviceAndroid : public Device {
  private:
   std::function<std::vector<unsigned char>(std::string)> _fileReader;
 
+  GPUProgram _currentProgram;
+
  public:
   explicit DeviceAndroid(ApiDesc apiDesc, int width, int height);
   ~DeviceAndroid() = default;

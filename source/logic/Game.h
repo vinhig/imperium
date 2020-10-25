@@ -15,6 +15,7 @@
 class Game {
  private:
   GPUProgram basic;
+  int frame = 0;
   /**
    * Call public LogicalUpdate and dispatch registered jobs to workers.
    */
@@ -69,9 +70,14 @@ class Game {
   virtual void Draw(Device* device) = 0;
 
   /**
-   * Launch the game.
+   * Should the game close.
    */
-  void Run();
+  bool ShouldClose();
+
+  /**
+   * Process a game loop.
+   */
+  void Process();
 
   System* GetSystem();
 };

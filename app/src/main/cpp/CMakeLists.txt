@@ -9,11 +9,19 @@ add_library(
         SHARED
 
         native-lib.cpp
+        ../../../../source/common/File.cpp
+
         ../../../../source/renderer/BackendOglEs.cpp
         ../../../../source/renderer/DeviceAndroid.cpp
+
         ../../../../source/loader/MeshLoader.cpp
         ../../../../source/loader/TextureLoader.cpp
         ../../../../source/loader/pch.cpp
+
+        ../../../../source/logic/CMeshInstance.cpp
+        ../../../../source/logic/CTransform.cpp
+        ../../../../source/logic/Game.cpp
+        ../../../../source/logic/TryHarder.cpp
 
         ../../../../libraries/openfbx/src/miniz.c
         ../../../../libraries/openfbx/src/ofbx.cpp

@@ -66,17 +66,18 @@ Game::Game(Device* device) {
   _system = new System(_device);
 }
 
-void Game::Run() {
-  SysLoad();
-  int frame = 0;
-  while (!_device->ShouldClose()) {
-    _device->Clear(RenderTarget{});
-    SysLogicalUpdate();
-    SysResourceUpdate();
-    SysDraw();
-    _device->RequestAnimationFrame();
-    frame += 1;
+bool Game::ShouldClose() { return _device->ShouldClose(); }
+
+void Game::Process() {
+  if (frame == 0) {
+    SysLoad();
   }
+  _device->Clear(RenderTarget{});
+  SysLogicalUpdate();
+  SysResourceUpdate();
+  SysDraw();
+  _device->RequestAnimationFrame();
+  frame++;
 }
 
 System* Game::GetSystem() { return _system; }
