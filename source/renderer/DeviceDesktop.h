@@ -35,7 +35,7 @@ class DeviceDesktop : public Device {
   int GetWidth() override { return _width; };
   int GetHeight() override { return _height; };
 
-  void Clear(RenderTarget renderTarget) override;
+  void Clear(GPURenderTarget renderTarget) override;
   GPUBuffer CreateVertexBuffer(CPUBuffer<float> cpuBuffer) override;
   GPUBuffer CreateIndexBuffer(CPUBuffer<int> cpuBuffer) override;
   GPUBuffer CreateUniformBuffer(CPUBuffer<void> cpuBuffer) override;
@@ -47,6 +47,7 @@ class DeviceDesktop : public Device {
   GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap,
                                 int width, int height) override;
   GPUTexture CreateTextureFromData(CPUTexture cpuTexture) override;
+  GPURenderTarget CreateRenderTarget(int nbColors, bool depth) override;
 
   void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) override;
 

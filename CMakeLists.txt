@@ -16,6 +16,7 @@ include_directories(libraries/openfbx/src/)
 
 # Sub-projects
 add_subdirectory(libraries/spirv-cross)
+add_subdirectory(libraries/toml11)
 
 if (WIN32)
     set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
@@ -51,10 +52,11 @@ add_library(logic
 add_library(renderer
         source/renderer/BackendOgl.cpp
         source/renderer/BackendOglEs.cpp
-
         ${WIN32_CPP_RENDERER}
 
         source/renderer/DeviceDesktop.cpp
+        source/renderer/RenderingPass.cpp
+        source/renderer/Frame.cpp
 
         libraries/GL/src/glad.c)
 
@@ -64,7 +66,7 @@ target_link_libraries(Imperium renderer common loader logic)
 
 target_link_libraries(loader openfbx)
 
-target_link_libraries(logic glm)
+target_link_libraries(logic glm toml11)
 
 target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)

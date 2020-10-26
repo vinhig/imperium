@@ -73,7 +73,7 @@ void Game::Process() {
   if (frame == 0) {
     SysLoad();
   }
-  _device->Clear(RenderTarget{});
+  _device->Clear(GPURenderTarget{});
   SysLogicalUpdate();
   SysResourceUpdate();
   SysDraw();

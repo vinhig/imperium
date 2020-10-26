@@ -338,7 +338,7 @@ GPUInputLayout BackendDx::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
                          entry.index,
                          format,
                          0,
-                         (unsigned int)entry.offset,
+                         (unsigned int)(entry.offset),
                          D3D11_INPUT_PER_VERTEX_DATA,
                          0};
     index++;

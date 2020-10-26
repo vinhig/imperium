@@ -7,3 +7,6 @@
 [submodule "libraries/stb"]
 	path = libraries/stb
 	url = https://github.com/nothings/stb
+[submodule "libraries/toml11"]
+	path = libraries/toml11
+	url = https://github.com/ToruNiina/toml11

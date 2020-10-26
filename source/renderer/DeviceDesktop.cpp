@@ -186,7 +186,7 @@ void DeviceDesktop::RequestAnimationFrame() {
   }
 }
 
-void DeviceDesktop::Clear(RenderTarget renderTarget) { _backend->Clear(0); }
+void DeviceDesktop::Clear(GPURenderTarget renderTarget) { _backend->Clear(0); }
 
 GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   // Describe and create buffer
@@ -306,6 +306,15 @@ GPUTexture DeviceDesktop::CreateTextureFromData(CPUTexture cpuTexture) {
   textureCreationDesc.wrap = TextureWrap::Repeat;
 
   return _backend->CreateTexture(textureCreationDesc);
+}
+
+GPURenderTarget DeviceDesktop::CreateRenderTarget(int nbColors, bool depth) {
+  // Create textures
+
+  // Create framebuffer
+
+  // Link textures to framebuffer
+  return GPURenderTarget{};
 }
 
 void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,

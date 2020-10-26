@@ -26,7 +26,7 @@ class Device {
    * solid color. Each texture linked to the renderTarget will be cleared.
    * @param renderTarget RenderTarget to clear.
    */
-  virtual void Clear(RenderTarget renderTarget) = 0;
+  virtual void Clear(GPURenderTarget renderTarget) = 0;
 
   /**
    * Create a GPUBuffer containing vertices. Make sure vertices are correctly
@@ -110,6 +110,17 @@ class Device {
   virtual GPUTexture CreateTextureFromData(CPUTexture cpuTexture) = 0;
 
   /**
+   * Create a render target with default parameters. Default parameters:
+   *    - 4 color channels for each color texture
+   *    - Every texture is shader accessible
+   * @param nbColors Number of color textures to create and link.
+   * @param depth Should create a depth texture.
+   * @return GPURenderTarget containing shader accessible textures and that can
+   * be used in rendering pass.
+   */
+  virtual GPURenderTarget CreateRenderTarget(int nbColors, bool depth) = 0;
+
+  /**
    * Completely replace data stored in GPU buffer.
    * @param buffer GPUBuffer to modify.
    * @param newData CPUBuffer containing the new data to store.
@@ -128,7 +139,7 @@ class Device {
    * @param textures Array of textures to use.
    * @param nbTextures Number of textures in given array.
    */
-   virtual void BindTextures(GPUTexture* textures, int nbTextures) = 0;
+  virtual void BindTextures(GPUTexture* textures, int nbTextures) = 0;
 
   /**
    * Launch a draw call.
