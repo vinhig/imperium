@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <iostream>
 
+#include "../common/File.h"
 #include "../renderer/Descriptions.h"
 
 TextureLoader::TextureLoader() { _textures.reserve(10); }
@@ -37,23 +38,32 @@ GPUTexture TextureLoader::Get(const std::string& path) {
   return texture;
 }
 
-CPUTexture TextureLoader::Load(
-    const std::string& path
+CPUTexture TextureLoader::Load(const std::string& path
 #ifdef __ANDROID__
-    ,
-    std::function<std::vector<unsigned char>(std::string)> fileReader
+// ,
+// std::function<std::vector<unsigned char>(std::string)> fileReader
 #endif
 ) {
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(true);
 
 #ifdef __ANDROID__
-  auto vcontent = fileReader(path);
+  auto vcontent = File::FileReader(path);
   auto content = vcontent.data();
-  long file_size = vcontent.size();
+  long fileSize = vcontent.size();
 
-  unsigned char* data = stbi_load_from_memory(content, file_size, &width,
-                                              &height, &nrChannels, 4);
+  stbi_info_from_memory(content, fileSize, &width, &height, &nrChannels);
+
+  unsigned char* data;
+  if (nrChannels == 3) {
+    data = stbi_load_from_memory(content, fileSize, &width, &height,
+                                 &nrChannels, 4);
+    nrChannels = 4;
+  } else {
+    data = stbi_load_from_memory(content, fileSize, &width, &height,
+                                 &nrChannels, 4);
+  }
+
 #else
   FILE* file = fopen(path.c_str(), "r");
   if (!file) {
@@ -64,6 +74,7 @@ CPUTexture TextureLoader::Load(
   // Invoke stb_image
   // https://github.com/nothings/stb
   stbi_info(path.c_str(), &width, &height, &nrChannels);
+
   unsigned char* data;
   if (nrChannels == 3) {
     data = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);

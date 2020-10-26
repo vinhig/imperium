@@ -10,7 +10,7 @@
 // https://music.youtube.com/watch?v=3GicPBWG5EM&feature=share
 
 int main(int argc, char** argv) {
-  auto device = new DeviceDesktop({1024, 768, ApiDesc::OpenGL33});
+  auto device = new DeviceDesktop({1024, 768, ApiDesc::Directx11});
 
   auto myGame = new MyGame(device);
 

@@ -18,9 +18,15 @@ class DeviceAndroid : public Device {
 
   GPUProgram _currentProgram;
 
+  int _width = 0;
+  int _height = 0;
+
  public:
   explicit DeviceAndroid(ApiDesc apiDesc, int width, int height);
   ~DeviceAndroid() = default;
+
+  int GetWidth() override { return _width; };
+  int GetHeight() override { return _height; };
 
   void Clear(RenderTarget renderTarget) override;
   GPUBuffer CreateVertexBuffer(CPUBuffer<float> cpuBuffer) override;
@@ -38,7 +44,7 @@ class DeviceAndroid : public Device {
   void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) override;
 
   void BindProgram(GPUProgram program) override;
-  void BindTextures(GPUTexture* textures, int nbTextures) override;
+  void BindTextures(GPUTexture *textures, int nbTextures) override;
 
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer *uniformBuffers, size_t nbUniformBuffers) override;

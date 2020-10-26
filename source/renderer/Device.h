@@ -18,6 +18,9 @@
  */
 class Device {
  public:
+  virtual int GetWidth() = 0;
+  virtual int GetHeight() = 0;
+
   /**
    * Clear given renderTarget. Clear means fill the whole texture with a
    * solid color. Each texture linked to the renderTarget will be cleared.
@@ -26,7 +29,7 @@ class Device {
   virtual void Clear(RenderTarget renderTarget) = 0;
 
   /**
-   * Create a GPUBuffer containing vertices. Make sure vertices are correclty
+   * Create a GPUBuffer containing vertices. Make sure vertices are correctly
    * structured as a vertex buffer can only be used next to an input layout with
    * the same structure.
    * @param buffer CPUBuffer containing structured vertices.

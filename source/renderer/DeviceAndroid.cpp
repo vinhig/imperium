@@ -15,6 +15,9 @@ DeviceAndroid::DeviceAndroid(ApiDesc apiDesc, int width, int height) {
   } else {
     throw std::runtime_error("Incompatible API backend");
   }
+
+  _width = width;
+  _height = height;
 }
 
 void DeviceAndroid::Clear(RenderTarget renderTarget) { _backend->Clear(0); }

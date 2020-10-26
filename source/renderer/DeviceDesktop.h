@@ -25,9 +25,15 @@ class DeviceDesktop : public Device {
 
   GPUProgram _currentProgram;
 
+  int _width = 1024;
+  int _height = 768;
+
  public:
   explicit DeviceDesktop(DeviceDesc deviceDesc);
   ~DeviceDesktop();
+
+  int GetWidth() override { return _width; };
+  int GetHeight() override { return _height; };
 
   void Clear(RenderTarget renderTarget) override;
   GPUBuffer CreateVertexBuffer(CPUBuffer<float> cpuBuffer) override;

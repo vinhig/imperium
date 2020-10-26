@@ -15,7 +15,11 @@ CTransform::CTransform(Entity* owner, void* args) : IComponent(owner) {
 
   auto position = glm::vec3(3.0f, 3.0f, 3.0f);
   auto lookAt = glm::vec3(0.0f, 0.0f, 0.0f);
-  _projection = glm::perspective(70.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
+  _projection = glm::perspective(
+      70.0f,
+      (float)GetEntity()->GetSystem()->GetDevice()->GetWidth() /
+          (float)GetEntity()->GetSystem()->GetDevice()->GetHeight(),
+      0.1f, 100.0f);
   _view = glm::lookAt(position, lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
 
   _model = glm::mat4(1.0f);

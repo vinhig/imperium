@@ -54,8 +54,8 @@ class TextureLoader {
   CPUTexture Load(
       const std::string& path
 #ifdef __ANDROID__
-      ,
-      std::function<std::vector<unsigned char>(std::string)> fileReader
+      // ,
+      // std::function<std::vector<unsigned char>(std::string)> fileReader
 #endif
   );
 

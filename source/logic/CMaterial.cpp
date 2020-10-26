@@ -10,8 +10,13 @@
 #include "../loader/TextureLoader.h"
 
 CMaterial::CMaterial(Entity* owner, void* args) : IComponent(owner) {
+#if __ANDROID__
+  SetDiffuseTexture("no-texture.png");
+  SetNormalTexture("no-texture.png");
+#else
   SetDiffuseTexture("../assets/no-texture.png");
   SetNormalTexture("../assets/no-texture.png");
+#endif
 
   _material = {0.8, 1.0, {1.0, 1.0, 1.0, 1.0}};
   GetCPUBuffer()->data = malloc(sizeof(SubMaterial));

@@ -18,6 +18,7 @@ add_library(
         ../../../../source/loader/TextureLoader.cpp
         ../../../../source/loader/pch.cpp
 
+        ../../../../source/logic/CMaterial.cpp
         ../../../../source/logic/CMeshInstance.cpp
         ../../../../source/logic/CTransform.cpp
         ../../../../source/logic/Game.cpp

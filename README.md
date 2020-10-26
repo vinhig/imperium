@@ -9,9 +9,10 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 * Deferred rendering
 * Scriptable RenderGraph (with JavaScript)
 * Cascaded Shadows
+* PBR Materials
 * Basic skeleton animation
 
-(This repo is a Work-In-Progress. At the time being, we can barely draw a textured sphere.)
+(This repo is a Work-In-Progress. At the time being, we can barely draw a cute textured plant with Phong effect.)
 
 ### API support
 
@@ -91,6 +92,7 @@ This project makes heavy use of:
 * https://github.com/nem0/OpenFBX
 * https://github.com/g-truc/glm
 * https://github.com/Dav1dde/glad
+* https://github.com/KhronosGroup/SPIRV-Cross
 
 A big thanks to them.
 
@@ -109,3 +111,8 @@ Example: We are on a Windows/Ogl build and we decide to create a RenderTarget ob
 This kind of abstraction is called `double level of abstraction` (MAYBE someone has already written a document or given
 it a more selling name).
  
+## Screenshots
+
+![Screenshot 1](docs/screenshot1.png)
+
+![Screenshot 2](docs/screenshot2.png)
