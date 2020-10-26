@@ -14,8 +14,8 @@ CMaterial::CMaterial(Entity* owner, void* args) : IComponent(owner) {
   SetDiffuseTexture("no-texture.png");
   SetNormalTexture("no-texture.png");
 #else
-  SetDiffuseTexture("../assets/no-texture.png");
-  SetNormalTexture("../assets/no-texture.png");
+  SetDiffuseTexture("../assets/textures/no-texture.png");
+  SetNormalTexture("../assets/textures/no-texture.png");
 #endif
 
   _material = {0.8, 1.0, {1.0, 1.0, 1.0, 1.0}};

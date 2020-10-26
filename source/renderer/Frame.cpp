@@ -6,5 +6,5 @@
 
 Frame::Frame(const std::string &config) {
   // Parse given toml config
-  
+
 }

@@ -208,9 +208,9 @@ Java_com_warnengine_imperium_RendererWrapper_on_1surface_1created(
   // Some fucking good texturing
   auto textureLoader = new TextureLoader();
   // Diffuse stuff
-  auto diffuseCpuTexture = textureLoader->Load("Diffuse.png", fileReader);
+  auto diffuseCpuTexture = textureLoader->Load("diffuse.png", fileReader);
   diffuseTexture = g_device->CreateTextureFromData(diffuseCpuTexture);
-  textureLoader->Link("Diffuse.png", diffuseTexture.texture);
+  textureLoader->Link("diffuse.png", diffuseTexture.texture);
 }
 
 extern "C" JNIEXPORT void JNICALL

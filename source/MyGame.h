@@ -27,7 +27,7 @@ class MyGame : public Game {
 #if __ANDROID__
     std::string path = "indoor-plant.fbx";
 #else
-    std::string path = "../assets/indoor-plant.fbx";
+    std::string path = "../assets/meshes/indoor-plant.fbx";
 #endif
     auto mesh = plant->GetOrCreate<CMeshInstance>((void*)&path);
     plant->Get<CTransform>()->SetRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
@@ -39,9 +39,9 @@ class MyGame : public Game {
     plant->Get<CMaterial>()->SetNormalTexture("indoor-plant-normal.jpg");
 #else
     plant->Get<CMaterial>()->SetDiffuseTexture(
-        "../assets/indoor-plant-diffuse.jpg");
+        "../assets/textures/indoor-plant-diffuse.jpg");
     plant->Get<CMaterial>()->SetNormalTexture(
-        "../assets/indoor-plant-normal.jpg");
+        "../assets/textures/indoor-plant-normal.jpg");
 #endif
   };
 

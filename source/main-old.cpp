@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
   // Normal stuff
   auto normalCpuTexture = textureLoader->Load("../assets/indoor-plant-normal.png");
   auto normalTexture = device->CreateTextureFromData(normalCpuTexture);
-  textureLoader->Link("../assets/Wheels.png", normalTexture.texture);
+  textureLoader->Link("../assets/wheels.png", normalTexture.texture);
 
   float caca = 0.0f;
   while (!device->ShouldClose()) {
