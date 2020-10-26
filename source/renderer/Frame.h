@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "Device.h"
 #include "RenderingPass.h"
 
 /**
@@ -28,5 +29,5 @@ class Frame {
    * layout (some workaround with dx, it's a shame i know).
    * @param config
    */
-  Frame(const std::string& config);
+  Frame(Device* device, const std::string& config);
 };

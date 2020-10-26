@@ -11,12 +11,12 @@ find_package(Threads REQUIRED)
 
 # 3rd party includes
 include_directories(libraries/)
+include_directories(libraries/toml11)
 include_directories(libraries/GL/include/)
 include_directories(libraries/openfbx/src/)
 
 # Sub-projects
 add_subdirectory(libraries/spirv-cross)
-add_subdirectory(libraries/toml11)
 
 if (WIN32)
     set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
@@ -66,7 +66,7 @@ target_link_libraries(Imperium renderer common loader logic)
 
 target_link_libraries(loader openfbx)
 
-target_link_libraries(logic glm toml11)
+target_link_libraries(logic glm)
 
 target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
@@ -87,6 +87,8 @@ endif (WIN32)
 
 # Assets compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")
+
+message(GLSL_SOURCE_FILES)
 
 foreach (GLSL ${GLSL_SOURCE_FILES})
     get_filename_component(FILE_NAME ${GLSL} NAME)

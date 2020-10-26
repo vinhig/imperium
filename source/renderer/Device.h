@@ -110,15 +110,12 @@ class Device {
   virtual GPUTexture CreateTextureFromData(CPUTexture cpuTexture) = 0;
 
   /**
-   * Create a render target with default parameters. Default parameters:
-   *    - 4 color channels for each color texture
-   *    - Every texture is shader accessible
-   * @param nbColors Number of color textures to create and link.
-   * @param depth Should create a depth texture.
-   * @return GPURenderTarget containing shader accessible textures and that can
-   * be used in rendering pass.
+   * Create a render target from given textures.
+   * @param textures Color buffers to link to render target.
+   * @param depth Depth texture to link to render target.
    */
-  virtual GPURenderTarget CreateRenderTarget(int nbColors, bool depth) = 0;
+  virtual GPURenderTarget CreateRenderTarget(
+      const std::vector<GPUTexture>& textures, const GPUTexture& depth) = 0;
 
   /**
    * Completely replace data stored in GPU buffer.

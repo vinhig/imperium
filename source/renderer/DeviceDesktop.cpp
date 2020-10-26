@@ -200,8 +200,6 @@ GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   assert(desc.size != 0);
   assert(desc.data != nullptr);
 
-  std::cout << "Stttride:" << desc.stride << std::endl;
-
   auto buffer = _backend->CreateBuffer(desc);
 
   return buffer;
@@ -308,13 +306,10 @@ GPUTexture DeviceDesktop::CreateTextureFromData(CPUTexture cpuTexture) {
   return _backend->CreateTexture(textureCreationDesc);
 }
 
-GPURenderTarget DeviceDesktop::CreateRenderTarget(int nbColors, bool depth) {
-  // Create textures
+GPURenderTarget DeviceDesktop::CreateRenderTarget(
+    const std::vector<GPUTexture> &textures, const GPUTexture &depth) {
 
-  // Create framebuffer
 
-  // Link textures to framebuffer
-  return GPURenderTarget{};
 }
 
 void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,

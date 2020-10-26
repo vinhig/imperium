@@ -7,6 +7,7 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "../renderer/Frame.h"
 #include "CMeshInstance.h"
 
 void Game::SysLogicalUpdate() {
@@ -33,6 +34,8 @@ void Game::SysResourceUpdate() {
 }
 
 void Game::SysLoad() {
+  // Load rendering graph
+  auto frame = new Frame(_device, "../assets/basic.toml");
   // TODO: Load LOADING PLS WAIT texture
   // Dummy shader
   // Has to be used to create input layout with the directx backend

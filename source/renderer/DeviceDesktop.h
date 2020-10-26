@@ -47,7 +47,8 @@ class DeviceDesktop : public Device {
   GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap,
                                 int width, int height) override;
   GPUTexture CreateTextureFromData(CPUTexture cpuTexture) override;
-  GPURenderTarget CreateRenderTarget(int nbColors, bool depth) override;
+  GPURenderTarget CreateRenderTarget(const std::vector<GPUTexture>& textures,
+                                     const GPUTexture& depth) override;
 
   void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) override;
 
