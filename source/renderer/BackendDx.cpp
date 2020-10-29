@@ -110,9 +110,9 @@ BackendDx::BackendDx(BackendDesc backendDesc, ComPtr<ID3D11Device> device,
   // _context->OMSetDepthStencilState(_depthStencilState.Get(), 0);
 }
 
-void BackendDx::Clear(uint32_t framebuffer) {
+void BackendDx::Clear(GPURenderTarget renderTarget) {
   // Clear the backbuffer ?
-  if (framebuffer == 0) {
+  if (renderTarget.framebuffer == 0) {
     float bgColor[] = {1.0f, 0.61f, 1.0f, 1.0f};
     _context->ClearRenderTargetView(_renderTargetView.Get(), bgColor);
     _context->ClearDepthStencilView(_depthStencilView.Get(),
@@ -458,6 +458,11 @@ GPUTexture BackendDx::CreateTexture(TextureCreationDesc textureCreationDesc) {
                     textureCreationDesc.height};
 }
 
+GPURenderTarget BackendDx::CreateRenderTarget(
+    const std::vector<GPUTexture>& colors, GPUTexture depth) {
+  return GPURenderTarget();
+}
+
 void BackendDx::BindProgram(GPUProgram program) {
   auto shaders = _programs[program.program];
   _context->VSSetShader(shaders.first.Get(), nullptr, 0);
@@ -473,6 +478,8 @@ void BackendDx::BindTexture(GPUTexture texture, int index) {
 
 void BackendDx::BindTextures(const std::vector<GPUTexture>& texture,
                              int index) {}
+
+void BackendDx::BindRenderTarget(GPURenderTarget renderTarget) {}
 
 void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
@@ -518,6 +525,8 @@ void BackendDx::UpdateBuffer(BufferUpdateDesc updateDesc) {
   auto buffer = _buffers[updateDesc.buffer->buffer].Get();
   _context->UpdateSubresource(buffer, 0, nullptr, updateDesc.data, 0, 0);
 }
+
+void BackendDx::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {}
 
 void BackendDx::Present() {
   _swapChain->Present(1, 0);

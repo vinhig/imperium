@@ -16,7 +16,7 @@
  */
 class Frame {
  private:
-  std::vector<RenderingPass> _renderingPasses;
+  std::vector<RenderingPass*> _renderingPasses;
 
  public:
   /**
@@ -30,4 +30,18 @@ class Frame {
    * @param config
    */
   Frame(Device* device, const std::string& config);
+
+  /**
+   * Commit all draw calls from all rendering passes.
+   * @param device Device to use.
+   */
+  void Commit(Device* device);
+
+  /**
+   * Register a new draw call. Distribute draw call across rendering passes if
+   * they accept it.
+   * @param drawCall Draw call to register.
+   * @param layer Layer to accept.
+   */
+  void RegisterDrawCall(DrawCall drawCall, Layer layer);
 };

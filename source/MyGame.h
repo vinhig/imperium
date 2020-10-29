@@ -7,6 +7,7 @@
 #include "logic/Actions.h"
 #include "logic/CMeshInstance.h"
 #include "logic/CTransform.h"
+#include "logic/CViewport.h"
 #include "logic/Ecs.h"
 #include "logic/Game.h"
 
@@ -15,6 +16,7 @@ class MyGame : public Game {
   // CTransform* _transform;
   // CMeshInstance* _mesh;
   Entity* plant;
+  Entity* viewport;
   float _caca = 0.0f;
 
  public:
@@ -43,6 +45,9 @@ class MyGame : public Game {
     plant->Get<CMaterial>()->SetNormalTexture(
         "../assets/textures/indoor-plant-normal.jpg");
 #endif
+
+    viewport = new Entity(GetSystem(), 1);
+    viewport->GetOrCreate<CViewport>(nullptr);
   };
 
   void LogicalUpdate(TryHarder* tryHarder) override {

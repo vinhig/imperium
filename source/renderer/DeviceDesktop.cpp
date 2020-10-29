@@ -64,7 +64,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       glDebugMessageCallback(OglDebugOutput, nullptr);
       // Init backend
       _backend = new BackendOgl({deviceDesc.width, deviceDesc.height});
-      glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // perfectly illegal
       break;
     }
     case OpenGL46: {
@@ -88,7 +88,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       }
       // Init backend
       _backend = new BackendOglEs({deviceDesc.width, deviceDesc.height});
-      glClearColor(1.0f, 0.61f, 1.0f, 1.0f);  // perfectly illegal
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // perfectly illegal
       break;
     }
 #if defined(_WIN32) || defined(WIN32)
@@ -186,7 +186,9 @@ void DeviceDesktop::RequestAnimationFrame() {
   }
 }
 
-void DeviceDesktop::Clear(GPURenderTarget renderTarget) { _backend->Clear(0); }
+void DeviceDesktop::Clear(GPURenderTarget renderTarget) {
+  _backend->Clear(renderTarget);
+}
 
 GPUBuffer DeviceDesktop::CreateVertexBuffer(CPUBuffer<float> cpuBuffer) {
   // Describe and create buffer
@@ -308,8 +310,7 @@ GPUTexture DeviceDesktop::CreateTextureFromData(CPUTexture cpuTexture) {
 
 GPURenderTarget DeviceDesktop::CreateRenderTarget(
     const std::vector<GPUTexture> &textures, const GPUTexture &depth) {
-
-
+  return _backend->CreateRenderTarget(textures, depth);
 }
 
 void DeviceDesktop::UpdateUniformBuffer(GPUBuffer buffer,
@@ -335,9 +336,18 @@ void DeviceDesktop::BindTextures(GPUTexture *textures, int nbTextures) {
   }
 }
 
+void DeviceDesktop::BindRenderTarget(GPURenderTarget renderTarget) {
+  _backend->BindRenderTarget(renderTarget);
+}
+
 void DeviceDesktop::Draw(GPUDrawInput drawInput, int count, int times,
                          GPUBuffer *uniformBuffers, size_t nbUniformBuffers) {
   _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);
 }
+
+void DeviceDesktop::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
+  _backend->BlitRenderTarget(from, to);
+}
+
 
 GPUProgram DeviceDesktop::GetCurrentProgram() { return _currentProgram; }

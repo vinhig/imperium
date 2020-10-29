@@ -19,7 +19,7 @@
 #include "../common/Log.h"
 
 BackendOglEs::BackendOglEs(BackendDesc backendDesc) {
-  glClearColor(1.0f, 0.61f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
@@ -149,9 +149,10 @@ GPUProgram BackendOglEs::CreateProgram(std::vector<uint32_t> vertexSource,
   return GPUProgram{program};
 }
 
-void BackendOglEs::Clear(uint32_t framebuffer) {
-  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+void BackendOglEs::Clear(GPURenderTarget renderTarget) {
+  glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 GPUDrawInput BackendOglEs::CreateDrawInput(
@@ -243,6 +244,11 @@ GPUTexture BackendOglEs::CreateTexture(
                     textureCreationDesc.height};
 }
 
+GPURenderTarget BackendOglEs::CreateRenderTarget(
+    const std::vector<GPUTexture>& colors, GPUTexture depth) {
+  return GPURenderTarget();
+}
+
 void BackendOglEs::BindProgram(GPUProgram program) {
   glUseProgram(program.program);
 }
@@ -254,6 +260,8 @@ void BackendOglEs::BindTexture(GPUTexture texture, int index) {
 
 void BackendOglEs::BindTextures(const std::vector<GPUTexture>& texture,
                                 int index) {}
+
+void BackendOglEs::BindRenderTarget(GPURenderTarget renderTarget) {}
 
 void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
                         GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
@@ -269,6 +277,8 @@ void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times,
   }
 }
 
+void BackendOglEs::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {}
+
 void BackendOglEs::UpdateBuffer(BufferUpdateDesc updateDesc) {
   // Vertex and index buffer can't be modified (at the time being)
   // We can bind it as an Uniform Buffer
@@ -277,3 +287,4 @@ void BackendOglEs::UpdateBuffer(BufferUpdateDesc updateDesc) {
                   updateDesc.data);
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
+

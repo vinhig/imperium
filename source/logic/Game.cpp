@@ -7,8 +7,8 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "../renderer/Frame.h"
 #include "CMeshInstance.h"
+#include "CViewport.h"
 
 void Game::SysLogicalUpdate() {
   // 1 is a logically updatable uuid
@@ -35,17 +35,18 @@ void Game::SysResourceUpdate() {
 
 void Game::SysLoad() {
   // Load rendering graph
-  auto frame = new Frame(_device, "../assets/basic.toml");
+  _frame = new Frame(_device, "../assets/basic.toml");
   // TODO: Load LOADING PLS WAIT texture
   // Dummy shader
   // Has to be used to create input layout with the directx backend
-  basic = _device->CreateProgram("basic");
-  _device->BindProgram(basic);
+  _basic = _device->CreateProgram("basic");
+  _device->BindProgram(_basic);
   Load(_device);
 }
 
 void Game::SysDraw() {
   // 2 is a drawable uuid
+  /*
   for (int i = 0; i < _system->Components(2).size(); ++i) {
     auto comp = _system->Components(2)[i];
     auto draw = ((CMeshInstance*)comp)->Draw();
@@ -56,7 +57,26 @@ void Game::SysDraw() {
                     draw.uniforms, draw.nbUniforms);
     }
   }
+   */
+  // Iterate through all drawable components
+  // 2 is CMeshInstance so drawable
+  for (int i = 0; i < _system->Components(2).size(); i++) {
+    auto comp = _system->Components(2)[i];
+    auto draw = ((CMeshInstance*)comp)->Draw();
+    // Send this draw call to frame
+    // It's up to Frame to decide where and when to draw
+    _frame->RegisterDrawCall(draw, Layer::A);
+  }
+
+  for (int i = 0; i < _system->Components(4).size(); i++) {
+    auto comp = _system->Components(4)[i];
+    auto draw = ((CViewport*)comp)->Draw();
+    // Send this draw call to frame
+    // It's up to Frame to decide where and when to draw
+    _frame->RegisterDrawCall(draw, Layer::C);
+  }
   Draw(_device);
+  _frame->Commit(_device);
 }
 
 Game::Game(Device* device) {

@@ -16,6 +16,8 @@ Frame::Frame(Device* device, const std::string& config) {
     std::vector<std::string> inputs;
     std::string pointOfView;
     std::string shader;
+    unsigned int layer;
+    bool needTextures;
     bool multiple;
   };
 
@@ -38,7 +40,26 @@ Frame::Frame(Device* device, const std::string& config) {
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");
+      pass.needTextures = toml::find<bool>(table, "needTexture");
       pass.multiple = toml::find<bool>(table, "multiple");
+
+      // Get accepted layers
+      std::vector<std::string> layers =
+          toml::find<std::vector<std::string>>(table, "layers");
+
+      for (const auto& l : layers) {
+        if (l == "A") {
+          pass.layer |= Layer::A;
+        } else if (l == "B") {
+          pass.layer |= Layer::B;
+        } else if (l == "C") {
+          pass.layer |= Layer::C;
+        } else if (l == "D") {
+          pass.layer |= Layer::D;
+        } else if (l == "E") {
+          pass.layer |= Layer::E;
+        }
+      }
 
       // toml11 internally use an unorderer_map
       // that's why we need to sort pass
@@ -52,16 +73,25 @@ Frame::Frame(Device* device, const std::string& config) {
 
   // Create resources
   for (const auto& pass : passes) {
+    // Shader for this rendering pass
     auto program = device->CreateProgram(pass.shader);
+
+    // Depth buffer
+    GPUTexture depth = device->CreateEmptyTexture(
+        TextureFormat::DEPTH, TextureWrap::ClampToEdge, device->GetWidth(),
+        device->GetHeight());
+
+    // All outputs color buffer
     std::vector<GPUTexture> outputs(pass.outputs.size());
     for (int i = 0; i < pass.outputs.size(); i++) {
       outputs[i] = device->CreateEmptyTexture(
           TextureFormat::RGBA, TextureWrap::ClampToEdge, device->GetWidth(),
           device->GetHeight());
+      // Class them by name
       coolTextures[pass.outputs[i]] = outputs[i];
     }
 
-    auto renderTarget = device->CreateRenderTarget(outputs.data(), outputs.size(), true);
+    auto renderTarget = device->CreateRenderTarget(outputs, depth);
 
     std::vector<GPUTexture> inputs(pass.inputs.size());
     for (int i = 0; i < pass.inputs.size(); i++) {
@@ -70,8 +100,31 @@ Frame::Frame(Device* device, const std::string& config) {
       inputs[i] = coolTextures[pass.inputs[i]];
     }
 
+    _renderingPasses.push_back(new RenderingPass(program, renderTarget, inputs,
+                                                 pass.name, pass.needTextures,
+                                                 pass.layer));
+
     std::cout << "Rendering pass brief '" << pass.name
               << "': \n\tNb outputs: " << pass.outputs.size()
               << "\n\tNb inputs: " << pass.inputs.size() << std::endl;
+  }
+}
+
+void Frame::Commit(Device* device) {
+  // Render all rendering passes
+  for (const auto& pass : _renderingPasses) {
+    pass->Commit(device);
+  }
+  // Blit last render target onto window
+  device->BlitRenderTarget(_renderingPasses[_renderingPasses.size()-1]->RenderTarget(), GPURenderTarget{0});
+  device->BindRenderTarget(GPURenderTarget{0});
+}
+
+void Frame::RegisterDrawCall(DrawCall drawCall, Layer layer) {
+  // Get render pass accepting this drawCall
+  for (const auto& pass : _renderingPasses) {
+    if (pass->CanAccept(layer)) {
+      pass->AddDrawCall(drawCall);
+    }
   }
 }

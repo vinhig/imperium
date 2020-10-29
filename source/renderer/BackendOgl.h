@@ -18,7 +18,7 @@ class BackendOgl : public Backend {
   explicit BackendOgl(BackendDesc backendDesc);
   ~BackendOgl() = default;
 
-  void Clear(uint32_t framebuffer) override;
+  void Clear(GPURenderTarget renderTarget) override;
   GPUBuffer CreateBuffer(BufferCreationDesc bufferCreationDesc) override;
   GPUProgram CreateProgram(std::vector<uint32_t> vertexSource,
                            std::vector<uint32_t> fragmentSource) override;
@@ -27,13 +27,17 @@ class BackendOgl : public Backend {
                                GPUBuffer indexBuffer) override;
   GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
   GPUTexture CreateTexture(TextureCreationDesc textureCreationDesc) override;
+  GPURenderTarget CreateRenderTarget(const std::vector<GPUTexture>& colors,
+                                     GPUTexture depth) override;
 
   void BindProgram(GPUProgram program) override;
   void BindTexture(GPUTexture texture, int index) override;
   void BindTextures(const std::vector<GPUTexture>& texture, int index) override;
+  void BindRenderTarget(GPURenderTarget renderTarget) override;
 
   void Draw(GPUDrawInput drawInput, int count, int times,
             GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+  void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) override;
 
   void UpdateBuffer(BufferUpdateDesc updateDesc) override;
 };

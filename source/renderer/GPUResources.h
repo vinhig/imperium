@@ -13,9 +13,6 @@
  * GPURenderTarget is a group of texture that are used as drawing target.
  */
 struct GPURenderTarget {
-  uint32_t depthBuffer;
-  uint32_t *colorBuffers;
-  size_t nbColorBuffers;
   uint32_t framebuffer;
 };
 

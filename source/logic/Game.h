@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../renderer/Device.h"
+#include "../renderer/Frame.h"
 #include "Ecs.h"
 #include "TryHarder.h"
 
@@ -14,7 +15,8 @@
  */
 class Game {
  private:
-  GPUProgram basic;
+  GPUProgram _basic;
+  Frame* _frame;
   int frame = 0;
   /**
    * Call public LogicalUpdate and dispatch registered jobs to workers.

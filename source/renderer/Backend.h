@@ -20,11 +20,11 @@
 class Backend {
  public:
   /**
-   * Clear given framebuffer. Clear means fill the whole texture with a solid
-   * color. Each texture linked to the framebuffer will be cleared.
-   * @param framebuffer Framebuffer to clear.
+   * Clear given render target. Clear means fill whole textures with a solid
+   * color. Each texture linked to the render target will be cleared.
+   * @param renderTarget Render target to clear to clear.
    */
-  virtual void Clear(uint32_t framebuffer) = 0;
+  virtual void Clear(GPURenderTarget renderTarget) = 0;
 
   /**
    * Create some fucking good buffer of data.
@@ -69,6 +69,15 @@ class Backend {
   virtual GPUTexture CreateTexture(TextureCreationDesc textureCreationDesc) = 0;
 
   /**
+   * Create a render target from multiple textures.
+   * @param colors Color buffers to draw to.
+   * @param depth Texture for depth testing.
+   * @return GPURenderTarget linked with given textures.
+   */
+  virtual GPURenderTarget CreateRenderTarget(
+      const std::vector<GPUTexture>& colors, GPUTexture depth) = 0;
+
+  /**
    * Specify active program to use for next draw calls.
    * @param program Program to use.
    */
@@ -83,6 +92,12 @@ class Backend {
    * `layout(binding=index)` from shader source code.
    */
   virtual void BindTexture(GPUTexture texture, int index) = 0;
+
+  /**
+   * Specify render target object to render to.
+   * @param renderTarget Render target to render to.
+   */
+  virtual void BindRenderTarget(GPURenderTarget renderTarget) = 0;
 
   /**
    * Bind multiple textures. This method is only implemented for bindless
@@ -105,6 +120,8 @@ class Backend {
    */
   virtual void Draw(GPUDrawInput drawInput, int count, int times,
                     GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
+
+  virtual void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) = 0;
 
   /**
    * Replace a part of data stored in a buffer. Part of this buffer is specified

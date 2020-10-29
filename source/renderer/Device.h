@@ -139,6 +139,12 @@ class Device {
   virtual void BindTextures(GPUTexture* textures, int nbTextures) = 0;
 
   /**
+   * Specify render target to target for next draw calls.
+   * @param renderTarget Render target to draw to.
+   */
+  virtual void BindRenderTarget(GPURenderTarget renderTarget) = 0;
+
+  /**
    * Launch a draw call.
    * @param drawInput Structure of data to draw.
    * @param count Number of elements index to draw.
@@ -148,6 +154,13 @@ class Device {
    */
   virtual void Draw(GPUDrawInput drawInput, int count, int times,
                     GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
+
+  /**
+   * Blit a render target on another render target.
+   * @param from Render target acting as source.
+   * @param to Render target acting as destination.
+   */
+  virtual void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) = 0;
 
   /**
    * Ask underlying backend to swap buffers. Swapping buffers means showing the

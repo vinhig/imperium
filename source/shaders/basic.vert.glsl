@@ -35,7 +35,7 @@ void main() {
     vertOut.uv = uv;
     // vertOut.color = vec3(materials.m[int(material)].texture, materials.m[int(material)].texture, materials.m[int(material)].texture);
     vertOut.color = vec3(1.0, 1.0, 1.0);
-    vertOut.normal = mat3(transpose(inverse(object.model))) * normal;;
+    vertOut.normal = mat3(transpose(inverse(object.model))) * normal;
 
     vertOut.camera_position = lights.camera_position;
     vertOut.light_position = lights.light_position;
