@@ -10,8 +10,8 @@ layout(binding = 2) uniform sampler2D abeldo;
 layout(binding = 3) uniform sampler2D specular;
 
 void main() {
-    color = texture(position, o_uv)
-        * texture(normal, o_uv)
-        // * texture(abeldo, o_uv)
-        * texture(specular, o_uv);
+    color = // texture(position, o_uv)
+        // * texture(normal, o_uv)
+        /**/ texture(abeldo, o_uv);
+        // * texture(specular, o_uv);
 }

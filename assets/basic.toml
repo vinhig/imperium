@@ -1,31 +1,34 @@
 [config]
 name = "Default render graph"
-nbPasses = 3
+nbPasses = 2
 
-[reflection]
-order = 0
-shader = "reflection"
-deps = []
-multiple = true
-outputs = ["reflection"]
-needTexture = true
-pointOfView = "light"
+#[reflection]
+#order = 0
+#shader = "reflection"
+#deps = []
+#multiple = true
+#outputs = ["reflection"]
+#needTexture = true
+#pointOfView = "light"
+#layers = ["A"]
 
 [g-buffer]
-order = 1                       # place on the render graph
+order = 0                       # place on the render graph
 shader = "gbuffer"              # shader to use
-deps = ["reflection"]           # textures from rendergraph to bind
+deps = []                       # textures from rendergraph to bind
 multiple = false                # presence of multiple identical node
                                 # if true, renderer will iterate on every pointOfView
 outputs = ["position", "normal", "albedo", "specular"] # output textures
 needTexture = true              # textures from material to bind
 pointOfView = "main_camera"     # which camera should be used?
+layers = ["A", "B"]             # layer to be drawn
 
 [final]
-order = 2
+order = 1
 shader = "blit"
 deps = ["position", "normal", "albedo", "specular"]
 multiple = false
-outputs = []
+outputs = ["color"]
 needTexture = true
 pointOfView = "none"
+layers = ["C"]

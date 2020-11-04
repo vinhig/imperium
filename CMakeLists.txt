@@ -47,6 +47,7 @@ add_library(logic
         source/logic/CTransform.cpp
         source/logic/CMeshInstance.cpp
         source/logic/CMaterial.cpp
+        source/logic/CViewport.cpp
         )
 
 add_library(renderer

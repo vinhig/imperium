@@ -7,7 +7,7 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 ### Graphics techniques
 
 * Deferred rendering
-* Scriptable RenderGraph (with JavaScript)
+* Programmable RenderGraph
 * Cascaded Shadows
 * PBR Materials
 * Basic skeleton animation
