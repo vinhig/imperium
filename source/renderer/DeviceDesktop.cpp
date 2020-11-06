@@ -340,14 +340,23 @@ void DeviceDesktop::BindRenderTarget(GPURenderTarget renderTarget) {
   _backend->BindRenderTarget(renderTarget);
 }
 
+void DeviceDesktop::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
+  _backend->BindUniformBuffer(uniformBuffer, layout);
+}
+
 void DeviceDesktop::Draw(GPUDrawInput drawInput, int count, int times,
-                         GPUBuffer *uniformBuffers, size_t nbUniformBuffers) {
-  _backend->Draw(drawInput, count, times, uniformBuffers, nbUniformBuffers);
+                         GPUBuffer *uniformBuffers, size_t nbUniformBuffers,
+                         int offsetUniform) {
+  // Bind one time all uniform buffers
+  for (int i = 0; i < nbUniformBuffers; ++i) {
+    _backend->BindUniformBuffer(uniformBuffers[i], i + offsetUniform);
+  }
+  // Issue draw calls
+  _backend->Draw(drawInput, count, times);
 }
 
 void DeviceDesktop::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
   _backend->BlitRenderTarget(from, to);
 }
-
 
 GPUProgram DeviceDesktop::GetCurrentProgram() { return _currentProgram; }

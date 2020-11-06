@@ -2,16 +2,6 @@
 name = "Default render graph"
 nbPasses = 2
 
-#[reflection]
-#order = 0
-#shader = "reflection"
-#deps = []
-#multiple = true
-#outputs = ["reflection"]
-#needTexture = true
-#pointOfView = "light"
-#layers = ["A"]
-
 [g-buffer]
 order = 0                       # place on the render graph
 shader = "gbuffer"              # shader to use

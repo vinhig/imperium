@@ -122,6 +122,9 @@ class System {
   template <typename T>
   T* Get(Entity* entity);
 
+  template <typename T>
+  T* GetFirstActive();
+
   /**
    * Register a created component owned by a specific entity.
    * @tparam T Type of component to register.
@@ -137,6 +140,8 @@ class Entity {
   System* _system = nullptr;
   Entity* _parent = nullptr;
   int _id;
+
+  bool _enabled = true;
 
  public:
   Entity(System* system, int id) {
@@ -159,6 +164,8 @@ class Entity {
    * @param parent  Reference to parent entity.
    */
   void SetParent(Entity* parent) { _parent = parent; };
+
+  bool IsEnabled() { return _enabled; }
 
   template <typename T>
   T* GetOrCreate(void* args) {
@@ -195,6 +202,22 @@ T* System::Get(Entity* entity) {
     }
   }
   // Sad, we don't found any component
+  return nullptr;
+}
+
+template <typename T>
+T* System::GetFirstActive() {
+  std::unordered_map<int, std::vector<IComponent*>>::iterator components =
+      _componentsForType.find(T::Uuid);
+  if (components != _componentsForType.end()) {
+    if (components->second.size() != 0) {
+      for (int i = 0; i < components->second.size(); i++) {
+        if (components->second[i]->GetEntity()->IsEnabled()) {
+          return (T*)components->second[i];
+        }
+      }
+    }
+  }
   return nullptr;
 }
 

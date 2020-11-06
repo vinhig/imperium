@@ -9,11 +9,13 @@
 
 RenderingPass::RenderingPass(GPUProgram program, GPURenderTarget renderTarget,
                              std::vector<GPUTexture> inputs, std::string name,
-                             bool needTextures, unsigned int layer) {
+                             std::string pointOfViewName, bool needTextures,
+                             unsigned int layer) {
   _program = program;
   _renderTarget = renderTarget;
   _inputs = std::move(inputs);
   _name = std::move(name);
+  _pointOfViewName = std::move(pointOfViewName);
   _layer = layer;
   _needTextures = needTextures;
 }
@@ -38,6 +40,10 @@ void RenderingPass::Commit(Device* device) {
   // Specific to this rendering pass
   device->BindProgram(_program);            // program
   device->BindRenderTarget(_renderTarget);  // render target
+  // Bind point of view
+  if (_pointOfViewSet) {
+    device->BindUniformBuffer(_pointOfView, 0);
+  }
 
   for (const auto& draw : _drawCalls) {
     if (_needTextures) {
@@ -48,12 +54,18 @@ void RenderingPass::Commit(Device* device) {
     }
     for (int i = 0; i < draw.nbResources; i++) {
       device->Draw(draw.drawInputs[i], draw.counts[i], draw.times,
-                   draw.uniforms, draw.nbUniforms);
+                   draw.uniforms, draw.nbUniforms, 1);
     }
   }
   _drawCalls.clear();
 }
 
+void RenderingPass::SetPointOfView(GPUBuffer pointOfView) {
+  _pointOfView = pointOfView;
+  _pointOfViewSet = true;
+}
+
 void RenderingPass::Sort() {
   // TODO: as we are just drawing a little plant, don't bother with sorting lol
 }
+

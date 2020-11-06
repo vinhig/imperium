@@ -145,6 +145,14 @@ class Device {
   virtual void BindRenderTarget(GPURenderTarget renderTarget) = 0;
 
   /**
+   * Specify an uniform buffer to bind at a specific layout to use for next draw
+   * calls.
+   * @param uniformBuffer GPUBuffer to bind.
+   * @param layout Slot index to target.
+   */
+  virtual void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) = 0;
+
+  /**
    * Launch a draw call.
    * @param drawInput Structure of data to draw.
    * @param count Number of elements index to draw.
@@ -153,7 +161,7 @@ class Device {
    * @param nbUniformBuffers Number of uniform buffers.
    */
   virtual void Draw(GPUDrawInput drawInput, int count, int times,
-                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
+                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers, int offsetUniform) = 0;
 
   /**
    * Blit a render target on another render target.

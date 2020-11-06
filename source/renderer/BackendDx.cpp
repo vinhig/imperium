@@ -481,8 +481,9 @@ void BackendDx::BindTextures(const std::vector<GPUTexture>& texture,
 
 void BackendDx::BindRenderTarget(GPURenderTarget renderTarget) {}
 
-void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
-                     GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
+void BackendDx::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {}
+
+void BackendDx::Draw(GPUDrawInput drawInput, int count, int times) {
   _context->IASetInputLayout(_inputLayouts[drawInput.inputLayout].Get());
 
   unsigned int stride = 0;
@@ -502,11 +503,13 @@ void BackendDx::Draw(GPUDrawInput drawInput, int count, int times,
 
   // Set an array of uniform buffers
   // (they're called constant buffers in directx)
+  /*
   std::vector<ID3D11Buffer*> constantBuffers(nbUniformBuffers);
   for (int j = 0; j < nbUniformBuffers; ++j) {
     constantBuffers[j] = _buffers[uniformBuffers[j].buffer].Get();
   }
   _context->VSSetConstantBuffers(0, nbUniformBuffers, constantBuffers.data());
+   */
 
   // Set the only index buffer
   _context->IASetIndexBuffer(_buffers[_vaos[drawInput.vao].second.buffer].Get(),

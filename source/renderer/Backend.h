@@ -100,6 +100,14 @@ class Backend {
   virtual void BindRenderTarget(GPURenderTarget renderTarget) = 0;
 
   /**
+   * Specify an uniform buffer to bind at a specific layout to use for next draw
+   * calls.
+   * @param uniformBuffer GPUBuffer to bind.
+   * @param layout Slot index to target.
+   */
+  virtual void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) = 0;
+
+  /**
    * Bind multiple textures. This method is only implemented for bindless
    * backend as it require texture to be texture handle. Can and has to be
    * called even if it's not implemented to ensure the cross-platform character
@@ -115,12 +123,14 @@ class Backend {
    * @param drawInput Structure of data to draw.
    * @param count Number of elements index to draw.
    * @param times Number of same draw calls to launch.
-   * @param uniformBuffers Uniform buffers to bind during draw call.
-   * @param nbUniformBuffers Number of uniform buffers.
    */
-  virtual void Draw(GPUDrawInput drawInput, int count, int times,
-                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers) = 0;
+  virtual void Draw(GPUDrawInput drawInput, int count, int times) = 0;
 
+  /**
+   * Copy and past linked textures from a render target to another.
+   * @param from Linked textures to copy from.
+   * @param to Linked texture to paste to.
+   */
   virtual void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) = 0;
 
   /**

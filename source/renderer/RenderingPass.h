@@ -16,20 +16,24 @@ class RenderingPass {
  private:
   GPUProgram _program{};
   GPURenderTarget _renderTarget{};
+  GPUBuffer _pointOfView;
 
   std::vector<GPUTexture> _inputs;
   std::vector<DrawCall> _drawCalls;
 
   std::string _name;
+  std::string _pointOfViewName;
 
   unsigned int _layer;
 
   bool _needTextures;
+  bool _pointOfViewSet = false;
 
  public:
   RenderingPass(GPUProgram program, GPURenderTarget renderTarget,
                 std::vector<GPUTexture> inputs, std::string name,
-                bool needTextures, unsigned int layer);
+                std::string pointOfViewName, bool needTextures,
+                unsigned int layer);
   ~RenderingPass();
 
   /**
@@ -57,5 +61,13 @@ class RenderingPass {
    */
   void Sort();
 
+  /**
+   * Set which point of view to use.
+   * @param pointOfView GPUBuffer to bind before any draw calls.
+   */
+  void SetPointOfView(GPUBuffer pointOfView);
+
   GPURenderTarget RenderTarget() { return _renderTarget; };
+
+  std::string PointOfViewName() { return _pointOfViewName; };
 };

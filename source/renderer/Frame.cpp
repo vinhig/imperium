@@ -100,9 +100,9 @@ Frame::Frame(Device* device, const std::string& config) {
       inputs[i] = coolTextures[pass.inputs[i]];
     }
 
-    _renderingPasses.push_back(new RenderingPass(program, renderTarget, inputs,
-                                                 pass.name, pass.needTextures,
-                                                 pass.layer));
+    _renderingPasses.push_back(
+        new RenderingPass(program, renderTarget, inputs, pass.name,
+                          pass.pointOfView, pass.needTextures, pass.layer));
 
     std::cout << "Rendering pass brief '" << pass.name
               << "': \n\tNb outputs: " << pass.outputs.size()
@@ -116,7 +116,9 @@ void Frame::Commit(Device* device) {
     pass->Commit(device);
   }
   // Blit last render target onto window
-  device->BlitRenderTarget(_renderingPasses[_renderingPasses.size()-1]->RenderTarget(), GPURenderTarget{0});
+  device->BlitRenderTarget(
+      _renderingPasses[_renderingPasses.size() - 1]->RenderTarget(),
+      GPURenderTarget{0});
   device->BindRenderTarget(GPURenderTarget{0});
 }
 
@@ -125,6 +127,14 @@ void Frame::RegisterDrawCall(DrawCall drawCall, Layer layer) {
   for (const auto& pass : _renderingPasses) {
     if (pass->CanAccept(layer)) {
       pass->AddDrawCall(drawCall);
+    }
+  }
+}
+
+void Frame::SetPointOfView(GPUBuffer uniformBuffer, std::string name) {
+  for (const auto& pass : _renderingPasses) {
+    if (pass->PointOfViewName() == name) {
+      pass->SetPointOfView(uniformBuffer);
     }
   }
 }

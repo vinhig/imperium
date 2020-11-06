@@ -48,6 +48,7 @@ add_library(logic
         source/logic/CMeshInstance.cpp
         source/logic/CMaterial.cpp
         source/logic/CViewport.cpp
+        source/logic/CCamera.cpp
         )
 
 add_library(renderer

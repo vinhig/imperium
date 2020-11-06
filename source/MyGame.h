@@ -5,6 +5,7 @@
 #pragma once
 
 #include "logic/Actions.h"
+#include "logic/CCamera.h"
 #include "logic/CMeshInstance.h"
 #include "logic/CTransform.h"
 #include "logic/CViewport.h"
@@ -17,6 +18,7 @@ class MyGame : public Game {
   // CMeshInstance* _mesh;
   Entity* plant;
   Entity* viewport;
+  Entity* camera;
   float _caca = 0.0f;
 
  public:
@@ -32,7 +34,7 @@ class MyGame : public Game {
     std::string path = "../assets/meshes/indoor-plant.fbx";
 #endif
     auto mesh = plant->GetOrCreate<CMeshInstance>((void*)&path);
-    plant->Get<CTransform>()->SetRotation(glm::vec3(-90.0f, 0.0f, 0.0f));
+    plant->Get<CTransform>()->SetRotation(glm::vec3(-90.0f, 0.0f, 45.0f));
     plant->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -1.5f, 0.0f));
     plant->Get<CTransform>()->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
 
@@ -48,12 +50,16 @@ class MyGame : public Game {
 
     viewport = new Entity(GetSystem(), 1);
     viewport->GetOrCreate<CViewport>(nullptr);
+
+    camera = new Entity(GetSystem(), 2);
+    auto cam = camera->GetOrCreate<CCamera>(nullptr);
+
+    cam->SetRotation(glm::vec3(-25.0f, 0.0f, 0.0f));
+    cam->SetPosition(glm::vec3(0.0f, -2.0f, 4.0f));
   };
 
   void LogicalUpdate(TryHarder* tryHarder) override {
-    // _transform->SetRotation(glm::vec3(_caca, 0.0f, 0.0f));
-    // tryHarder->Register(_transform->Logic());
-    _caca += 0.01f;
+    _caca += 2.0f;
   };
 
   void ResourceUpdate(Device* device) override{};

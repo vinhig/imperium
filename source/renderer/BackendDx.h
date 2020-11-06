@@ -80,15 +80,16 @@ class BackendDx : public Backend {
                                GPUBuffer indexBuffer) override;
   GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
   GPUTexture CreateTexture(TextureCreationDesc textureCreationDesc) override;
-  GPURenderTarget CreateRenderTarget(const std::vector<GPUTexture>& colors, GPUTexture depth) override;
+  GPURenderTarget CreateRenderTarget(const std::vector<GPUTexture>& colors,
+                                     GPUTexture depth) override;
 
   void BindProgram(GPUProgram program) override;
   void BindTexture(GPUTexture texture, int index) override;
   void BindTextures(const std::vector<GPUTexture>& texture, int index) override;
   void BindRenderTarget(GPURenderTarget renderTarget) override;
+  void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) override;
 
-  void Draw(GPUDrawInput drawInput, int count, int times,
-            GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+  void Draw(GPUDrawInput drawInput, int count, int times) override;
   void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) override;
 
   void UpdateBuffer(BufferUpdateDesc updateDesc) override;

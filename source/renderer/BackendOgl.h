@@ -34,9 +34,9 @@ class BackendOgl : public Backend {
   void BindTexture(GPUTexture texture, int index) override;
   void BindTextures(const std::vector<GPUTexture>& texture, int index) override;
   void BindRenderTarget(GPURenderTarget renderTarget) override;
+  void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) override;
 
-  void Draw(GPUDrawInput drawInput, int count, int times,
-            GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+  void Draw(GPUDrawInput drawInput, int count, int times) override;
   void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) override;
 
   void UpdateBuffer(BufferUpdateDesc updateDesc) override;

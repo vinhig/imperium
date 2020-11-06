@@ -55,9 +55,11 @@ class DeviceDesktop : public Device {
   void BindProgram(GPUProgram program) override;
   void BindTextures(GPUTexture* textures, int nbTextures) override;
   void BindRenderTarget(GPURenderTarget renderTarget) override;
+  void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) override;
 
   void Draw(GPUDrawInput drawInput, int count, int times,
-            GPUBuffer* uniformBuffers, size_t nbUniformBuffers) override;
+            GPUBuffer* uniformBuffers, size_t nbUniformBuffers,
+            int offsetUniform) override;
   void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) override;
 
   GPUProgram GetCurrentProgram() override;

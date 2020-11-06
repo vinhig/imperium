@@ -44,4 +44,13 @@ class Frame {
    * @param layer Layer to accept.
    */
   void RegisterDrawCall(DrawCall drawCall, Layer layer);
+
+  /**
+   * Link an uniform buffer as a named point of view. Frame will find the
+   * underlying render pass that needs it.
+   * @param uniformBuffer GPUBuffer representing a point of view.
+   * @param name Name of the given point of view. Must match at least one name
+   * from rendering pipeline config file.
+   */
+  void SetPointOfView(GPUBuffer uniformBuffer, std::string name);
 };

@@ -288,13 +288,15 @@ void BackendOgl::BindTextures(const std::vector<GPUTexture>& texture,
 void BackendOgl::BindRenderTarget(GPURenderTarget renderTarget) {
   glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
 }
+void BackendOgl::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
+  glBindBufferBase(GL_UNIFORM_BUFFER, layout, uniformBuffer.buffer);
+}
 
-void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times,
-                      GPUBuffer* uniformBuffers, size_t nbUniformBuffers) {
+void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times) {
   glBindVertexArray(drawInput.vao);
-  for (int i = 0; i < nbUniformBuffers; i++) {
+  /*for (int i = 0; i < nbUniformBuffers; i++) {
     glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers[i].buffer);
-  }
+  }*/
   if (times == 1) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
   } else {

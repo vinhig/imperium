@@ -7,6 +7,7 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "CCamera.h"
 #include "CMeshInstance.h"
 #include "CViewport.h"
 
@@ -15,6 +16,11 @@ void Game::SysLogicalUpdate() {
   for (int i = 0; i < _system->Components(1).size(); ++i) {
     auto comp = (CTransform*)_system->Components(1)[i];
     comp->UpdateMvp();
+  }
+  // 5 is a logically updatable uuid
+  for (int i = 0; i < _system->Components(5).size(); ++i) {
+    auto comp = (CCamera*)_system->Components(5)[i];
+    comp->UpdateVp();
   }
   LogicalUpdate(_tryHarder);
   _tryHarder->Do();
@@ -25,6 +31,14 @@ void Game::SysResourceUpdate() {
   // 1 is a resource updatable uuid
   for (int i = 0; i < _system->Components(1).size(); ++i) {
     auto comp = (CTransform*)_system->Components(1)[i];
+    auto res = comp->Resource();
+    if (res.enable) {
+      _device->UpdateUniformBuffer(res.dest, res.from);
+    }
+  }
+  // 5 is a resource updatable uuid
+  for (int i = 0; i < _system->Components(5).size(); ++i) {
+    auto comp = (CCamera*)_system->Components(5)[i];
     auto res = comp->Resource();
     if (res.enable) {
       _device->UpdateUniformBuffer(res.dest, res.from);
@@ -58,6 +72,13 @@ void Game::SysDraw() {
     }
   }
    */
+  // Get point of views
+  auto mainCamera = _system->GetFirstActive<CCamera>();
+  if (mainCamera == nullptr) {
+    throw std::runtime_error("Game must provide a CCamera.");
+  }
+  _frame->SetPointOfView(mainCamera->GetGPUBuffer(), "main_camera");
+
   // Iterate through all drawable components
   // 2 is CMeshInstance so drawable
   for (int i = 0; i < _system->Components(2).size(); i++) {

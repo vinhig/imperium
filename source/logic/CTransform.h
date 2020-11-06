@@ -13,17 +13,11 @@ class CTransform : public IComponent,
                    public IComponentResource {
  private:
   struct Matrices {
-    float mvp[16];
     float model[16];
   };
   glm::vec3 _position;
   glm::vec3 _rotation;
   glm::vec3 _scale;
-
-  // TODO: we should use a camera for that lol
-  glm::mat4 _projection;
-  glm::mat4 _view;
-  glm::mat4 _mvp;
 
   glm::mat4 _model;
 
