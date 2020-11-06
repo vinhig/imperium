@@ -1,5 +1,5 @@
 [config]
-name = "Default render graph"
+name = "Deferred render graph"
 nbPasses = 2
 
 [g-buffer]
@@ -10,8 +10,9 @@ multiple = false                # presence of multiple identical nodes
                                 # if true, renderer will iterate on multiple
                                 # point of views
 outputs = ["position", "normal", "albedo", "specular"] # output textures
-needTextures = true              # textures from material to bind
-needLights = false               # light resources to bind
+precisions = ["high", "high", "low", "low"]            # level of precision for each texture
+needTextures = true             # textures from material to bind
+needLights = false              # light resources to bind
 pointOfView = "main_camera"     # which camera should be used?
 layers = ["A", "B"]             # layer to be drawn
 
@@ -21,6 +22,7 @@ shader = "blit"
 deps = ["position", "normal", "albedo", "specular"]
 multiple = false
 outputs = ["color"]
+precision = ["low"]
 needTextures = true
 needLights = true
 pointOfView = "none"

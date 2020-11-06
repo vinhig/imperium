@@ -6,13 +6,20 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 
 ### Graphics techniques
 
-* Deferred rendering
-* Programmable RenderGraph
-* Cascaded Shadows
-* PBR Materials
-* Basic skeleton animation
+#### What's done
 
-(This repo is a Work-In-Progress. At the time being, we can barely draw a cute textured plant with Phong effect.)
+* Advanced render graph.
+    * Programmable via configuration file.
+    * Built-in:
+        * Deferred-rendering (Phong Shading)
+        * Forward-rendering (Phong Shading)
+        
+#### What has to be done
+
+* Advanced render graph.
+    * Built-in:
+        * Deferred-rendering (PBR and shadows)
+* Basic skeleton animation. 
 
 ### API support
 
@@ -32,7 +39,7 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
 * 🚧 Don't hesitate to make a pull request lol.
 * 🤞 It's a dream but we will get there!
 
-(This repo is a Work-In-Progress.)
+(This repo is a Work-In-Progress. Due to last changes, the OpenGL 3.3 backend is the only working backend.)
 
 ## Building
 
