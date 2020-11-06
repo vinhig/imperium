@@ -18,7 +18,7 @@ void main() {
     vec3 normal = texture(t_normal, vertOut.uv).rgb;
     vec3 abeldo = texture(t_abeldo, vertOut.uv).rgb;
 
-    vec3 lighting = abeldo * 0.1;
+    vec3 lighting = abeldo * 0.3;
     vec3 view_dir = normalize(vertOut.camera_position - position);
 
     vec3 light_dir = normalize(vertOut.light_position - position);

@@ -213,27 +213,52 @@ GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
   auto internalFormat = GL_RGB;
   auto subType = GL_UNSIGNED_BYTE;
   switch (textureCreationDesc.format) {
-    case R:
+    case R: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_R;
+      } else {
+        internalFormat = GL_R16F;
+        subType = GL_FLOAT;
+      }
       format = GL_R;
-      internalFormat = GL_R;
       break;
-    case RG:
+    }
+    case RG: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RG;
+      } else {
+        internalFormat = GL_RG16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RG;
-      internalFormat = GL_RG;
       break;
-    case RGB:
+    }
+    case RGB: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RGB;
+      } else {
+        internalFormat = GL_RGB16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RGB;
-      internalFormat = GL_RGB;
       break;
-    case RGBA:
+    }
+    case RGBA: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RGBA;
+      } else {
+        internalFormat = GL_RGBA16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RGBA;
-      internalFormat = GL_RGBA;
       break;
-    case DEPTH:
+    }
+    case DEPTH: {
       format = GL_DEPTH_STENCIL;
       internalFormat = GL_DEPTH24_STENCIL8;
       subType = GL_UNSIGNED_INT_24_8;
       break;
+    }
   }
   // Upload
   glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureCreationDesc.width,

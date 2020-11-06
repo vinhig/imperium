@@ -9,7 +9,7 @@ layout(location=0) out VertOut {
     vec3 camera_position;
 } vertOut;
 
-layout (std140, binding=1) uniform Camera {
+layout (std140, binding=0) uniform Camera {
     mat4 viewProj;
     vec4 position;
 } camera;

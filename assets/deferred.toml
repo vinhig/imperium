@@ -6,8 +6,9 @@ nbPasses = 2
 order = 0                       # place on the render graph
 shader = "gbuffer"              # shader to use
 deps = []                       # textures from rendergraph to bind
-multiple = false                # presence of multiple identical node
-                                # if true, renderer will iterate on every pointOfView
+multiple = false                # presence of multiple identical nodes
+                                # if true, renderer will iterate on multiple
+                                # point of views
 outputs = ["position", "normal", "albedo", "specular"] # output textures
 needTextures = true              # textures from material to bind
 needLights = false               # light resources to bind

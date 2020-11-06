@@ -96,11 +96,13 @@ class Device {
    * @param format Describe color channels of the new texture.
    * @param wrap Behaviour of the sampler in case of out of range.
    * @param width Width of the texture.
-   * @param height Height of the texture
+   * @param height Height of the texture.
+   * @param presion Precision of the texture.
    * @return GPUTexture created with those information and completely empty.
    */
   virtual GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap,
-                                        int width, int height) = 0;
+                                        int width, int height,
+                                        TexturePrecision precision) = 0;
 
   /**
    * Create a texture by uploading content loaded from a TextureLoader.
@@ -161,7 +163,8 @@ class Device {
    * @param nbUniformBuffers Number of uniform buffers.
    */
   virtual void Draw(GPUDrawInput drawInput, int count, int times,
-                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers, int offsetUniform) = 0;
+                    GPUBuffer* uniformBuffers, size_t nbUniformBuffers,
+                    int offsetUniform) = 0;
 
   /**
    * Blit a render target on another render target.

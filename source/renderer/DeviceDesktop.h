@@ -45,7 +45,8 @@ class DeviceDesktop : public Device {
                                GPUBuffer indexBuffer) override;
   GPUInputLayout CreateInputLayout(InputLayoutDesc inputLayoutDesc) override;
   GPUTexture CreateEmptyTexture(TextureFormat format, TextureWrap wrap,
-                                int width, int height) override;
+                                int width, int height,
+                                TexturePrecision precision) override;
   GPUTexture CreateTextureFromData(CPUTexture cpuTexture) override;
   GPURenderTarget CreateRenderTarget(const std::vector<GPUTexture>& textures,
                                      const GPUTexture& depth) override;

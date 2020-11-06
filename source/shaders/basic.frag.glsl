@@ -8,34 +8,27 @@ layout(location=0) out vec4 color;
 layout(location=0) in vec4 fragPos;
 
 layout(location=1) in VertOut {
-    vec2 uv;
-    vec3 color;
-    float ambient;
-    float specular;
-    vec4 camera_position;
-    vec4 light_position;
     vec3 normal;
     vec4 frag_pos;
+    vec2 uv;
+    vec3 camera_position;
+    vec3 light_position;
 } vertOut;
 
 layout(binding = 0) uniform sampler2D diffuseTexture;
 layout(binding = 1) uniform sampler2D normalTexture;
 
 void main() {
-    vec3 ambient = vec3(1.0, 1.0, 1.0) * vertOut.ambient;
-    vec3 normal = normalize(vertOut.normal);
-    vec3 textureColor = texture(diffuseTexture, vertOut.uv).xyz;
+    vec3 position = vertOut.frag_pos.xyz;
+    vec3 normal = vertOut.normal;
+    vec3 abeldo = texture(diffuseTexture, vertOut.uv).rgb;
 
-    vec3 light_dir = normalize(vertOut.light_position.xyz - vertOut.frag_pos.xyz);
+    vec3 lighting = abeldo * 0.3;
+    vec3 view_dir = normalize(vertOut.camera_position - position);
 
-    float diff = max(dot(normal, light_dir), 0.0);
-    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+    vec3 light_dir = normalize(vertOut.light_position - position);
+    vec3 diffuse = max(dot(normal, light_dir), 0.0) * abeldo * vec3(1.0, 1.0, 1.0);
+    lighting += diffuse;
 
-    vec3 view_dir = normalize(vertOut.camera_position.xyz - vertOut.frag_pos.xyz);
-    vec3 reflect_dir = reflect(-light_dir, normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64);
-    vec3 specular = vertOut.specular * spec * vec3(1.0, 1.0, 1.0);
-
-    color = vec4((ambient + diffuse + specular) * textureColor, 1.0);
-    // color = vec4(vertOut.color, 1.0);
+    color = vec4(lighting, 1.0);
 }

@@ -13,6 +13,7 @@ Frame::Frame(Device* device, const std::string& config) {
   struct Pass {
     std::string name;
     std::vector<std::string> outputs;
+    std::vector<std::string> precisions;
     std::vector<std::string> inputs;
     std::string pointOfView;
     std::string shader;
@@ -38,6 +39,7 @@ Frame::Frame(Device* device, const std::string& config) {
       Pass pass = {};
       pass.name = k;
       pass.outputs = toml::find<std::vector<std::string>>(table, "outputs");
+      pass.precisions = toml::find<std::vector<std::string>>(table, "outputs");
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");
@@ -81,14 +83,18 @@ Frame::Frame(Device* device, const std::string& config) {
     // Depth buffer
     GPUTexture depth = device->CreateEmptyTexture(
         TextureFormat::DEPTH, TextureWrap::ClampToEdge, device->GetWidth(),
-        device->GetHeight());
+        device->GetHeight(), TexturePrecision::High);
 
     // All outputs color buffer
     std::vector<GPUTexture> outputs(pass.outputs.size());
     for (int i = 0; i < pass.outputs.size(); i++) {
+      auto precision = TexturePrecision::High;
+      if (pass.precisions[i] == "low") {
+        precision = TexturePrecision::Low;
+      }
       outputs[i] = device->CreateEmptyTexture(
           TextureFormat::RGBA, TextureWrap::ClampToEdge, device->GetWidth(),
-          device->GetHeight());
+          device->GetHeight(), precision);
       // Class them by name
       coolTextures[pass.outputs[i]] = outputs[i];
     }

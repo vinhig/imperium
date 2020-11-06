@@ -62,10 +62,14 @@ class MyGame : public Game {
     light = new Entity(GetSystem(), 3);
     auto li = light->GetOrCreate<CDirectionalLight>(nullptr);
 
-    li->SetPosition(glm::vec3(3.0f,3.0f,3.0f));
+    li->SetPosition(glm::vec3(3.0f, 3.0f, 3.0f));
   };
 
-  void LogicalUpdate(TryHarder* tryHarder) override { _caca += 2.0f; };
+  void LogicalUpdate(TryHarder* tryHarder) override {
+    _caca += 0.1f;
+    light->Get<CDirectionalLight>()->SetPosition(
+        glm::vec3(sin(_caca), cos(_caca), sin(_caca)));
+  };
 
   void ResourceUpdate(Device* device) override{};
 

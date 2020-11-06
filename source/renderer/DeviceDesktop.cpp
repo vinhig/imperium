@@ -281,7 +281,8 @@ GPUInputLayout DeviceDesktop::CreateInputLayout(
 
 GPUTexture DeviceDesktop::CreateEmptyTexture(TextureFormat format,
                                              TextureWrap wrap, int width,
-                                             int height) {
+                                             int height,
+                                             TexturePrecision precision) {
   // Call the same backend method as CreateTextureFromData
   // but pass a null pointer, forcing it to upload nothing
   TextureCreationDesc textureCreationDesc = {};
@@ -290,6 +291,7 @@ GPUTexture DeviceDesktop::CreateEmptyTexture(TextureFormat format,
   textureCreationDesc.height = height;
   textureCreationDesc.format = format;
   textureCreationDesc.wrap = wrap;
+  textureCreationDesc.precision = precision;
 
   return _backend->CreateTexture(textureCreationDesc);
 }
@@ -304,6 +306,7 @@ GPUTexture DeviceDesktop::CreateTextureFromData(CPUTexture cpuTexture) {
   textureCreationDesc.height = cpuTexture.height;
   textureCreationDesc.format = cpuTexture.format;
   textureCreationDesc.wrap = TextureWrap::Repeat;
+  textureCreationDesc.precision = TexturePrecision::Low;
 
   return _backend->CreateTexture(textureCreationDesc);
 }

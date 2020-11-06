@@ -43,6 +43,11 @@ enum TextureFormat {
   DEPTH,
 };
 
+enum TexturePrecision {
+  Low,
+  High,
+};
+
 enum TextureWrap {
   Repeat,
   MirrorRepeat,
@@ -138,6 +143,7 @@ struct TextureCreationDesc {
   int height;
   TextureFormat format;
   TextureWrap wrap;
+  TexturePrecision precision;
 };
 
 /**
