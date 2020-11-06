@@ -39,7 +39,7 @@ Frame::Frame(Device* device, const std::string& config) {
       Pass pass = {};
       pass.name = k;
       pass.outputs = toml::find<std::vector<std::string>>(table, "outputs");
-      pass.precisions = toml::find<std::vector<std::string>>(table, "outputs");
+      pass.precisions = toml::find<std::vector<std::string>>(table, "precisions");
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");

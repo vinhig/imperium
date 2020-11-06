@@ -63,7 +63,7 @@ void Game::SysResourceUpdate() {
 
 void Game::SysLoad() {
   // Load rendering graph
-  _frame = new Frame(_device, "../assets/forward.toml");
+  _frame = new Frame(_device, "../assets/deferred.toml");
   // TODO: Load LOADING PLS WAIT texture
   // Dummy shader
   // Has to be used to create input layout with the directx backend

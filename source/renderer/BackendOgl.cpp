@@ -319,9 +319,7 @@ void BackendOgl::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
 
 void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times) {
   glBindVertexArray(drawInput.vao);
-  /*for (int i = 0; i < nbUniformBuffers; i++) {
-    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers[i].buffer);
-  }*/
+
   if (times == 1) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
   } else {

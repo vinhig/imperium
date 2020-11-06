@@ -19,10 +19,9 @@
 #include "../common/Log.h"
 
 BackendOglEs::BackendOglEs(BackendDesc backendDesc) {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  glDisable(GL_CULL_FACE);
+  // glCullFace(GL_BACK);
   if (backendDesc.width != 0 && backendDesc.height != 0) {
     glViewport(0, 0, backendDesc.width, backendDesc.height);
   }
@@ -219,24 +218,52 @@ GPUTexture BackendOglEs::CreateTexture(
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   auto format = GL_RGB;
+  auto internalFormat = GL_RGB;
+  auto subType = GL_UNSIGNED_BYTE;
   switch (textureCreationDesc.format) {
-    case R:
-      throw std::runtime_error("TextureFormat::R not supported on OpenGLES");
-    case RG:
+    case R: {
+      throw std::runtime_error("GL_R not supported on OpenGL ES.");
+    }
+    case RG: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RG;
+      } else {
+        internalFormat = GL_RG16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RG;
       break;
-    case RGB:
+    }
+    case RGB: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RGB;
+      } else {
+        internalFormat = GL_RGB16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RGB;
       break;
-    case RGBA:
+    }
+    case RGBA: {
+      if (textureCreationDesc.precision == TexturePrecision::Low) {
+        internalFormat = GL_RGBA;
+      } else {
+        internalFormat = GL_RGBA16F;
+        subType = GL_FLOAT;
+      }
       format = GL_RGBA;
       break;
-    case DEPTH:
+    }
+    case DEPTH: {
+      format = GL_DEPTH_STENCIL;
+      internalFormat = GL_DEPTH24_STENCIL8;
+      subType = GL_UNSIGNED_INT_24_8;
       break;
+    }
   }
   // Upload
-  glTexImage2D(GL_TEXTURE_2D, 0, format, textureCreationDesc.width,
-               textureCreationDesc.height, 0, format, GL_UNSIGNED_BYTE,
+  glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureCreationDesc.width,
+               textureCreationDesc.height, 0, format, subType,
                textureCreationDesc.data);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -246,7 +273,30 @@ GPUTexture BackendOglEs::CreateTexture(
 
 GPURenderTarget BackendOglEs::CreateRenderTarget(
     const std::vector<GPUTexture>& colors, GPUTexture depth) {
-  return GPURenderTarget();
+  // Create framebuffer
+  uint32_t framebuffer = 0;
+  glGenFramebuffers(1, &framebuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+  // Bind each color buffer
+  auto i = 0;
+  std::vector<GLenum> colorBuffers;
+  for (const auto& color : colors) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+                           GL_TEXTURE_2D, color.texture, 0);
+    colorBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+    i++;
+  }
+  // DON'T FORGET THIS
+  glDrawBuffers(colors.size(), colorBuffers.data());
+
+  // Bind depth buffer
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                         GL_TEXTURE_2D, depth.texture, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  return GPURenderTarget{framebuffer};
 }
 
 void BackendOglEs::BindProgram(GPUProgram program) {
@@ -261,15 +311,17 @@ void BackendOglEs::BindTexture(GPUTexture texture, int index) {
 void BackendOglEs::BindTextures(const std::vector<GPUTexture>& texture,
                                 int index) {}
 
-void BackendOglEs::BindRenderTarget(GPURenderTarget renderTarget) {}
+void BackendOglEs::BindRenderTarget(GPURenderTarget renderTarget) {
+  glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
+}
 
-void BackendOglEs::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {}
+void BackendOglEs::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
+  glBindBufferBase(GL_UNIFORM_BUFFER, layout, uniformBuffer.buffer);
+}
 
 void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times) {
   glBindVertexArray(drawInput.vao);
-  /*for (int i = 0; i < nbUniformBuffers; i++) {
-    glBindBufferBase(GL_UNIFORM_BUFFER, i, uniformBuffers[i].buffer);
-  }*/
+
   if (times == 1) {
     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
   } else {
@@ -278,7 +330,15 @@ void BackendOglEs::Draw(GPUDrawInput drawInput, int count, int times) {
   }
 }
 
-void BackendOglEs::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {}
+void BackendOglEs::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, from.framebuffer);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.framebuffer);
+  // TODO: Should not use hardcoded value
+  glBlitFramebuffer(0, 0, 1024, 768, 0, 0, 1024, 768,
+                    GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
 
 void BackendOglEs::UpdateBuffer(BufferUpdateDesc updateDesc) {
   // Vertex and index buffer can't be modified (at the time being)
@@ -288,4 +348,3 @@ void BackendOglEs::UpdateBuffer(BufferUpdateDesc updateDesc) {
                   updateDesc.data);
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
-
