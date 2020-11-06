@@ -12,13 +12,14 @@ layout(location=1) out VertOut {
 
 layout(std140, binding=0) uniform Camera {
     mat4 vp;
+    vec3 position;
 } camera;
 
-layout(std140, binding=1) uniform Object {
+layout(std140, binding=2) uniform Object {
     mat4 model;
 } object;
 
-layout(std140, binding=2) uniform Material {
+layout(std140, binding=3) uniform Material {
     float ambient;
     float specular;
     float color[4];

@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "CCamera.h"
+#include "CDirectionalLight.h"
 #include "CMeshInstance.h"
 #include "CViewport.h"
 
@@ -20,6 +21,11 @@ void Game::SysLogicalUpdate() {
   // 5 is a logically updatable uuid
   for (int i = 0; i < _system->Components(5).size(); ++i) {
     auto comp = (CCamera*)_system->Components(5)[i];
+    comp->UpdateVp();
+  }
+  // 6 is a logically updatable uuid
+  for (int i = 0; i < _system->Components(6).size(); ++i) {
+    auto comp = (CCamera*)_system->Components(6)[i];
     comp->UpdateVp();
   }
   LogicalUpdate(_tryHarder);
@@ -39,6 +45,14 @@ void Game::SysResourceUpdate() {
   // 5 is a resource updatable uuid
   for (int i = 0; i < _system->Components(5).size(); ++i) {
     auto comp = (CCamera*)_system->Components(5)[i];
+    auto res = comp->Resource();
+    if (res.enable) {
+      _device->UpdateUniformBuffer(res.dest, res.from);
+    }
+  }
+  // 6 is a resource updatable uuid
+  for (int i = 0; i < _system->Components(6).size(); ++i) {
+    auto comp = (CCamera*)_system->Components(6)[i];
     auto res = comp->Resource();
     if (res.enable) {
       _device->UpdateUniformBuffer(res.dest, res.from);
@@ -72,12 +86,18 @@ void Game::SysDraw() {
     }
   }
    */
-  // Get point of views
+  // Get point of view
   auto mainCamera = _system->GetFirstActive<CCamera>();
   if (mainCamera == nullptr) {
     throw std::runtime_error("Game must provide a CCamera.");
   }
   _frame->SetPointOfView(mainCamera->GetGPUBuffer(), "main_camera");
+  // Get light view
+  auto light = _system->GetFirstActive<CDirectionalLight>();
+  if (light == nullptr) {
+    throw std::runtime_error("Game must provide a CDirectional light.");
+  }
+  _frame->SetLightView(light->GetGPUBuffer());
 
   // Iterate through all drawable components
   // 2 is CMeshInstance so drawable

@@ -49,6 +49,7 @@ add_library(logic
         source/logic/CMaterial.cpp
         source/logic/CViewport.cpp
         source/logic/CCamera.cpp
+        source/logic/CDirectionalLight.cpp
         )
 
 add_library(renderer

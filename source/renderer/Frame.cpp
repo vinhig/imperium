@@ -18,6 +18,7 @@ Frame::Frame(Device* device, const std::string& config) {
     std::string shader;
     unsigned int layer;
     bool needTextures;
+    bool needLights;
     bool multiple;
   };
 
@@ -40,7 +41,8 @@ Frame::Frame(Device* device, const std::string& config) {
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");
-      pass.needTextures = toml::find<bool>(table, "needTexture");
+      pass.needTextures = toml::find<bool>(table, "needTextures");
+      pass.needLights = toml::find<bool>(table, "needLights");
       pass.multiple = toml::find<bool>(table, "multiple");
 
       // Get accepted layers
@@ -61,7 +63,7 @@ Frame::Frame(Device* device, const std::string& config) {
         }
       }
 
-      // toml11 internally use an unorderer_map
+      // toml11 internally use an unordered_map
       // that's why we need to sort pass
       auto order = toml::find<int>(table, "order");
       passes[order] = pass;
@@ -100,9 +102,9 @@ Frame::Frame(Device* device, const std::string& config) {
       inputs[i] = coolTextures[pass.inputs[i]];
     }
 
-    _renderingPasses.push_back(
-        new RenderingPass(program, renderTarget, inputs, pass.name,
-                          pass.pointOfView, pass.needTextures, pass.layer));
+    _renderingPasses.push_back(new RenderingPass(
+        program, renderTarget, inputs, pass.name, pass.pointOfView,
+        pass.needTextures, pass.needLights, pass.layer));
 
     std::cout << "Rendering pass brief '" << pass.name
               << "': \n\tNb outputs: " << pass.outputs.size()
@@ -135,6 +137,13 @@ void Frame::SetPointOfView(GPUBuffer uniformBuffer, std::string name) {
   for (const auto& pass : _renderingPasses) {
     if (pass->PointOfViewName() == name) {
       pass->SetPointOfView(uniformBuffer);
+    }
+  }
+}
+void Frame::SetLightView(GPUBuffer uniformBuffer) {
+  for (const auto& pass : _renderingPasses) {
+    if (pass->NeedLights()) {
+      pass->SetLightView(uniformBuffer);
     }
   }
 }

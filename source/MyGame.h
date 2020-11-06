@@ -6,6 +6,7 @@
 
 #include "logic/Actions.h"
 #include "logic/CCamera.h"
+#include "logic/CDirectionalLight.h"
 #include "logic/CMeshInstance.h"
 #include "logic/CTransform.h"
 #include "logic/CViewport.h"
@@ -19,6 +20,7 @@ class MyGame : public Game {
   Entity* plant;
   Entity* viewport;
   Entity* camera;
+  Entity* light;
   float _caca = 0.0f;
 
  public:
@@ -56,11 +58,14 @@ class MyGame : public Game {
 
     cam->SetRotation(glm::vec3(-25.0f, 0.0f, 0.0f));
     cam->SetPosition(glm::vec3(0.0f, -2.0f, 4.0f));
+
+    light = new Entity(GetSystem(), 3);
+    auto li = light->GetOrCreate<CDirectionalLight>(nullptr);
+
+    li->SetPosition(glm::vec3(3.0f,3.0f,3.0f));
   };
 
-  void LogicalUpdate(TryHarder* tryHarder) override {
-    _caca += 2.0f;
-  };
+  void LogicalUpdate(TryHarder* tryHarder) override { _caca += 2.0f; };
 
   void ResourceUpdate(Device* device) override{};
 

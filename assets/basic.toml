@@ -9,7 +9,8 @@ deps = []                       # textures from rendergraph to bind
 multiple = false                # presence of multiple identical node
                                 # if true, renderer will iterate on every pointOfView
 outputs = ["position", "normal", "albedo", "specular"] # output textures
-needTexture = true              # textures from material to bind
+needTextures = true              # textures from material to bind
+needLights = false               # light resources to bind
 pointOfView = "main_camera"     # which camera should be used?
 layers = ["A", "B"]             # layer to be drawn
 
@@ -19,6 +20,7 @@ shader = "blit"
 deps = ["position", "normal", "albedo", "specular"]
 multiple = false
 outputs = ["color"]
-needTexture = true
+needTextures = true
+needLights = true
 pointOfView = "none"
 layers = ["C"]

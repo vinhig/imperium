@@ -53,4 +53,11 @@ class Frame {
    * from rendering pipeline config file.
    */
   void SetPointOfView(GPUBuffer uniformBuffer, std::string name);
+
+  /**
+   * Link a uniform buffer as a light view. Frame will find the underlying
+   * render pass that needs it.
+   * @param uniformBuffer GPUBuffer representing a light view.
+   */
+  void SetLightView(GPUBuffer uniformBuffer);
 };

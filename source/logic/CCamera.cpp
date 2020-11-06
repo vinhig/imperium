@@ -36,6 +36,7 @@ CCamera::CCamera(Entity *owner, void *args) : IComponent(owner) {
   GetCPUBuffer()->size = sizeof(Matrices);
   auto uniform = (Matrices *)GetCPUBuffer()->data;
   memcpy(&uniform->viewProj[0], &_view[0][0], 16 * sizeof(float));
+  memcpy(&uniform->position[0], &_position[0], 3 * sizeof(float));
 
   // TODO: copy CPUBuffer before calling device is quite dirty
   CPUBuffer<void> cpuBuffer = {};
@@ -79,6 +80,7 @@ void CCamera::UpdateVp() {
     // Push modification to cpu buffer
     auto uniform = (Matrices *)GetCPUBuffer()->data;
     memcpy(&uniform->viewProj[0], &_view[0][0], 16 * sizeof(float));
+    memcpy(&uniform->position[0], &_position[0], 3 * sizeof(float));
 
     ForceUpdate();
     _update = false;

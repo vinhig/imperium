@@ -10,7 +10,7 @@
 RenderingPass::RenderingPass(GPUProgram program, GPURenderTarget renderTarget,
                              std::vector<GPUTexture> inputs, std::string name,
                              std::string pointOfViewName, bool needTextures,
-                             unsigned int layer) {
+                             bool needLights, unsigned int layer) {
   _program = program;
   _renderTarget = renderTarget;
   _inputs = std::move(inputs);
@@ -18,6 +18,7 @@ RenderingPass::RenderingPass(GPUProgram program, GPURenderTarget renderTarget,
   _pointOfViewName = std::move(pointOfViewName);
   _layer = layer;
   _needTextures = needTextures;
+  _needLights = needLights;
 }
 
 // TODO: should delete _renderTarget
@@ -44,6 +45,9 @@ void RenderingPass::Commit(Device* device) {
   if (_pointOfViewSet) {
     device->BindUniformBuffer(_pointOfView, 0);
   }
+  if (_lightViewSet && _needLights) {
+    device->BindUniformBuffer(_lightView, 1);
+  }
 
   for (const auto& draw : _drawCalls) {
     if (_needTextures) {
@@ -54,7 +58,7 @@ void RenderingPass::Commit(Device* device) {
     }
     for (int i = 0; i < draw.nbResources; i++) {
       device->Draw(draw.drawInputs[i], draw.counts[i], draw.times,
-                   draw.uniforms, draw.nbUniforms, 1);
+                   draw.uniforms, draw.nbUniforms, 2);
     }
   }
   _drawCalls.clear();
@@ -65,7 +69,11 @@ void RenderingPass::SetPointOfView(GPUBuffer pointOfView) {
   _pointOfViewSet = true;
 }
 
+void RenderingPass::SetLightView(GPUBuffer lightView) {
+  _lightView = lightView;
+  _lightViewSet = true;
+}
+
 void RenderingPass::Sort() {
   // TODO: as we are just drawing a little plant, don't bother with sorting lol
 }
-

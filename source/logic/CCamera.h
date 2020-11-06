@@ -14,6 +14,7 @@ class CCamera : public IComponent,
  private:
   struct Matrices {
     float viewProj[16];
+    float position[4];
   };
 
   glm::mat4 _projection;
