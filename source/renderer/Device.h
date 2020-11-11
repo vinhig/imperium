@@ -137,8 +137,10 @@ class Device {
    * Specify which textures to use for next draw calls.
    * @param textures Array of textures to use.
    * @param nbTextures Number of textures in given array.
+   * @param offset Binding number to begin binding.
    */
-  virtual void BindTextures(GPUTexture* textures, int nbTextures) = 0;
+  virtual void BindTextures(GPUTexture* textures, int nbTextures,
+                            int offset) = 0;
 
   /**
    * Specify render target to target for next draw calls.

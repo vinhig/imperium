@@ -54,7 +54,7 @@ class DeviceDesktop : public Device {
   void UpdateUniformBuffer(GPUBuffer buffer, CPUBuffer<void> newData) override;
 
   void BindProgram(GPUProgram program) override;
-  void BindTextures(GPUTexture* textures, int nbTextures) override;
+  void BindTextures(GPUTexture* textures, int nbTextures, int offset) override;
   void BindRenderTarget(GPURenderTarget renderTarget) override;
   void BindUniformBuffer(GPUBuffer uniformBuffer, int layout) override;
 

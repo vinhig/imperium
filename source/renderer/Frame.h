@@ -43,7 +43,7 @@ class Frame {
    * @param drawCall Draw call to register.
    * @param layer Layer to accept.
    */
-  void RegisterDrawCall(DrawCall drawCall, Layer layer);
+  void RegisterDrawCall(DrawCall drawCall);
 
   /**
    * Link an uniform buffer as a named point of view. Frame will find the
@@ -52,7 +52,7 @@ class Frame {
    * @param name Name of the given point of view. Must match at least one name
    * from rendering pipeline config file.
    */
-  void SetPointOfView(GPUBuffer uniformBuffer, std::string name);
+  void SetPointOfView(GPUBuffer uniformBuffer, const std::string& name);
 
   /**
    * Link a uniform buffer as a light view. Frame will find the underlying

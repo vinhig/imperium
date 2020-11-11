@@ -333,9 +333,10 @@ void DeviceDesktop::BindProgram(GPUProgram program) {
   _backend->BindProgram(program);
 }
 
-void DeviceDesktop::BindTextures(GPUTexture *textures, int nbTextures) {
+void DeviceDesktop::BindTextures(GPUTexture *textures, int nbTextures,
+                                 int offset) {
   for (int i = 0; i < nbTextures; i++) {
-    _backend->BindTexture(textures[i], i);
+    _backend->BindTexture(textures[i], i + offset);
   }
 }
 

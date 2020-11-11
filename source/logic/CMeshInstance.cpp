@@ -54,6 +54,8 @@ CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
   // How to draw this? Only the CMaterial component will say
   _material = GetEntity()->GetOrCreate<CMaterial>(nullptr);
   _uniforms.push_back(_material->GetGPUBuffer());
+
+  SetLayer(Layer::A);
 }
 
 DrawCall CMeshInstance::Draw() {
@@ -64,5 +66,6 @@ DrawCall CMeshInstance::Draw() {
                   _material->NbTextures(),
                   _counts.data(),
                   1,
-                  (int)_drawInputs.size()};
+                  (int)_drawInputs.size(),
+                  GetLayer()};
 }

@@ -9,6 +9,16 @@
 
 #include "../common/Log.h"
 
+// String manipulation
+bool endsWith(std::string const& string, std::string const& ending) {
+  if (string.length() >= ending.length()) {
+    return (0 == string.compare(string.length() - ending.length(),
+                                ending.length(), ending));
+  } else {
+    return false;
+  }
+}
+
 Frame::Frame(Device* device, const std::string& config) {
   struct Pass {
     std::string name;
@@ -39,7 +49,8 @@ Frame::Frame(Device* device, const std::string& config) {
       Pass pass = {};
       pass.name = k;
       pass.outputs = toml::find<std::vector<std::string>>(table, "outputs");
-      pass.precisions = toml::find<std::vector<std::string>>(table, "precisions");
+      pass.precisions =
+          toml::find<std::vector<std::string>>(table, "precisions");
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");
@@ -88,15 +99,20 @@ Frame::Frame(Device* device, const std::string& config) {
     // All outputs color buffer
     std::vector<GPUTexture> outputs(pass.outputs.size());
     for (int i = 0; i < pass.outputs.size(); i++) {
-      auto precision = TexturePrecision::High;
-      if (pass.precisions[i] == "low") {
-        precision = TexturePrecision::Low;
+      // Differentiation between depth and color texture
+      if (endsWith(pass.outputs[i], "_DEPTH")) {
+        coolTextures[pass.outputs[i]] = depth;
+      } else {
+        auto precision = TexturePrecision::High;
+        if (pass.precisions[i] == "low") {
+          precision = TexturePrecision::Low;
+        }
+        outputs[i] = device->CreateEmptyTexture(
+            TextureFormat::RGBA, TextureWrap::ClampToEdge, device->GetWidth(),
+            device->GetHeight(), precision);
+        // Class them by name
+        coolTextures[pass.outputs[i]] = outputs[i];
       }
-      outputs[i] = device->CreateEmptyTexture(
-          TextureFormat::RGBA, TextureWrap::ClampToEdge, device->GetWidth(),
-          device->GetHeight(), precision);
-      // Class them by name
-      coolTextures[pass.outputs[i]] = outputs[i];
     }
 
     auto renderTarget = device->CreateRenderTarget(outputs, depth);
@@ -105,7 +121,13 @@ Frame::Frame(Device* device, const std::string& config) {
     for (int i = 0; i < pass.inputs.size(); i++) {
       // DON'T CREATE AN INPUT TEXTURE
       // Just retrieve texture with this name created by a previous pass
-      inputs[i] = coolTextures[pass.inputs[i]];
+      if (coolTextures.find(pass.inputs[i]) != coolTextures.end()) {
+        inputs[i] = coolTextures[pass.inputs[i]];
+      } else {
+        throw std::runtime_error(
+            "Couldn't find this dependencies in render graph: " +
+            pass.inputs[i]);
+      }
     }
 
     _renderingPasses.push_back(new RenderingPass(
@@ -130,16 +152,16 @@ void Frame::Commit(Device* device) {
   device->BindRenderTarget(GPURenderTarget{0});
 }
 
-void Frame::RegisterDrawCall(DrawCall drawCall, Layer layer) {
+void Frame::RegisterDrawCall(DrawCall drawCall) {
   // Get render pass accepting this drawCall
   for (const auto& pass : _renderingPasses) {
-    if (pass->CanAccept(layer)) {
+    if (pass->CanAccept(drawCall.layer)) {
       pass->AddDrawCall(drawCall);
     }
   }
 }
 
-void Frame::SetPointOfView(GPUBuffer uniformBuffer, std::string name) {
+void Frame::SetPointOfView(GPUBuffer uniformBuffer, const std::string& name) {
   for (const auto& pass : _renderingPasses) {
     if (pass->PointOfViewName() == name) {
       pass->SetPointOfView(uniformBuffer);

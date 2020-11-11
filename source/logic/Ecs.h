@@ -30,9 +30,16 @@ class IComponent {
 };
 
 class IComponentDrawable {
+ private:
+  Layer _layer;
+
  public:
   explicit IComponentDrawable(){};
   ~IComponentDrawable() = default;
+
+  Layer GetLayer() { return _layer; };
+  void SetLayer(Layer layer) { _layer = layer; };
+
   virtual DrawCall Draw() = 0;
 };
 

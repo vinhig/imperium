@@ -9,6 +9,14 @@
 #include "../renderer/CPUResources.h"
 #include "../renderer/GPUResources.h"
 
+enum Layer {
+  A = 1, // CMeshInstance and stuff visible by default
+  B = 2,
+  C = 4, // CMeshInstance used for debug purpose
+  D = 8, // CViewport used for deferred rendering and debug blit
+  E = 10,
+};
+
 struct DrawCall {
   GPUDrawInput* drawInputs;
   GPUBuffer* uniforms;
@@ -18,6 +26,7 @@ struct DrawCall {
   int* counts;
   int times;
   int nbResources;
+  Layer layer;
 };
 
 struct LogicCall {
@@ -28,12 +37,4 @@ struct ResourceCall {
   CPUBuffer<void> from;
   GPUBuffer dest;
   bool enable;
-};
-
-enum Layer {
-  A = 1,
-  B = 2,
-  C = 4,
-  D = 8,
-  E = 10,
 };

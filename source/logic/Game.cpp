@@ -63,7 +63,7 @@ void Game::SysResourceUpdate() {
 
 void Game::SysLoad() {
   // Load rendering graph
-  _frame = new Frame(_device, "../assets/deferred.toml");
+  _frame = new Frame(_device, "../assets/forward.toml");
   // TODO: Load LOADING PLS WAIT texture
   // Dummy shader
   // Has to be used to create input layout with the directx backend
@@ -106,7 +106,7 @@ void Game::SysDraw() {
     auto draw = ((CMeshInstance*)comp)->Draw();
     // Send this draw call to frame
     // It's up to Frame to decide where and when to draw
-    _frame->RegisterDrawCall(draw, Layer::A);
+    _frame->RegisterDrawCall(draw);
   }
 
   for (int i = 0; i < _system->Components(4).size(); i++) {
@@ -114,7 +114,7 @@ void Game::SysDraw() {
     auto draw = ((CViewport*)comp)->Draw();
     // Send this draw call to frame
     // It's up to Frame to decide where and when to draw
-    _frame->RegisterDrawCall(draw, Layer::C);
+    _frame->RegisterDrawCall(draw);
   }
   Draw(_device);
   _frame->Commit(_device);

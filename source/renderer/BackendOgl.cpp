@@ -14,7 +14,7 @@
 BackendOgl::BackendOgl(BackendDesc backendDesc) {
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  // glCullFace(GL_BACK);
+  glCullFace(GL_BACK);
   glViewport(0, 0, backendDesc.width, backendDesc.height);
 }
 
@@ -254,9 +254,9 @@ GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
       break;
     }
     case DEPTH: {
-      format = GL_DEPTH_STENCIL;
-      internalFormat = GL_DEPTH24_STENCIL8;
-      subType = GL_UNSIGNED_INT_24_8;
+      format = GL_DEPTH_COMPONENT;
+      internalFormat = GL_DEPTH_COMPONENT;
+      subType = GL_FLOAT;
       break;
     }
   }
@@ -290,8 +290,8 @@ GPURenderTarget BackendOgl::CreateRenderTarget(
   glDrawBuffers(colors.size(), colorBuffers.data());
 
   // Bind depth buffer
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                         GL_TEXTURE_2D, depth.texture, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                         depth.texture, 0);
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

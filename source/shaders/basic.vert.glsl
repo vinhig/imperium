@@ -10,10 +10,11 @@ layout(location=1) out VertOut {
     vec2 uv;
     vec3 camera_position;
     vec3 light_position;
+    vec3 shadow_coords;
 } vertOut;
 
 layout(std140, binding=0) uniform Camera {
-    mat4 vp;
+    mat4 viewProj;
     vec4 position;
 } camera;
 
@@ -33,12 +34,21 @@ layout(std140, binding=3) uniform Material {
 } material;
 
 void main() {
-    mat4 mvp = camera.vp * object.model;
+    mat4 mvp = camera.viewProj * object.model;
     vertOut.normal = mat3(transpose(inverse(object.model))) * normal;
     vertOut.frag_pos = mvp * vec4(position, 1.0);
     vertOut.uv = uv;
     vertOut.camera_position = camera.position.xyz;
     vertOut.light_position = light.position.xyz;
 
-    gl_Position = mvp * vec4(position, 1.0);
+    mat4 bias = mat4(
+        vec4(0.5, 0.0, 0.0, 0.0),
+        vec4(0.0, 0.5, 0.0, 0.0),
+        vec4(0.0, 0.0, 0.5, 0.0),
+        vec4(0.5, 0.5, 0.5, 1.0)
+    );
+
+    vertOut.shadow_coords = (bias * (light.viewProj * object.model * vec4(position, 1.0))).xyz;
+
+    gl_Position = (mvp * vec4(position, 1.0));
 }

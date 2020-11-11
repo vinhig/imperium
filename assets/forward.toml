@@ -1,17 +1,53 @@
 [config]
 name = "Forward render graph"
-nbPasses = 1
+nbPasses = 4
 
-[final]
-order = 0                       # place on the render graph
+[directional-light]
+order = 0
+shader = "directional-light"
+deps = []
+multiple = false
+outputs = ["depth_DEPTH"]
+precisions = ["low"]
+needTextures = false
+needLights = true
+pointOfView = "none"
+layers = ["A", "B"]
+
+[forward-pass]
+order = 1                       # place on the render graph
 shader = "basic"                # shader to use
-deps = []                       # textures from rendergraph to bind
+deps = ["depth_DEPTH"]          # textures from rendergraph to bind
 multiple = false                # presence of multiple identical nodes
                                 # if true, renderer will iterate on multiple
                                 # point of views
-outputs = ["color"]             # output textures
-precisions = ["low"]             # level of precision for each texture
+outputs = ["color-forward"]     # output textures
+precisions = ["low"]            # level of precision for each texture
 needTextures = true             # textures from material to bind
 needLights = true               # light resources to bind
 pointOfView = "main_camera"     # which camera should be used?
 layers = ["A", "B"]             # layer to be drawn
+
+[debug-pass]
+order = 2
+shader = "debug"
+deps = []
+multiple = false
+outputs = ["color-debug"]
+precisions = ["low"]
+needTextures = false
+needLights = false
+pointOfView = "main_camera"
+layers = ["D"]
+
+[final]
+order = 3
+shader = "blit-debug"
+deps = ["color-forward", "color-debug"]
+multiple = false
+outputs = ["color-blit"]
+precisions = ["low"]
+needTextures = false
+needLights = false
+pointOfView = "none"
+layers = ["C"]

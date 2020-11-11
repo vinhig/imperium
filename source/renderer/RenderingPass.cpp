@@ -49,12 +49,14 @@ void RenderingPass::Commit(Device* device) {
     device->BindUniformBuffer(_lightView, 1);
   }
 
+  if (!_inputs.empty()) {
+    device->BindTextures(_inputs.data(), _inputs.size(), 0);
+  }
+  int texOffset = _inputs.size();
+
   for (const auto& draw : _drawCalls) {
     if (_needTextures) {
-      device->BindTextures(draw.textures, draw.nbTextures);
-    }
-    if (!_inputs.empty()) {
-      device->BindTextures(_inputs.data(), _inputs.size());
+      device->BindTextures(draw.textures, draw.nbTextures, texOffset);
     }
     for (int i = 0; i < draw.nbResources; i++) {
       device->Draw(draw.drawInputs[i], draw.counts[i], draw.times,

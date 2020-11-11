@@ -61,12 +61,14 @@ CViewport::CViewport(Entity* owner, void* args) : IComponent(owner) {
   verticesBuffer[0] = _vertices;
   verticesBuffer[1] = _vertices;
   _drawInput = device->CreateDrawInput(inputLayout, verticesBuffer, _indices);
+
+  SetLayer(Layer::C);
 }
 
 DrawCall CViewport::Draw() {
   // int count = 6;
-  auto draw =
-      DrawCall{&_drawInput, nullptr, nullptr, 0, 0, _counts.data(), 1, 1};
+  auto draw = DrawCall{&_drawInput,    nullptr, nullptr, 0,         0,
+                       _counts.data(), 1,       1,       GetLayer()};
 
   return draw;
 }

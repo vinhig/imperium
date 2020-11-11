@@ -11,7 +11,7 @@ find_package(Threads REQUIRED)
 
 # 3rd party includes
 include_directories(libraries/)
-include_directories(libraries/toml11)
+include_directories(libraries/toml11/)
 include_directories(libraries/GL/include/)
 include_directories(libraries/openfbx/src/)
 
@@ -20,7 +20,6 @@ add_subdirectory(libraries/spirv-cross)
 
 if (WIN32)
     set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
-    message("Salut")
 else ()
     set(WIN32_CPP_RENDERER "")
 endif (WIN32)
