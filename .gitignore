@@ -15,3 +15,6 @@
 .cxx
 /cmake-build-*
 /libraries
+/docs/latex
+/docs/html
+Doxyfile

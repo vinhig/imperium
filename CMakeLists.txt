@@ -68,8 +68,7 @@ target_link_libraries(Imperium renderer common loader logic)
 
 target_link_libraries(loader openfbx)
 
-target_link_libraries(logic glm)
-
+target_link_libraries(logic glm renderer loader)
 target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 

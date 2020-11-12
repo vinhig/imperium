@@ -9,8 +9,8 @@
 #include "Ecs.h"
 
 class CDirectionalLight : public IComponent,
-                public IComponentLogic,
-                public IComponentResource {
+                          public IComponentLogic,
+                          public IComponentResource {
  private:
   struct Matrices {
     float viewProj[16];
@@ -34,7 +34,7 @@ class CDirectionalLight : public IComponent,
   LogicCall Logic() override;
 
   int UUID() override { return 6; };
-  static const int Uuid = 6;
+  static const int Uuid;
 
   const glm::vec3& GetPosition() const { return _position; }
   void SetPosition(const glm::vec3& position) {

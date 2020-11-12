@@ -4,6 +4,7 @@
 
 #include "CMaterial.h"
 
+#include <cstring>
 #include <string>
 
 #include "../common/File.h"
@@ -28,7 +29,8 @@ CMaterial::CMaterial(Entity* owner, void* args) : IComponent(owner) {
   CPUBuffer<void> cpuBuffer = {};
   cpuBuffer.data = GetCPUBuffer()->data;
   cpuBuffer.size = GetCPUBuffer()->size;
-  GPUBuffer gpuBuffer = GetEntity()->GetSystem()->GetDevice()->CreateUniformBuffer(cpuBuffer);
+  GPUBuffer gpuBuffer =
+      GetEntity()->GetSystem()->GetDevice()->CreateUniformBuffer(cpuBuffer);
   SetGPUBuffer(gpuBuffer);
 }
 

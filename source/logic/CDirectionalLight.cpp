@@ -4,6 +4,8 @@
 
 #include "CDirectionalLight.h"
 
+#include <cstring>
+
 CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
     : IComponent(owner) {
   auto device = ((IComponent *)this)->GetEntity()->GetSystem()->GetDevice();
@@ -14,8 +16,7 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
   float near_plane = 0.01f;
   float far_plane = 15.5f;
 
-  _projection =
-      glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+  _projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 
   glm::vec3 rads =
       glm::vec3(glm::radians(_rotation.x), glm::radians(_rotation.y),
@@ -27,8 +28,8 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
 
   // View matrix
   // Currently at origin
-  _view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-                      _lookAt, glm::vec3(0.0f, 1.0f, 0.0f));
+  _view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), _lookAt,
+                      glm::vec3(0.0f, 1.0f, 0.0f));
 
   _view = _projection * _view;
 
@@ -82,3 +83,5 @@ void CDirectionalLight::UpdateVp() {
     _update = false;
   }
 }
+
+const int CDirectionalLight::Uuid = 6;

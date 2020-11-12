@@ -4,6 +4,8 @@
 
 #include "CCamera.h"
 
+#include <cstring>
+
 CCamera::CCamera(Entity *owner, void *args) : IComponent(owner) {
   auto device = ((IComponent *)this)->GetEntity()->GetSystem()->GetDevice();
 
@@ -75,3 +77,5 @@ void CCamera::UpdateVp() {
     _update = false;
   }
 }
+
+const int CCamera::Uuid = 5;
