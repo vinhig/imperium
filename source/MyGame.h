@@ -85,7 +85,7 @@ class MyGame : public Game {
     _caca += 0.02f;
 
     light->Get<CDirectionalLight>()->SetPosition(
-        glm::vec3(-2.0f, 4.0f, sin(_caca) * 2.0f));
+        glm::vec3(-2.0f, 8.0f, sin(_caca) * 2.0f));
 
     light->Get<CDirectionalLight>()->SetRotation(
         glm::vec3(-30.0f, cos(_caca) * 180 / 3.14, -30.0f));

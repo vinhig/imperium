@@ -10,11 +10,11 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
     : IComponent(owner) {
   auto device = ((IComponent *)this)->GetEntity()->GetSystem()->GetDevice();
 
-  _position = glm::vec3(-2.0f, 4.0f, -1.0f);
+  _position = glm::vec3(-2.0f, 8.0f, -1.0f);
   _rotation = glm::vec3(-30.0f, -30.0f, -30.0f);
 
   float near_plane = 0.01f;
-  float far_plane = 15.5f;
+  float far_plane = 30.0f;
 
   _projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 
@@ -58,7 +58,6 @@ LogicCall CDirectionalLight::Logic() {
 
 void CDirectionalLight::UpdateVp() {
   if (_update) {
-    std::cout << "Updating VP" << std::endl;
 
     glm::vec3 rads =
         glm::vec3(glm::radians(_rotation.x), glm::radians(_rotation.y),

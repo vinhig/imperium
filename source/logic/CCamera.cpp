@@ -53,8 +53,6 @@ LogicCall CCamera::Logic() {
 
 void CCamera::UpdateVp() {
   if (_update) {
-    std::cout << "Updating VP" << std::endl;
-
     glm::vec3 rads =
         glm::vec3(glm::radians(_rotation.x), glm::radians(_rotation.y),
                   glm::radians(_rotation.z));

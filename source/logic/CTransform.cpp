@@ -32,7 +32,6 @@ CTransform::CTransform(Entity* owner, void* args) : IComponent(owner) {
 
 void CTransform::UpdateMvp() {
   if (_update) {
-    std::cout << "Updating MVP" << std::endl;
     // Compute matrices changes
     auto translation = glm::translate(_position);
     auto scale = glm::scale(_scale);

@@ -67,7 +67,6 @@ class IComponentResource {
    */
   ResourceCall Resource() {
     if (_update) {
-      std::cout << "Pushing some data" << std::endl;
       _update = false;
       return ResourceCall{_cpuBuffer, _gpuBuffer, true};
     } else {
@@ -230,7 +229,6 @@ T* System::GetFirstActive() {
 
 template <typename T>
 void System::Create(Entity* entity, void* args) {
-  std::cout << "Creating " << T::Uuid << std::endl;
   std::unordered_map<int, std::vector<IComponent*>>::iterator comp =
       _componentsForEntity.find(entity->GetId());
   if (comp == _componentsForEntity.end()) {
