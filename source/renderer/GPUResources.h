@@ -14,6 +14,8 @@
  */
 struct GPURenderTarget {
   uint32_t framebuffer;
+  int width;
+  int height;
 };
 
 /**
@@ -52,5 +54,6 @@ struct GPUProgram {
  */
 struct GPUTexture {
   uint32_t texture;
-  int width, height;
+  int width;
+  int height;
 };

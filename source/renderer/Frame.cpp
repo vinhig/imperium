@@ -5,6 +5,7 @@
 #include "Frame.h"
 
 #include <iostream>
+#include <sstream>
 #include <toml11/toml.hpp>
 
 #include "../common/Log.h"
@@ -24,6 +25,7 @@ Frame::Frame(Device* device, const std::string& config) {
     std::string name;
     std::vector<std::string> outputs;
     std::vector<std::string> precisions;
+    std::string dimensions;
     std::vector<std::string> inputs;
     std::string pointOfView;
     std::string shader;
@@ -51,6 +53,7 @@ Frame::Frame(Device* device, const std::string& config) {
       pass.outputs = toml::find<std::vector<std::string>>(table, "outputs");
       pass.precisions =
           toml::find<std::vector<std::string>>(table, "precisions");
+      pass.dimensions = toml::find<std::string>(table, "dimensions");
       pass.inputs = toml::find<std::vector<std::string>>(table, "deps");
       pass.pointOfView = toml::find<std::string>(table, "pointOfView");
       pass.shader = toml::find<std::string>(table, "shader");
@@ -91,10 +94,26 @@ Frame::Frame(Device* device, const std::string& config) {
     // Shader for this rendering pass
     auto program = device->CreateProgram(pass.shader);
 
-    // Depth buffer
+    // Parse dimensions
+    int width = device->GetWidth();
+    int height = device->GetHeight();
+    if (pass.dimensions != "device") {
+      // Extract width and height from string
+      auto toParse = pass.dimensions;
+      int del = toParse.find("x");
+      assert(del != -1);  // Must be this format : WIDTHxHEIGHT
+      auto strWidth = std::stringstream(toParse.substr(0, del));
+      auto strHeight =
+          std::stringstream(toParse.substr(del + 1, toParse.length() - 1));
+      // Convert to integer
+      strWidth >> width;
+      strHeight >> height;
+    }
+
+    // Create a depth buffer by default
     GPUTexture depth = device->CreateEmptyTexture(
-        TextureFormat::DEPTH, TextureWrap::ClampToEdge, device->GetWidth(),
-        device->GetHeight(), TexturePrecision::High);
+        TextureFormat::DEPTH, TextureWrap::ClampToEdge, width,
+        height, TexturePrecision::High);
 
     // All outputs color buffer
     std::vector<GPUTexture> outputs(pass.outputs.size());
@@ -107,9 +126,9 @@ Frame::Frame(Device* device, const std::string& config) {
         if (pass.precisions[i] == "low") {
           precision = TexturePrecision::Low;
         }
-        outputs[i] = device->CreateEmptyTexture(
-            TextureFormat::RGBA, TextureWrap::ClampToEdge, device->GetWidth(),
-            device->GetHeight(), precision);
+        outputs[i] = device->CreateEmptyTexture(TextureFormat::RGBA,
+                                                TextureWrap::ClampToEdge, width,
+                                                height, precision);
         // Class them by name
         coolTextures[pass.outputs[i]] = outputs[i];
       }
@@ -148,8 +167,10 @@ void Frame::Commit(Device* device) {
   // Blit last render target onto window
   device->BlitRenderTarget(
       _renderingPasses[_renderingPasses.size() - 1]->RenderTarget(),
-      GPURenderTarget{0});
-  device->BindRenderTarget(GPURenderTarget{0});
+      GPURenderTarget{0, device->GetWidth(), device->GetHeight()});
+
+  device->BindRenderTarget(
+      GPURenderTarget{0, device->GetWidth(), device->GetHeight()});
 }
 
 void Frame::RegisterDrawCall(DrawCall drawCall) {

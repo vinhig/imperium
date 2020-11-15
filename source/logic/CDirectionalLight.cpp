@@ -10,11 +10,11 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
     : IComponent(owner) {
   auto device = ((IComponent *)this)->GetEntity()->GetSystem()->GetDevice();
 
-  _position = glm::vec3(-2.0f, 8.0f, -1.0f);
-  _rotation = glm::vec3(-30.0f, -30.0f, -30.0f);
+  _position = glm::vec3(-10.0f, 10.0f, 0.0f);
+  _rotation = glm::vec3(-0.0f, -0.0f, -45.0f);
 
-  float near_plane = 0.01f;
-  float far_plane = 30.0f;
+  float near_plane = 1.0f;
+  float far_plane = 20.0f;
 
   _projection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 
@@ -28,7 +28,7 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
 
   // View matrix
   // Currently at origin
-  _view = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), _lookAt,
+  _view = glm::lookAt(_position, glm::vec3(0.0f, 0.0f, 0.0f),
                       glm::vec3(0.0f, 1.0f, 0.0f));
 
   _view = _projection * _view;
@@ -38,6 +38,7 @@ CDirectionalLight::CDirectionalLight(Entity *owner, void *args)
   auto uniform = (Matrices *)GetCPUBuffer()->data;
   memcpy(&uniform->viewProj[0], &_view[0][0], 16 * sizeof(float));
   memcpy(&uniform->position[0], &_position[0], 3 * sizeof(float));
+  uniform->position[3] = 1.0;
 
   // TODO: copy CPUBuffer before calling device is quite dirty
   CPUBuffer<void> cpuBuffer = {};
@@ -57,8 +58,7 @@ LogicCall CDirectionalLight::Logic() {
 }
 
 void CDirectionalLight::UpdateVp() {
-  if (_update) {
-
+  if (_update && false) {
     glm::vec3 rads =
         glm::vec3(glm::radians(_rotation.x), glm::radians(_rotation.y),
                   glm::radians(_rotation.z));
@@ -77,6 +77,7 @@ void CDirectionalLight::UpdateVp() {
     auto uniform = (Matrices *)GetCPUBuffer()->data;
     memcpy(&uniform->viewProj[0], &_view[0][0], 16 * sizeof(float));
     memcpy(&uniform->position[0], &_position[0], 3 * sizeof(float));
+    uniform->position[3] = 1.0;
 
     ForceUpdate();
     _update = false;

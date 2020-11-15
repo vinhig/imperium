@@ -360,6 +360,8 @@ void DeviceDesktop::Draw(GPUDrawInput drawInput, int count, int times,
 }
 
 void DeviceDesktop::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
+  // Dimensions of source and destination render target have to be identical
+  assert(from.height == to.height && from.width == to.width);
   _backend->BlitRenderTarget(from, to);
 }
 

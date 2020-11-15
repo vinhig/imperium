@@ -188,6 +188,9 @@ GPUInputLayout BackendOgl::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
 }
 
 GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
+  // A texture cannot be 0x0
+  assert(textureCreationDesc.width && textureCreationDesc.height);
+
   uint32_t texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -265,12 +268,25 @@ GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
                textureCreationDesc.data);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+
   return GPUTexture{texture, textureCreationDesc.width,
                     textureCreationDesc.height};
 }
 
 GPURenderTarget BackendOgl::CreateRenderTarget(
     const std::vector<GPUTexture>& colors, GPUTexture depth) {
+  // All attached textures have to share the same dimensions
+  int checkWidth = 0;
+  int checkHeight = 0;
+  for (const auto& color : colors) {
+    if (checkWidth && checkHeight) {
+      assert(checkWidth == color.width && checkHeight == color.height);
+    } else {
+      checkWidth = color.width;
+      checkHeight = color.height;
+    }
+  }
+
   // Create framebuffer
   uint32_t framebuffer = 0;
   glGenFramebuffers(1, &framebuffer);
@@ -294,7 +310,14 @@ GPURenderTarget BackendOgl::CreateRenderTarget(
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  return GPURenderTarget{framebuffer};
+  // Width and Height of render target
+  // In case we do not have any attached color texture
+  if (!(checkWidth && checkHeight)) {
+    checkWidth = depth.height;
+    checkHeight = depth.height;
+  }
+
+  return GPURenderTarget{framebuffer, checkWidth, checkHeight};
 }
 
 void BackendOgl::BindProgram(GPUProgram program) {
@@ -311,7 +334,9 @@ void BackendOgl::BindTextures(const std::vector<GPUTexture>& texture,
 
 void BackendOgl::BindRenderTarget(GPURenderTarget renderTarget) {
   glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
+  glViewport(0, 0, renderTarget.width, renderTarget.height);
 }
+
 void BackendOgl::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
   glBindBufferBase(GL_UNIFORM_BUFFER, layout, uniformBuffer.buffer);
 }
@@ -330,8 +355,7 @@ void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times) {
 void BackendOgl::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
   glBindFramebuffer(GL_READ_FRAMEBUFFER, from.framebuffer);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, to.framebuffer);
-  // TODO: Should not use hardcoded value
-  glBlitFramebuffer(0, 0, 1024, 768, 0, 0, 1024, 768,
+  glBlitFramebuffer(0, 0, from.width, from.height, 0, 0, to.width, to.height,
                     GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

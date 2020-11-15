@@ -38,7 +38,7 @@ class MyGame : public Game {
     camera = new Entity(GetSystem(), 2);
     auto cam = camera->GetOrCreate<CCamera>(nullptr);
     cam->SetRotation(glm::vec3(-25.0f, -90.0f, 0.0f));
-    cam->SetPosition(glm::vec3(0.0f, 8.0f, 16.0f));
+    cam->SetPosition(glm::vec3(0.0f, 16.0f, 24.0f));
 
     light = new Entity(GetSystem(), 3);
     auto li = light->GetOrCreate<CDirectionalLight>(nullptr);
@@ -84,11 +84,11 @@ class MyGame : public Game {
   void LogicalUpdate(TryHarder* tryHarder) override {
     _caca += 0.02f;
 
-    light->Get<CDirectionalLight>()->SetPosition(
-        glm::vec3(-2.0f, 8.0f, sin(_caca) * 2.0f));
+    /*light->Get<CDirectionalLight>()->SetPosition(
+        glm::vec3(-4.0f, 8.0f, sin(_caca) * 2.0f));
 
     light->Get<CDirectionalLight>()->SetRotation(
-        glm::vec3(-30.0f, cos(_caca) * 180 / 3.14, -30.0f));
+        glm::vec3(-30.0f, cos(_caca) * 180 / 3.14, -45.0f));*/
 
     ball->Get<CTransform>()->SetPosition(
         light->Get<CDirectionalLight>()->GetPosition());
