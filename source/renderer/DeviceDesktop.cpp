@@ -43,6 +43,9 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
     throw std::runtime_error("Unable to init glfw");
   }
 
+  _width = deviceDesc.width;
+  _height = deviceDesc.height;
+
   switch (deviceDesc.api) {
     case OpenGL33: {
       // Request corresponding context
