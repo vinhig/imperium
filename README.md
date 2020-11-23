@@ -12,14 +12,15 @@ At the time being, this is just a skeleton of a multi-platform rendering engine.
     * Programmable via configuration file.
     * Built-in:
         * Deferred-rendering (Phong Shading)
-        * Forward-rendering (Phong Shading)
+        * Forward-rendering (Phong Shading and shadows)
+* Crappy and awful Entity-Component-System.
         
 #### What has to be done
 
 * Advanced render graph.
     * Built-in:
         * Deferred-rendering (PBR and shadows)
-* Basic skeleton animation. 
+* Basic skeleton animation.
 
 ### API support
 
@@ -53,6 +54,8 @@ git submodule update
 ```
 
 ### Android
+
+Warning: completely broken.
 
 Make sure you've installed NDK and Android SDK. glslangValidator has to be installed.
 

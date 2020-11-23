@@ -14,9 +14,11 @@ include_directories(libraries/)
 include_directories(libraries/toml11/)
 include_directories(libraries/GL/include/)
 include_directories(libraries/openfbx/src/)
+include_directories(libraries/bullet3/src/)
 
 # Sub-projects
 add_subdirectory(libraries/spirv-cross)
+add_subdirectory(libraries/bullet3)
 
 if (WIN32)
     set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
@@ -41,14 +43,16 @@ add_library(loader
         )
 
 add_library(logic
+        source/logic/CCamera.cpp
+        source/logic/CCollider.cpp
+        source/logic/CDirectionalLight.cpp
+        source/logic/CMaterial.cpp
+        source/logic/CMeshInstance.cpp
+        source/logic/CRigidBody.cpp
+        source/logic/CTransform.cpp
+        source/logic/CViewport.cpp
         source/logic/Game.cpp
         source/logic/TryHarder.cpp
-        source/logic/CTransform.cpp
-        source/logic/CMeshInstance.cpp
-        source/logic/CMaterial.cpp
-        source/logic/CViewport.cpp
-        source/logic/CCamera.cpp
-        source/logic/CDirectionalLight.cpp
         )
 
 add_library(renderer
@@ -68,7 +72,7 @@ target_link_libraries(Imperium renderer common loader logic)
 
 target_link_libraries(loader openfbx)
 
-target_link_libraries(logic glm renderer loader)
+target_link_libraries(logic glm renderer loader BulletDynamics BulletCollision LinearMath)
 target_link_libraries(renderer glfw OpenGL::GL)
 target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 

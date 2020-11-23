@@ -11,8 +11,12 @@
 #include "CDirectionalLight.h"
 #include "CMeshInstance.h"
 #include "CViewport.h"
+#include "CRigidBody.h"
 
 void Game::SysLogicalUpdate() {
+  // TODO: looks like a fucking hack
+  _system->UpdatePhysics();
+  // TODO: we should feed a tryharder instead of calling updatable components
   // 1 is a logically updatable uuid
   for (int i = 0; i < _system->Components(1).size(); ++i) {
     auto comp = (CTransform*)_system->Components(1)[i];
@@ -27,6 +31,11 @@ void Game::SysLogicalUpdate() {
   for (int i = 0; i < _system->Components(6).size(); ++i) {
     auto comp = (CCamera*)_system->Components(6)[i];
     comp->UpdateVp();
+  }
+  // 7 is a logically updatable uuid
+  for (int i = 0; i < _system->Components(7).size(); ++i) {
+    auto comp = (CRigidBody*)_system->Components(7)[i];
+    comp->SyncBody();
   }
   LogicalUpdate(_tryHarder);
   _tryHarder->Do();

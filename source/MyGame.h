@@ -4,10 +4,15 @@
 
 #pragma once
 
+#include <functional>
+#include <random>
+
 #include "logic/Actions.h"
 #include "logic/CCamera.h"
+#include "logic/CCollider.h"
 #include "logic/CDirectionalLight.h"
 #include "logic/CMeshInstance.h"
+#include "logic/CRigidBody.h"
 #include "logic/CTransform.h"
 #include "logic/CViewport.h"
 #include "logic/Ecs.h"
@@ -23,6 +28,7 @@ class MyGame : public Game {
   Entity* light;
   Entity* bench;
   Entity* ball;
+  Entity* sphere;
   float _caca = 0.0f;
 
  public:
@@ -58,6 +64,30 @@ class MyGame : public Game {
     // bench->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -2.2f, 0.0f));
     bench->Get<CTransform>()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
     bench->Get<CTransform>()->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    bench->Get<CTransform>()->SetPosition({0.01f, 0.01f, 0.01f});
+    auto colliderDesc1 = ColliderDesc{ColliderShape::Cube, 10.0f, 0.01f, 10.0f};
+    bench->GetOrCreate<CCollider>((void*)&colliderDesc1);
+    auto rigidBodyDesc1 = RigidBodyDesc{0.0f};
+    bench->GetOrCreate<CRigidBody>((void*)&rigidBodyDesc1);
+
+    // The bouncing sphere
+    std::default_random_engine generator;
+    std::uniform_real_distribution<float> distribution(-5.0f, 5.0f);
+    auto rand = std::bind(distribution, generator);
+
+    for (int i = 0; i < 40; ++i) {
+      auto sphere = new Entity(GetSystem(), 7 + i);
+      std::string path4 = "../assets/meshes/sphere.fbx";
+      sphere->GetOrCreate<CMeshInstance>((void*)&path4);
+      // bench->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -2.2f, 0.0f));
+      sphere->Get<CTransform>()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+      sphere->Get<CTransform>()->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+      sphere->Get<CTransform>()->SetPosition({rand(), rand() + 8.0f, rand()});
+      auto colliderDesc2 = ColliderDesc{ColliderShape::Sphere, 1.0f, 1.0f, 1.0f};
+      sphere->GetOrCreate<CCollider>((void*)&colliderDesc2);
+      auto rigidBodyDesc2 = RigidBodyDesc{1.0f};
+      sphere->GetOrCreate<CRigidBody>((void*)&rigidBodyDesc2);
+    }
 
     plant = new Entity(GetSystem(), 0);
 #if __ANDROID__
