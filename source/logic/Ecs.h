@@ -11,6 +11,7 @@
 #include "../renderer/Device.h"
 #include "Actions.h"
 #include "TryHarder.h"
+#include "btBulletDynamicsCommon.h"
 
 class Game;  // c++ bad;
 class IComponent;
@@ -106,10 +107,30 @@ class System {
   // std::vector<IComponent*>: components of this type
   std::unordered_map<int, std::vector<IComponent*>> _componentsForType;
 
+  // Bullet components
+  btDefaultCollisionConfiguration* _collisionConfiguration{};
+  btCollisionDispatcher* _dispatcher{};
+  btBroadphaseInterface* _overlappingPairCache{};
+  btSequentialImpulseConstraintSolver* _solver{};
+  btDiscreteDynamicsWorld* _dynamicsWorld{};
+  btAlignedObjectArray<btCollisionShape*> _collisionShapes;
+
   Device* _device;
 
  public:
-  System(Device* device) { _device = device; };
+  explicit System(Device* device) {
+    _device = device;
+
+    // Initialize physics components with default configuration
+    _collisionConfiguration = new btDefaultCollisionConfiguration();
+    _dispatcher = new btCollisionDispatcher(_collisionConfiguration);
+    _overlappingPairCache = new btDbvtBroadphase();
+    _solver = new btSequentialImpulseConstraintSolver;
+    _dynamicsWorld = new btDiscreteDynamicsWorld(
+        _dispatcher, _overlappingPairCache, _solver, _collisionConfiguration);
+
+    _dynamicsWorld->setGravity(btVector3(0, -10, 0));
+  };
   ~System() = default;
 
   Device* GetDevice() { return _device; };
@@ -131,6 +152,8 @@ class System {
   template <typename T>
   T* GetFirstActive();
 
+  float test = 0.0f;
+
   /**
    * Register a created component owned by a specific entity.
    * @tparam T Type of component to register.
@@ -139,6 +162,16 @@ class System {
    */
   template <typename T>
   void Create(Entity* entity, void* args);
+
+  void AddShape(btCollisionShape* shape) { _collisionShapes.push_back(shape); };
+  void AddBody(btRigidBody* body) { _dynamicsWorld->addRigidBody(body); };
+
+  void UpdatePhysics() {
+    // TODO: should have a more precise timestep
+    test += 1.0f / 60.0f;
+    _dynamicsWorld->setGravity(btVector3(0, -10, 0));
+    _dynamicsWorld->stepSimulation((1.0f / 60.0f) * 1000, 10);
+  }
 };
 
 class Entity {

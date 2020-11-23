@@ -6,8 +6,10 @@
 
 #include "logic/Actions.h"
 #include "logic/CCamera.h"
+#include "logic/CCollider.h"
 #include "logic/CDirectionalLight.h"
 #include "logic/CMeshInstance.h"
+#include "logic/CRigidBody.h"
 #include "logic/CTransform.h"
 #include "logic/CViewport.h"
 #include "logic/Ecs.h"
@@ -58,6 +60,11 @@ class MyGame : public Game {
     // bench->Get<CTransform>()->SetPosition(glm::vec3(0.0f, -2.2f, 0.0f));
     bench->Get<CTransform>()->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
     bench->Get<CTransform>()->SetRotation(glm::vec3(90.0f, 0.0f, 0.0f));
+    bench->Get<CTransform>()->SetPosition({0.01f, 0.01f, 0.01f});
+    auto colliderDesc1 = ColliderDesc{10.0f, 1.0f, 10.0f};
+    bench->GetOrCreate<CCollider>((void*)&colliderDesc1);
+    auto rigidBodyDesc1 = RigidBodyDesc{10.0f};
+    bench->GetOrCreate<CRigidBody>((void*)&rigidBodyDesc1);
 
     plant = new Entity(GetSystem(), 0);
 #if __ANDROID__
