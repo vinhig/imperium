@@ -8,7 +8,13 @@
 
 #include "Ecs.h"
 
+enum ColliderShape {
+  Sphere,
+  Cube,
+};
+
 struct ColliderDesc {
+  ColliderShape shape;
   float x;
   float y;
   float z;

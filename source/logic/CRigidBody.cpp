@@ -4,6 +4,8 @@
 
 #include "CRigidBody.h"
 
+#include <glm/gtx/quaternion.hpp>
+
 #include "CCollider.h"
 
 CRigidBody::CRigidBody(Entity *owner, void *args) : IComponent(owner) {
@@ -22,7 +24,12 @@ CRigidBody::CRigidBody(Entity *owner, void *args) : IComponent(owner) {
                           _transform->GetPosition().y,
                           _transform->GetPosition().z});
 
-  _btTransform.setOrigin({2.0f, 2.0f, 2.0f});
+  auto quaternion =
+      glm::quat({glm::radians(_transform->GetRotation().x - 90.0f),
+                 glm::radians(_transform->GetRotation().y),
+                 glm::radians(_transform->GetRotation().z)});
+  _btTransform.setRotation(
+      {quaternion.x, quaternion.y, quaternion.z, quaternion.w});
 
   btScalar mass(description->mass);
   bool isDynamic = (description->mass != 0.0f);
@@ -37,22 +44,29 @@ CRigidBody::CRigidBody(Entity *owner, void *args) : IComponent(owner) {
 
   _motionState = new btDefaultMotionState(_btTransform);
   btRigidBody::btRigidBodyConstructionInfo rbInfo(
-      1.0f, _motionState, _shape->GetShape(), localInertia);
+      mass, _motionState, _shape->GetShape(), localInertia);
   _body = new btRigidBody(rbInfo);
 
   GetEntity()->GetSystem()->AddBody(_body);
 }
 
 void CRigidBody::SyncBody() {
-  _transform->SetPosition({_btTransform.getOrigin().x(),
-                           _btTransform.getOrigin().y(),
-                           _btTransform.getOrigin().z()});
+  auto vec = glm::eulerAngles(
+      glm::quat(_body->getWorldTransform().getRotation().getW(),
+                _body->getWorldTransform().getRotation().getX(),
+                _body->getWorldTransform().getRotation().getY(),
+                _body->getWorldTransform().getRotation().getZ()));
 
-  //  std::cout << _btTransform.getOrigin().x() << "; "
-  //            << _btTransform.getOrigin().y() << "; "
-  //            << _btTransform.getOrigin().z() << std::endl;
+  glm::vec3 degVec;
 
-  _body->applyForce({10.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f});
+  degVec.x = glm::degrees(vec.x);
+  degVec.y = glm::degrees(vec.y);
+  degVec.z = glm::degrees(vec.z);
+
+  _transform->SetPosition({_body->getWorldTransform().getOrigin().x(),
+                           _body->getWorldTransform().getOrigin().y(),
+                           _body->getWorldTransform().getOrigin().z()});
+  _transform->SetRotation(degVec);
 }
 
 LogicCall CRigidBody::Logic() {

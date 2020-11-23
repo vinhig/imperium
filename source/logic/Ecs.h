@@ -169,8 +169,8 @@ class System {
   void UpdatePhysics() {
     // TODO: should have a more precise timestep
     test += 1.0f / 60.0f;
-    _dynamicsWorld->setGravity(btVector3(0, -10, 0));
-    _dynamicsWorld->stepSimulation((1.0f / 60.0f) * 1000, 10);
+    _dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
+    _dynamicsWorld->stepSimulation((1.0f / 60.0f), 10);
   }
 };
 

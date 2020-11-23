@@ -6,10 +6,15 @@
 
 CCollider::CCollider(Entity* owner, void* args) : IComponent(owner) {
   // Cast arguments
-  ColliderDesc* desc = (ColliderDesc*)args;
+  auto desc = (ColliderDesc*)args;
 
   // Bullet stuff
-  _shape = new btSphereShape(btScalar(2.));
+  if (desc->shape == ColliderShape::Cube) {
+    _shape = new btBoxShape(
+        {btScalar(desc->x), btScalar(desc->y), btScalar(desc->z)});
+  } else {
+    _shape = new btSphereShape(desc->x);
+  }
 
   GetEntity()->GetSystem()->AddShape(_shape);
 }
