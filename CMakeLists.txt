@@ -57,7 +57,6 @@ add_library(logic
 
 add_library(renderer
         source/renderer/BackendOgl.cpp
-        source/renderer/BackendOglEs.cpp
         ${WIN32_CPP_RENDERER}
 
         source/renderer/DeviceDesktop.cpp

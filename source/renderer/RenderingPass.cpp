@@ -42,12 +42,6 @@ void RenderingPass::Commit(Device* device) {
   device->BindProgram(_program);            // program
   device->BindRenderTarget(_renderTarget);  // render target
   // Bind point of view
-  if (_pointOfViewSet) {
-    device->BindUniformBuffer(_pointOfView, 0);
-  }
-  if (_lightViewSet && _needLights) {
-    device->BindUniformBuffer(_lightView, 1);
-  }
 
   if (!_inputs.empty()) {
     device->BindTextures(_inputs.data(), _inputs.size(), 0);
@@ -55,6 +49,12 @@ void RenderingPass::Commit(Device* device) {
   int texOffset = _inputs.size();
 
   for (const auto& draw : _drawCalls) {
+    if (_pointOfViewSet) {
+      device->BindUniformBuffer(_pointOfView, 0);
+    }
+    if (_lightViewSet && _needLights) {
+      device->BindUniformBuffer(_lightView, 1);
+    }
     if (_needTextures) {
       device->BindTextures(draw.textures, draw.nbTextures, texOffset);
     }

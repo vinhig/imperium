@@ -9,7 +9,6 @@
 
 #include "../common/File.h"
 #include "BackendOgl.h"
-#include "BackendOglEs.h"
 #include "Descriptions.h"
 
 #if defined(_WIN32) || defined(WIN32)
@@ -67,7 +66,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
       glEnable(GL_DEBUG_OUTPUT);
       glDebugMessageCallback(OglDebugOutput, nullptr);
       // Init backend
-      _backend = new BackendOgl({deviceDesc.width, deviceDesc.height});
+      _backend = new BackendOgl({deviceDesc.width, deviceDesc.height}, false);
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // perfectly illegal
       break;
     }
@@ -91,7 +90,7 @@ DeviceDesktop::DeviceDesktop(DeviceDesc deviceDesc) {
         throw std::runtime_error("Unable to load OpenGLES 3.2 functions.");
       }
       // Init backend
-      _backend = new BackendOglEs({deviceDesc.width, deviceDesc.height});
+      _backend = new BackendOgl({deviceDesc.width, deviceDesc.height}, true);
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // perfectly illegal
       break;
     }

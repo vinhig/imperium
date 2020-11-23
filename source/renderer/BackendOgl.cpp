@@ -11,11 +11,21 @@
 
 #include "../common/Log.h"
 
-BackendOgl::BackendOgl(BackendDesc backendDesc) {
+BackendOgl::BackendOgl(BackendDesc backendDesc, bool esApi) {
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glViewport(0, 0, backendDesc.width, backendDesc.height);
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
+
+  if (esApi) {
+    _shaderVersion = 320;
+    _shaderEs = true;
+  } else {
+    _shaderVersion = 330;
+    _shaderEs = false;
+  }
 }
 
 GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
@@ -68,6 +78,8 @@ GPUBuffer BackendOgl::CreateBuffer(BufferCreationDesc bufferCreationDesc) {
   glBufferData(bufferType, bufferCreationDesc.size, bufferCreationDesc.data,
                bufferUsage);
   glBindBuffer(bufferType, 0);
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
   return GPUBuffer{buffer, bufferCreationDesc.stride};
 }
 
@@ -90,6 +102,8 @@ uint32_t CompileShader(const char* source, GLenum shaderType) {
     std::cout << errorMsg << std::endl;
     throw std::runtime_error(errorMsg);
   }
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 
   return shader;
 }
@@ -104,21 +118,23 @@ GPUProgram BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
     spirv_cross::CompilerGLSL glsl(std::move(vertexSource));
 
     spirv_cross::CompilerGLSL::Options options;
-    options.version = 330;
-    options.es = false;
+    options.version = _shaderVersion;
+    options.es = _shaderEs;
     glsl.set_common_options(options);
 
     vertexSourceCode = glsl.compile();
+    std::cout << vertexSourceCode << std::endl;
   }
   {
     spirv_cross::CompilerGLSL glsl(std::move(fragmentSource));
 
     spirv_cross::CompilerGLSL::Options options;
-    options.version = 330;
-    options.es = false;
+    options.version = _shaderVersion;
+    options.es = _shaderEs;
     glsl.set_common_options(options);
 
     fragmentSourceCode = glsl.compile();
+    std::cout << fragmentSourceCode << std::endl;
   }
   // Compile shaders
   auto vertexShader = CompileShader(vertexSourceCode.c_str(), GL_VERTEX_SHADER);
@@ -136,6 +152,9 @@ GPUProgram BackendOgl::CreateProgram(std::vector<uint32_t> vertexSource,
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
 
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
+
   return GPUProgram{program};
 }
 
@@ -143,6 +162,9 @@ void BackendOgl::Clear(GPURenderTarget renderTarget) {
   glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 GPUDrawInput BackendOgl::CreateDrawInput(
@@ -174,6 +196,9 @@ GPUDrawInput BackendOgl::CreateDrawInput(
   }
   glBindVertexArray(0);
 
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
+
   // Again, referencing an inputLayout is just useful for the directx 11 backend
   // We're passing a null value there
   return GPUDrawInput{0, vao};
@@ -188,6 +213,7 @@ GPUInputLayout BackendOgl::CreateInputLayout(InputLayoutDesc inputLayoutDesc) {
 }
 
 GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
+  assert(glGetError() == GL_NO_ERROR);
   // A texture cannot be 0x0
   assert(textureCreationDesc.width && textureCreationDesc.height);
 
@@ -210,6 +236,7 @@ GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  assert(glGetError() == GL_NO_ERROR);
 
   auto format = GL_RGB;
   auto internalFormat = GL_RGB;
@@ -263,11 +290,30 @@ GPUTexture BackendOgl::CreateTexture(TextureCreationDesc textureCreationDesc) {
     }
   }
   // Upload
+  //  if (_shaderEs) {
+  //    if (textureCreationDesc.data) {
+  //      glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+  //      textureCreationDesc.width,
+  //                   textureCreationDesc.height, 0, format, subType,
+  //                   textureCreationDesc.data);
+  //      assert(glGetError() == GL_NO_ERROR);
+  //    } else {
+  //      glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat,
+  //                     textureCreationDesc.width, textureCreationDesc.height);
+  //      assert(glGetError() == GL_NO_ERROR);
+  //    }
+  //  } else {
   glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureCreationDesc.width,
                textureCreationDesc.height, 0, format, subType,
                textureCreationDesc.data);
-  glGenerateMipmap(GL_TEXTURE_2D);
+  assert(glGetError() == GL_NO_ERROR);
+  //  }
+  if (format != GL_DEPTH_COMPONENT) {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  assert(glGetError() == GL_NO_ERROR);
 
   return GPUTexture{texture, textureCreationDesc.width,
                     textureCreationDesc.height};
@@ -299,6 +345,7 @@ GPURenderTarget BackendOgl::CreateRenderTarget(
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
                            GL_TEXTURE_2D, color.texture, 0);
     colorBuffers.push_back(GL_COLOR_ATTACHMENT0 + i);
+    std::cout << "\tBind texture to render target..." << std::endl;
     i++;
   }
   // DON'T FORGET THIS
@@ -317,16 +364,24 @@ GPURenderTarget BackendOgl::CreateRenderTarget(
     checkHeight = depth.height;
   }
 
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
+
   return GPURenderTarget{framebuffer, checkWidth, checkHeight};
 }
 
 void BackendOgl::BindProgram(GPUProgram program) {
   glUseProgram(program.program);
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::BindTexture(GPUTexture texture, int index) {
   glActiveTexture(GL_TEXTURE0 + index);
   glBindTexture(GL_TEXTURE_2D, texture.texture);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::BindTextures(const std::vector<GPUTexture>& texture,
@@ -335,10 +390,16 @@ void BackendOgl::BindTextures(const std::vector<GPUTexture>& texture,
 void BackendOgl::BindRenderTarget(GPURenderTarget renderTarget) {
   glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.framebuffer);
   glViewport(0, 0, renderTarget.width, renderTarget.height);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::BindUniformBuffer(GPUBuffer uniformBuffer, int layout) {
   glBindBufferBase(GL_UNIFORM_BUFFER, layout, uniformBuffer.buffer);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times) {
@@ -350,6 +411,9 @@ void BackendOgl::Draw(GPUDrawInput drawInput, int count, int times) {
     glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr,
                             times);
   }
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
@@ -359,6 +423,9 @@ void BackendOgl::BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) {
                     GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }
 
 void BackendOgl::UpdateBuffer(BufferUpdateDesc updateDesc) {
@@ -369,4 +436,7 @@ void BackendOgl::UpdateBuffer(BufferUpdateDesc updateDesc) {
   glBufferSubData(GL_UNIFORM_BUFFER, updateDesc.offset, updateDesc.size,
                   updateDesc.data);
   glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+  auto err = glGetError();
+  assert(err == GL_NO_ERROR);
 }

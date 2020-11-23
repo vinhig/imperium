@@ -59,7 +59,7 @@ void CRigidBody::SyncBody() {
 
   glm::vec3 degVec;
 
-  degVec.x = glm::degrees(vec.x);
+  degVec.x = glm::degrees(vec.x) + 90.0f;
   degVec.y = glm::degrees(vec.y);
   degVec.z = glm::degrees(vec.z);
 

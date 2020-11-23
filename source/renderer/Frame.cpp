@@ -91,6 +91,7 @@ Frame::Frame(Device* device, const std::string& config) {
 
   // Create resources
   for (const auto& pass : passes) {
+    std::cout << "Building assets for " << pass.name << std::endl;
     // Shader for this rendering pass
     auto program = device->CreateProgram(pass.shader);
 
@@ -112,11 +113,11 @@ Frame::Frame(Device* device, const std::string& config) {
 
     // Create a depth buffer by default
     GPUTexture depth = device->CreateEmptyTexture(
-        TextureFormat::DEPTH, TextureWrap::ClampToEdge, width,
-        height, TexturePrecision::High);
+        TextureFormat::DEPTH, TextureWrap::ClampToEdge, width, height,
+        TexturePrecision::High);
 
     // All outputs color buffer
-    std::vector<GPUTexture> outputs(pass.outputs.size());
+    std::vector<GPUTexture> outputs;
     for (int i = 0; i < pass.outputs.size(); i++) {
       // Differentiation between depth and color texture
       if (endsWith(pass.outputs[i], "_DEPTH")) {
@@ -126,9 +127,9 @@ Frame::Frame(Device* device, const std::string& config) {
         if (pass.precisions[i] == "low") {
           precision = TexturePrecision::Low;
         }
-        outputs[i] = device->CreateEmptyTexture(TextureFormat::RGBA,
-                                                TextureWrap::ClampToEdge, width,
-                                                height, precision);
+        outputs.push_back(device->CreateEmptyTexture(TextureFormat::RGBA,
+                                                     TextureWrap::ClampToEdge,
+                                                     width, height, precision));
         // Class them by name
         coolTextures[pass.outputs[i]] = outputs[i];
       }

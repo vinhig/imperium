@@ -14,8 +14,11 @@
  * Default backend on desktop (Linux, Mac and Windows).
  */
 class BackendOgl : public Backend {
+ private:
+  int _shaderVersion;
+  bool _shaderEs;
  public:
-  explicit BackendOgl(BackendDesc backendDesc);
+  explicit BackendOgl(BackendDesc backendDesc, bool esApi);
   ~BackendOgl() = default;
 
   void Clear(GPURenderTarget renderTarget) override;

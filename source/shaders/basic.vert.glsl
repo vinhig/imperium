@@ -42,10 +42,10 @@ void main() {
     vertOut.light_position = light.position.xyz;
 
     mat4 bias = mat4(
-        vec4(0.5, 0.0, 0.0, 0.0),
-        vec4(0.0, 0.5, 0.0, 0.0),
-        vec4(0.0, 0.0, 0.5, 0.0),
-        vec4(0.5, 0.5, 0.5, 1.0)
+    vec4(0.5, 0.0, 0.0, 0.0),
+    vec4(0.0, 0.5, 0.0, 0.0),
+    vec4(0.0, 0.0, 0.5, 0.0),
+    vec4(0.5, 0.5, 0.5, 1.0)
     );
 
     vertOut.shadow_coords = (bias * (light.viewProj * object.model * vec4(position, 1.0))).xyz;
