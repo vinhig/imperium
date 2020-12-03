@@ -9,7 +9,6 @@
 #include "CCamera.h"
 #include "CDirectionalLight.h"
 #include "CMeshInstance.h"
-#include "CRigidBody.h"
 #include "CViewport.h"
 
 Game::Game(Device* device) {
@@ -26,8 +25,6 @@ Game::Game(Device* device) {
 }
 
 void Game::SysLogicalUpdate() {
-  // TODO: looks like a fucking hack
-  _system->UpdatePhysics();
   // TODO: we should feed a tryharder instead of calling updatable components
   // 1 is a logically updatable uuid
   for (int i = 0; i < _system->Components(1).size(); ++i) {
@@ -43,11 +40,6 @@ void Game::SysLogicalUpdate() {
   for (int i = 0; i < _system->Components(6).size(); ++i) {
     auto comp = (CCamera*)_system->Components(6)[i];
     comp->UpdateVp();
-  }
-  // 7 is a logically updatable uuid
-  for (int i = 0; i < _system->Components(7).size(); ++i) {
-    auto comp = (CRigidBody*)_system->Components(7)[i];
-    comp->SyncBody();
   }
   LogicalUpdate(_tryHarder);
   _tryHarder->Do();

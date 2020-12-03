@@ -10,6 +10,3 @@
 [submodule "libraries/toml11"]
 	path = libraries/toml11
 	url = https://github.com/ToruNiina/toml11
-[submodule "libraries/bullet3"]
-	path = libraries/bullet3
-	url = https://github.com/bulletphysics/bullet3

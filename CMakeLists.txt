@@ -9,87 +9,58 @@ find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 find_package(Threads REQUIRED)
 
-# 3rd party includes
-include_directories(libraries/)
-include_directories(libraries/toml11/)
-include_directories(libraries/GL/include/)
-include_directories(libraries/openfbx/src/)
-include_directories(libraries/bullet3/src/)
-
 # Sub-projects
-add_subdirectory(libraries/spirv-cross)
-add_subdirectory(libraries/bullet3)
-
-if (WIN32)
-    set(WIN32_CPP_RENDERER "source/renderer/BackendDx.cpp")
-else ()
-    set(WIN32_CPP_RENDERER "")
-endif (WIN32)
-
-add_library(common
-        source/common/File.cpp
-        )
+add_subdirectory(libraries/spirv-cross/)
 
 add_library(openfbx
         libraries/openfbx/src/miniz.c libraries/openfbx/src/miniz.h
         libraries/openfbx/src/ofbx.cpp libraries/openfbx/src/ofbx.h
         )
 
-add_library(loader
-        source/loader/MeshLoader.cpp
-        source/loader/MeshMerger.cpp
-        source/loader/TextureLoader.cpp
-        source/loader/pch.cpp
-        )
+add_executable(Imperium
+        source/main.cpp
 
-add_library(logic
+        source/renderer/BackendOgl.cpp
+        source/renderer/BackendDx.cpp
+        source/renderer/DeviceDesktop.cpp
+        source/renderer/RenderingPass.cpp
+        source/renderer/Frame.cpp
+        libraries/gl/src/glad.c
+
         source/logic/CCamera.cpp
-        source/logic/CCollider.cpp
         source/logic/CDirectionalLight.cpp
         source/logic/CMaterial.cpp
         source/logic/CMeshInstance.cpp
-        source/logic/CRigidBody.cpp
         source/logic/CTransform.cpp
         source/logic/CViewport.cpp
         source/logic/Game.cpp
         source/logic/TryHarder.cpp
+
+        source/loader/MeshLoader.cpp
+        source/loader/TextureLoader.cpp
+        source/loader/pch.cpp
+
+        source/common/File.cpp
         )
 
-add_library(renderer
-        source/renderer/BackendOgl.cpp
-        ${WIN32_CPP_RENDERER}
+# 3rd party libraries
+target_link_libraries(Imperium openfbx glm glfw OpenGL::GL spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
 
-        source/renderer/DeviceDesktop.cpp
-        source/renderer/RenderingPass.cpp
-        source/renderer/Frame.cpp
-
-        libraries/GL/src/glad.c)
-
-add_executable(Imperium source/main.cpp)
-
-target_link_libraries(Imperium renderer common loader logic)
-
-target_link_libraries(loader openfbx)
-
-target_link_libraries(logic glm renderer loader BulletDynamics BulletCollision LinearMath)
-target_link_libraries(renderer glfw OpenGL::GL)
-target_link_libraries(renderer spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
-
-# Platform dependent dependencies
 if (UNIX)
-    target_link_libraries(renderer -ldl -lGLESv2)
+    target_link_libraries(Imperium -ldl)
 endif (UNIX)
 
-if (WIN32)
-    # TODO: directx is linked in source code, maybe something cleaner than
-    # #pragma comment(lib, "d3d11.lib")
-    # #pragma comment(lib, "d3dx11.lib")
-    # #pragma comment(lib, "dxguid.lib")
-    # This doesn't work obviously
-    # target_link_libraries(renderer d3d11 d3dx11 dxguid)
-endif (WIN32)
 
-# Assets compilation
+# 3rd party includes
+target_include_directories(Imperium PUBLIC libraries/)
+target_include_directories(Imperium PUBLIC libraries/toml11/)
+target_include_directories(Imperium PUBLIC libraries/GL/include/)
+target_include_directories(Imperium PUBLIC libraries/openfbx/src/)
+target_include_directories(Imperium PUBLIC libraries/bullet3/src/)
+target_include_directories(Imperium PUBLIC libraries/imgui/)
+target_include_directories(Imperium PUBLIC libraries/imgui/backends/)
+
+# Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")
 
 message(GLSL_SOURCE_FILES)
@@ -105,6 +76,6 @@ foreach (GLSL ${GLSL_SOURCE_FILES})
     list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach ()
 
-add_custom_target(shaders DEPENDS ${SPIRV_BINARY_FILES})
+add_custom_target(ImperiumShaders DEPENDS ${SPIRV_BINARY_FILES})
 
-add_dependencies(Imperium shaders)
+add_dependencies(Imperium ImperiumShaders)
