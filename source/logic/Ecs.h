@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <cassert>
-#include <iostream>
 #include <unordered_map>
 
+#include "../common/Assert.h"
+#include "../common/Log.h"
 #include "../renderer/Device.h"
 #include "Actions.h"
 #include "TryHarder.h"
@@ -115,10 +115,12 @@ class System {
   btDiscreteDynamicsWorld* _dynamicsWorld{};
   btAlignedObjectArray<btCollisionShape*> _collisionShapes;
 
-  Device* _device;
+  Device* _device{};
+  Game* _game{};
 
  public:
-  explicit System(Device* device) {
+  explicit System(Game* game, Device* device) {
+    _game = game;
     _device = device;
 
     // Initialize physics components with default configuration
@@ -131,9 +133,12 @@ class System {
 
     _dynamicsWorld->setGravity(btVector3(0, -10, 0));
   };
+
   ~System() = default;
 
   Device* GetDevice() { return _device; };
+
+  Game* GetGame() { return _game; };
 
   std::vector<IComponent*> Components(int uuid) {
     return _componentsForType[uuid];
@@ -213,7 +218,9 @@ class Entity {
       _system->Create<T>(this, args);
     }
     comp = _system->Get<T>(this);
-    assert(comp != nullptr);
+
+    std::string err = "Component '" + std::string(typeid(T).name()) + "' must no fail its creation.";
+    ASSERT_NOT_EQUAL(comp, nullptr, err.c_str());
     return comp;
   };
 

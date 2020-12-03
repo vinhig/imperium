@@ -178,7 +178,9 @@ DeviceDesktop::~DeviceDesktop() = default;
 
 bool DeviceDesktop::ShouldClose() { return glfwWindowShouldClose(_window); }
 
-void DeviceDesktop::RequestAnimationFrame() {
+void DeviceDesktop::BeginFrame() { glfwPollEvents(); }
+
+void DeviceDesktop::EndFrame() {
   glfwPollEvents();
   if (_api != ApiDesc::Directx11) {
     glfwSwapBuffers(_window);

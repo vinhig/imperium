@@ -39,7 +39,7 @@ void main() {
         float specularStrength = 0.5;
         vec3 view_dir = normalize(vertOut.camera_position - position);
         vec3 reflect_dir = reflect(-light_dir, normal);
-        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
+        float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 16);
         vec3 specular = specularStrength * spec * vec3(1.0, 1.0, 1.0);
 
         ambient = ambient + diffuse + specular;

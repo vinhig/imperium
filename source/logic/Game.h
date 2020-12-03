@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "../loader/MeshLoader.h"
+#include "../loader/TextureLoader.h"
 #include "../renderer/Device.h"
 #include "../renderer/Frame.h"
 #include "Ecs.h"
@@ -39,6 +41,9 @@ class Game {
 
   Device* _device;
   TryHarder* _tryHarder;
+
+  MeshLoader* _meshLoader;
+  TextureLoader* _textureLoader;
 
   System* _system;
 
@@ -80,6 +85,9 @@ class Game {
    * Process a game loop.
    */
   void Process();
+
+  MeshLoader* GetMeshLoader();
+  TextureLoader* GetTextureLoader();
 
   System* GetSystem();
 };

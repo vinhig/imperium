@@ -39,9 +39,6 @@ CRigidBody::CRigidBody(Entity *owner, void *args) : IComponent(owner) {
     _shape->GetShape()->calculateLocalInertia(mass, localInertia);
   }
 
-  std::cout << localInertia.x() << "; " << localInertia.y() << "; "
-            << localInertia.z() << std::endl;
-
   _motionState = new btDefaultMotionState(_btTransform);
   btRigidBody::btRigidBodyConstructionInfo rbInfo(
       mass, _motionState, _shape->GetShape(), localInertia);

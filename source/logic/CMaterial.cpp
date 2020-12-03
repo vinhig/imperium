@@ -8,16 +8,13 @@
 #include <string>
 
 #include "../common/File.h"
+#include "../common/Log.h"
 #include "../loader/TextureLoader.h"
+#include "Game.h"
 
 CMaterial::CMaterial(Entity* owner, void* args) : IComponent(owner) {
-#if __ANDROID__
-  SetDiffuseTexture("no-texture.png");
-  SetNormalTexture("no-texture.png");
-#else
   SetDiffuseTexture("../assets/textures/no-texture.png");
   SetNormalTexture("../assets/textures/no-texture.png");
-#endif
 
   _material = {0.8, 1.0, {1.0, 1.0, 1.0, 1.0}};
   GetCPUBuffer()->data = malloc(sizeof(SubMaterial));
@@ -35,13 +32,15 @@ CMaterial::CMaterial(Entity* owner, void* args) : IComponent(owner) {
 }
 
 void CMaterial::SetDiffuseTexture(const std::string& path) {
-  if (File::textureLoader.IsLoaded(path)) {
-    _diffuse = File::textureLoader.Get(path);
+  auto textureLoader = GetEntity()->GetSystem()->GetGame()->GetTextureLoader();
+  if (textureLoader->IsLoaded(path)) {
+    LOG_DEBUG("Optimisation success! (Diffuse texture)");
+    _diffuse = textureLoader->Get(path);
   } else {
-    auto normal = File::textureLoader.Load(path);
+    auto normal = textureLoader->Load(path);
     _diffuse =
         GetEntity()->GetSystem()->GetDevice()->CreateTextureFromData(normal);
-    File::textureLoader.Link(path, _diffuse);
+    textureLoader->Link(path, _diffuse);
   }
 
   // TODO: must free memory of last texture ^^
@@ -49,13 +48,15 @@ void CMaterial::SetDiffuseTexture(const std::string& path) {
 }
 
 void CMaterial::SetNormalTexture(const std::string& path) {
-  if (File::textureLoader.IsLoaded(path)) {
-    _normal = File::textureLoader.Get(path);
+  auto textureLoader = GetEntity()->GetSystem()->GetGame()->GetTextureLoader();
+  if (textureLoader->IsLoaded(path)) {
+    LOG_DEBUG("Optimisation success! (Normal texture)");
+    _normal = textureLoader->Get(path);
   } else {
-    auto normal = File::textureLoader.Load(path);
+    auto normal = textureLoader->Load(path);
     _normal =
         GetEntity()->GetSystem()->GetDevice()->CreateTextureFromData(normal);
-    File::textureLoader.Link(path, _normal);
+    textureLoader->Link(path, _normal);
   }
 
   // TODO: must free memory of last texture ^^

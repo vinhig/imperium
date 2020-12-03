@@ -4,46 +4,60 @@
 
 #include "CMeshInstance.h"
 
+#include "../common/Log.h"
 #include "../loader/MeshLoader.h"
+#include "Game.h"
 
 CMeshInstance::CMeshInstance(Entity* owner, void* args) : IComponent(owner) {
   std::string path = *((std::string*)args);
-  auto device = GetEntity()->GetSystem()->GetDevice();
-  // Specify how to draw data
-  InputLayoutDesc inputLayoutDesc = {};
-  auto program = GetEntity()->GetSystem()->GetDevice()->GetCurrentProgram();
-  inputLayoutDesc.program = &program;
-  inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 9,
-                                     DataType::Float,
-                                     (void*)(sizeof(float) * 0)});
-  inputLayoutDesc.entries.push_back({1, 3, false, sizeof(float) * 9,
-                                     DataType::Float,
-                                     (void*)(sizeof(float) * 3)});
-  inputLayoutDesc.entries.push_back({2, 2, false, sizeof(float) * 9,
-                                     DataType::Float,
-                                     (void*)(sizeof(float) * 6)});
+  // Check if this mesh hasn't been loaded yet
+  // Get mesh loader
+  auto meshLoader = GetEntity()->GetSystem()->GetGame()->GetMeshLoader();
+  if (meshLoader->IsLoaded(path)) {
+    LOG_DEBUG("Optimisation success! (Mesh)");
+    auto loaded = meshLoader->Get(path);
+    _drawInputs = loaded.first;
+    _counts = loaded.second;
+  } else {
+    auto device = GetEntity()->GetSystem()->GetDevice();
+    // Specify how to draw data
+    InputLayoutDesc inputLayoutDesc = {};
+    auto program = GetEntity()->GetSystem()->GetDevice()->GetCurrentProgram();
+    inputLayoutDesc.program = &program;
+    inputLayoutDesc.entries.push_back({0, 3, false, sizeof(float) * 9,
+                                       DataType::Float,
+                                       (void*)(sizeof(float) * 0)});
+    inputLayoutDesc.entries.push_back({1, 3, false, sizeof(float) * 9,
+                                       DataType::Float,
+                                       (void*)(sizeof(float) * 3)});
+    inputLayoutDesc.entries.push_back({2, 2, false, sizeof(float) * 9,
+                                       DataType::Float,
+                                       (void*)(sizeof(float) * 6)});
 
-  auto inputLayout = device->CreateInputLayout(inputLayoutDesc);
-  // TODO: MeshLoader should be a singleton
-  auto meshLoader = new MeshLoader();
-  auto meshes = meshLoader->Load(path);
+    auto inputLayout = device->CreateInputLayout(inputLayoutDesc);
+    // TODO: MeshLoader should be a singleton
+    auto meshes = meshLoader->Load(path);
 
-  int i = 0;
-  for (const auto& mesh : meshes) {
-    // Create resources
-    _vertexBuffers.push_back(device->CreateVertexBuffer(mesh.first));
-    _indexBuffers.push_back(device->CreateIndexBuffer(mesh.second));
-    _counts.push_back(mesh.second.nbElements);
+    int i = 0;
+    for (const auto& mesh : meshes) {
+      // Create resources
+      _vertexBuffers.push_back(device->CreateVertexBuffer(mesh.first));
+      _indexBuffers.push_back(device->CreateIndexBuffer(mesh.second));
+      _counts.push_back(mesh.second.nbElements);
 
-    // Create draw input
-    std::vector<GPUBuffer> buffers(3);
-    buffers[0] = _vertexBuffers[i];
-    buffers[1] = _vertexBuffers[i];
-    buffers[2] = _vertexBuffers[i];
-    auto drawInput =
-        device->CreateDrawInput(inputLayout, buffers, _indexBuffers[i]);
-    _drawInputs.push_back(drawInput);
-    i++;
+      // Create draw input
+      std::vector<GPUBuffer> buffers(3);
+      buffers[0] = _vertexBuffers[i];
+      buffers[1] = _vertexBuffers[i];
+      buffers[2] = _vertexBuffers[i];
+      auto drawInput =
+          device->CreateDrawInput(inputLayout, buffers, _indexBuffers[i]);
+      _drawInputs.push_back(drawInput);
+      i++;
+    }
+
+    // Register mesh with name
+    meshLoader->Link(path, _drawInputs, _counts);
   }
 
   // It's mandatory to have a CTransform

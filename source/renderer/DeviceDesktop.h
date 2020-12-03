@@ -65,7 +65,8 @@ class DeviceDesktop : public Device {
 
   GPUProgram GetCurrentProgram() override;
 
-  void RequestAnimationFrame() override;
+  void BeginFrame() override;
+  void EndFrame() override;
   bool ShouldClose() override;
   Backend* _backend;
 };

@@ -4,14 +4,26 @@
 
 #include "Game.h"
 
-#include <cassert>
 #include <stdexcept>
 
 #include "CCamera.h"
 #include "CDirectionalLight.h"
 #include "CMeshInstance.h"
-#include "CViewport.h"
 #include "CRigidBody.h"
+#include "CViewport.h"
+
+Game::Game(Device* device) {
+  if (device) {
+    _device = device;
+  } else {
+    throw std::runtime_error(
+        "Couldn't not create a Game with a corrupted device.");
+  }
+  _meshLoader = new MeshLoader();
+  _textureLoader = new TextureLoader();
+  _tryHarder = new TryHarder();
+  _system = new System(this, _device);
+}
 
 void Game::SysLogicalUpdate() {
   // TODO: looks like a fucking hack
@@ -82,19 +94,6 @@ void Game::SysLoad() {
 }
 
 void Game::SysDraw() {
-  // 2 is a drawable uuid
-  /*
-  for (int i = 0; i < _system->Components(2).size(); ++i) {
-    auto comp = _system->Components(2)[i];
-    auto draw = ((CMeshInstance*)comp)->Draw();
-    assert(draw.nbResources != 0);
-    _device->BindTextures(draw.textures, draw.nbTextures);
-    for (int j = 0; j < draw.nbResources; j++) {
-      _device->Draw(draw.drawInputs[j], draw.counts[j], draw.times,
-                    draw.uniforms, draw.nbUniforms);
-    }
-  }
-   */
   // Get point of view
   auto mainCamera = _system->GetFirstActive<CCamera>();
   if (mainCamera == nullptr) {
@@ -129,20 +128,10 @@ void Game::SysDraw() {
   _frame->Commit(_device);
 }
 
-Game::Game(Device* device) {
-  if (device) {
-    _device = device;
-  } else {
-    throw std::runtime_error(
-        "Couldn't not create a Game with a corrupted device.");
-  }
-  _tryHarder = new TryHarder();
-  _system = new System(_device);
-}
-
 bool Game::ShouldClose() { return _device->ShouldClose(); }
 
 void Game::Process() {
+  _device->BeginFrame();
   if (frame == 0) {
     SysLoad();
   }
@@ -150,8 +139,12 @@ void Game::Process() {
   SysLogicalUpdate();
   SysResourceUpdate();
   SysDraw();
-  _device->RequestAnimationFrame();
+  _device->EndFrame();
   frame++;
 }
 
 System* Game::GetSystem() { return _system; }
+
+MeshLoader* Game::GetMeshLoader() { return _meshLoader; }
+
+TextureLoader* Game::GetTextureLoader() { return _textureLoader; }

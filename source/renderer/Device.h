@@ -176,11 +176,17 @@ class Device {
   virtual void BlitRenderTarget(GPURenderTarget from, GPURenderTarget to) = 0;
 
   /**
+   * Ask underlying window backend to poll events and prepare subsystems for
+   * registering calls.
+   */
+  virtual void BeginFrame() = 0;
+
+  /**
    * Ask underlying backend to swap buffers. Swapping buffers means showing the
    * most recent back buffer on screen that issued all his draw calls. The back
    * buffer chosen may differ depend on the swap effect.
    */
-  virtual void RequestAnimationFrame() = 0;
+  virtual void EndFrame() = 0;
 
   /**
    * Get current active program.

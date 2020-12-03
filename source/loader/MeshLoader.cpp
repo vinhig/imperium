@@ -6,18 +6,26 @@
 
 #include <ofbx.h>
 
+#include <optional>
 #include <stdexcept>
 
 #include "../common/File.h"
 
+bool MeshLoader::IsLoaded(const std::string& path) {
+  return !(_meshes.find(path) == _meshes.end());
+}
+
+std::pair<std::vector<GPUDrawInput>, std::vector<int>> MeshLoader::Get(
+    const std::string& path) {
+  std::pair<std::vector<GPUDrawInput>, std::vector<int>> mesh;
+  if (IsLoaded(path)) {
+    mesh = _meshes[path];
+  }
+  return mesh;
+}
+
 std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
-    const std::string& path
-//#ifdef __ANDROID__
-//    ,
-//    std::function<std::vector<unsigned char>(std::string)> fileReader
-//#endif
-) {
-#ifndef __ANDROID__
+    const std::string& path) {
   // Open file
   FILE* fp = fopen(path.c_str(), "rb");
   if (!fp) {
@@ -28,11 +36,6 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
   fseek(fp, 0, SEEK_SET);
   auto* content = new ofbx::u8[file_size];
   fread(content, 1, file_size, fp);
-#else
-  auto vcontent = File::FileReader(path);
-  auto content = vcontent.data();
-  long file_size = vcontent.size();
-#endif
 
   // Load scene
   auto scene = ofbx::load((ofbx::u8*)content, file_size,
@@ -107,4 +110,9 @@ std::vector<std::pair<CPUBuffer<float>, CPUBuffer<int>>> MeshLoader::Load(
     buffers[i] = {verticesBuffer, indicesBuffer};
   }
   return buffers;
+}
+
+void MeshLoader::Link(const std::string& path, std::vector<GPUDrawInput> mesh,
+                      std::vector<int> counts) {
+  _meshes[path] = {mesh, counts};
 }
