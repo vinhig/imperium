@@ -4,13 +4,12 @@ project(Imperium)
 set(CMAKE_CXX_STANDARD 17)
 
 # Platform independent dependencies
-find_package(glfw3 3.3 REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
+find_package(Vulkan REQUIRED)
 find_package(Threads REQUIRED)
 
-# Sub-projects
-add_subdirectory(libraries/spirv-cross/)
+add_subdirectory(libraries/vk-boostrap)
 
 add_library(openfbx
         libraries/openfbx/src/miniz.c libraries/openfbx/src/miniz.h
@@ -20,31 +19,15 @@ add_library(openfbx
 add_executable(Imperium
         source/main.cpp
 
-        source/renderer/BackendOgl.cpp
-        source/renderer/BackendDx.cpp
-        source/renderer/DeviceDesktop.cpp
-        source/renderer/RenderingPass.cpp
-        source/renderer/Frame.cpp
-        libraries/gl/src/glad.c
-
-        source/logic/CCamera.cpp
-        source/logic/CDirectionalLight.cpp
-        source/logic/CMaterial.cpp
-        source/logic/CMeshInstance.cpp
-        source/logic/CTransform.cpp
-        source/logic/CViewport.cpp
         source/logic/Game.cpp
-        source/logic/TryHarder.cpp
 
-        source/loader/MeshLoader.cpp
-        source/loader/TextureLoader.cpp
-        source/loader/pch.cpp
-
-        source/common/File.cpp
+        source/render/backend/BackendVulkan.cpp
+        source/render/Context.cpp
+        source/render/DeviceDesktop.cpp
         )
 
 # 3rd party libraries
-target_link_libraries(Imperium openfbx glm glfw OpenGL::GL spirv-cross-core spirv-cross-cpp spirv-cross-hlsl spirv-cross-glsl)
+target_link_libraries(Imperium openfbx Vulkan::Vulkan vk-bootstrap OpenGL::GL SDL2)
 
 if (UNIX)
     target_link_libraries(Imperium -ldl)
@@ -52,13 +35,8 @@ endif (UNIX)
 
 
 # 3rd party includes
+target_include_directories(Imperium PUBLIC source/)
 target_include_directories(Imperium PUBLIC libraries/)
-target_include_directories(Imperium PUBLIC libraries/toml11/)
-target_include_directories(Imperium PUBLIC libraries/GL/include/)
-target_include_directories(Imperium PUBLIC libraries/openfbx/src/)
-target_include_directories(Imperium PUBLIC libraries/bullet3/src/)
-target_include_directories(Imperium PUBLIC libraries/imgui/)
-target_include_directories(Imperium PUBLIC libraries/imgui/backends/)
 
 # Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

@@ -1,12 +1,9 @@
-[submodule "libraries/spirv-cross"]
-	path = libraries/spirv-cross
-	url = https://github.com/KhronosGroup/SPIRV-Cross
 [submodule "libraries/openfbx"]
 	path = libraries/openfbx
 	url = https://github.com/nem0/OpenFBX
 [submodule "libraries/stb"]
 	path = libraries/stb
 	url = https://github.com/nothings/stb
-[submodule "libraries/toml11"]
-	path = libraries/toml11
-	url = https://github.com/ToruNiina/toml11
+[submodule "libraries/vk-boostrap"]
+	path = libraries/vk-boostrap
+	url = https://github.com/charles-lunarg/vk-bootstrap
