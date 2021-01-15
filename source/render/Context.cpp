@@ -28,13 +28,18 @@ void Context::Init(Device* device) {
       printf("Unsupported backend: OpenGL46.\n");
       return;
   }
+
+  _mainPipeline = _backend->CreatePipeline(Backend::PipelineType::Graphics);
 }
 
 void Context::BeginFrame() {
   _backend->BeginFrame();
+  _backend->BindRenderpass(0);
+  _backend->BeginPipeline(_mainPipeline);
 }
 
 void Context::EndFrame() {
+  _backend->EndPipeline(_mainPipeline);
   _backend->EndFrame();
 }
 

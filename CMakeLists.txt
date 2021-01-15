@@ -49,7 +49,7 @@ foreach (GLSL ${GLSL_SOURCE_FILES})
     add_custom_command(
             OUTPUT ${SPIRV}
             COMMAND cmake -E make_directory "${PROJECT_BINARY_DIR}/assets/"
-            COMMAND glslangValidator -V ${GLSL} -o ${SPIRV}
+            COMMAND glslangValidator -V100 ${GLSL} -o ${SPIRV}
             DEPENDS ${GLSL})
     list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach ()

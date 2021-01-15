@@ -1,5 +1,5 @@
 //
-// Created by vinhi on 15/01/2020.
+// Created by vinhi on 15.01.2020.
 //
 
 #pragma once
@@ -15,6 +15,11 @@ class Device;
 }
 
 namespace Imperium::Render::Backend {
+
+struct PipelineStuff {
+  VkPipeline pipeline;
+  VkPipelineLayout pipelineLayout;
+};
 
 class BackendVulkan : public Backend {
  private:
@@ -51,14 +56,36 @@ class BackendVulkan : public Backend {
   VkRenderPass _renderPass;
   std::vector<VkFramebuffer> _framebuffers;
 
+  std::vector<PipelineStuff> _pipelines;
+
+  VkCommandBuffer CreateCommandBuffer();
+  VkShaderModule CreateShaderModule(const char* filePath);
+  static VkPipelineShaderStageCreateInfo CreateShaderStageInfo(
+      VkShaderStageFlagBits stage, VkShaderModule shader);
+  static VkPipelineVertexInputStateCreateInfo CreateVertexInputStateInfo(
+      /*some things are needed here*/);
+  static VkPipelineInputAssemblyStateCreateInfo CreateInputAssemblyStateInfo(
+      VkPrimitiveTopology topology);
+  static VkPipelineRasterizationStateCreateInfo CreateRasterizationStateInfo(
+      VkPolygonMode polygonMode);
+  static VkPipelineMultisampleStateCreateInfo CreateMultisampleStateInfo();
+  static VkPipelineColorBlendAttachmentState
+  CreateColorBlendAttachmentStateInfo();
+  static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo();
+
  public:
   BackendVulkan(Device* device);
   ~BackendVulkan() override;
 
-  VkCommandBuffer CreateCommandBuffer();
-
   void BeginFrame() override;
   void EndFrame() override;
+
+  void BeginPipeline(int pipeline) override;
+  void EndPipeline(int pipeline) override;
+
+  void BindRenderpass(int renderpass) override;
+
+  int CreatePipeline(PipelineType pipelineType) override;
 };
 
 }  // namespace Imperium::Render::Backend

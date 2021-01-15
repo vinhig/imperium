@@ -1,5 +1,5 @@
 //
-// Created by vinhi on 01/12/2020.
+// Created by vinhi on 01.12.2020.
 //
 
 #include <cstdio>

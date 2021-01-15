@@ -4,23 +4,11 @@
 
 #pragma once
 
-#include <fstream>
-#include <functional>
-#include <iostream>
 #include <string>
 #include <vector>
 
-#include "../loader/MeshLoader.h"
-#include "../loader/TextureLoader.h"
-
 class File {
  public:
-  static std::function<std::vector<unsigned char>(std::string)> FileReader;
-
-  static TextureLoader textureLoader;
-
-  static MeshLoader meshLoader;
-
   /**
    * Read text from file specified by path.
    * @param path Path to file to read.

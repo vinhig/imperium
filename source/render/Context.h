@@ -1,5 +1,5 @@
 //
-// Created by vinhi on 14/01/2020.
+// Created by vinhi on 14.01.2020.
 //
 
 namespace Imperium::Render::Backend {
@@ -18,6 +18,8 @@ class Context {
   int _width{0};
   int _height{0};
   bool _failed{true};
+
+  int _mainPipeline;
 
   Backend::Backend* _backend;
 
