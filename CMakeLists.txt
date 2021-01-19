@@ -30,7 +30,7 @@ add_executable(Imperium
         )
 
 # 3rd party libraries
-target_link_libraries(Imperium openfbx Vulkan::Vulkan vk-bootstrap OpenGL::GL SDL2)
+target_link_libraries(Imperium openfbx Vulkan::Vulkan vk-bootstrap OpenGL::GL SDL2::SDL2 SDL2::SDL2main)
 
 if (UNIX)
     target_link_libraries(Imperium -ldl)

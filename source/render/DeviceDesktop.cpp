@@ -22,7 +22,7 @@ DeviceDesktop::DeviceDesktop(Context* context) {
                        SDL_WINDOWPOS_CENTERED, context->Width(),
                        context->Height(), SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
   if (!_window) {
-    printf("SDL Window failed to be created.\n");
+    printf("SDL Window failed to be created. %s\n", SDL_GetError());
     return;
   }
   _context->Init(this);
