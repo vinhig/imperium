@@ -21,7 +21,7 @@ class Option {
    */
   explicit Option(T value) : _value(value) { _hasValue = true; }
 
-  [[nodiscard]] bool HasValue() const { return _hasValue; };
+  bool HasValue() const { return _hasValue; };
   void SetValue(T value) { _value = value; };
 
   T Value() { return _value; };

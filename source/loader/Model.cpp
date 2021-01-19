@@ -10,12 +10,10 @@
 
 namespace Imperium::Loader {
 Model::Model(int bufferCount) {
-  _meshes = Core::List<Core::Pair<VertexBuffer, IndexBuffer>>(bufferCount);
+  _meshes = Meshes(bufferCount);
 }
 
-Core::List<Core::Pair<VertexBuffer, IndexBuffer>>& Model::Meshes() {
-  return _meshes;
-}
+Meshes& Model::GetMeshes() { return _meshes; }
 
 void Model::SetVertices(int bufferId, float* vertices, int nbElements) {
   auto buffer = _meshes[bufferId];
@@ -28,7 +26,7 @@ void Model::SetVertices(int bufferId, float* vertices, int nbElements) {
     memcpy(vertexBuffer.elements, vertices, sizeof(float) * nbElements);
     buffer.Value()->SetLeft(vertexBuffer);
   } else {
-    printf("No vertex buffer with this ID (from Mode::SetVertices).\n");
+    printf("No vertex buffer with this ID (from Model::SetVertices).\n");
     return;
   }
 }
@@ -44,7 +42,7 @@ void Model::SetIndices(int bufferId, int* indices, int nbElements) {
     memcpy(indexBuffer.elements, indices, sizeof(int) * nbElements);
     buffer.Value()->SetRight(indexBuffer);
   } else {
-    printf("No index buffer with this ID (from Mode::SetIndices).\n");
+    printf("No index buffer with this ID (from Model::SetIndices).\n");
     return;
   }
 }

@@ -20,15 +20,17 @@ struct IndexBuffer {
   int* elements{nullptr};
 };
 
+using Meshes = Core::List<Core::Pair<VertexBuffer, IndexBuffer>>;
+
 class Model {
  private:
-  Core::List<Core::Pair<VertexBuffer, IndexBuffer>> _meshes;
+  Meshes _meshes;
 
  public:
   Model(int bufferCount);
   ~Model();
 
-  Core::List<Core::Pair<VertexBuffer, IndexBuffer>>& Meshes();
+  Meshes& GetMeshes();
   void SetVertices(int bufferId, float* vertices, int nbElements);
   void SetIndices(int bufferId, int* indices, int nbElements);
 };

@@ -6,7 +6,6 @@
 
 #include <SDL2/SDL_vulkan.h>
 #include <VkBootstrap.h>
-#define VMA_IMPLEMENTATION
 #include <fstream>
 
 #include "render/Device.h"

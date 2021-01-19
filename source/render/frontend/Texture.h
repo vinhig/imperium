@@ -14,8 +14,8 @@ namespace Imperium::Render::Frontend {
 
 struct Texture {
   Backend::Backend* backend;
-  Texture(CPUBuffer<int> indexBuffer, CPUBuffer<float> vertexBuffer);
-  ~Texture();
+  Texture() = default;
+  ~Texture() = default;
 };
 
 }  // namespace Imperium::Render::Frontend

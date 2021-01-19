@@ -27,6 +27,7 @@ add_executable(Imperium
         source/render/backend/BackendVulkan.cpp
         source/render/Context.cpp
         source/render/DeviceDesktop.cpp
+        source/render/Pch.cpp
         )
 
 # 3rd party libraries

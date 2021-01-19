@@ -15,7 +15,6 @@ namespace Imperium::Render::Frontend {
 struct Mesh {
   Backend::Backend* backend;
   Mesh() = default;
-  Mesh(CPUBuffer<int> indexBuffer, CPUBuffer<float> vertexBuffer);
   ~Mesh() = default;
 };
 

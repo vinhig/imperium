@@ -15,7 +15,6 @@ class Loader {
 
   /**
    * Load fbx model from disk.
-   * @param path
    */
   Core::Option<Model*> CreateModelTriangle();
 };

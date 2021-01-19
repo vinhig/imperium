@@ -33,7 +33,7 @@ Core::Option<Render::Frontend::Mesh> Game::LoadModel() {
 
   // Use context to create frontend objects
   // Texture(s), Mesh(es)
-  auto meshes = model->Meshes()[0].Value();
+  auto meshes = model->GetMeshes()[0].Value();
 
   // Okay we know that's a simple triangle
   Render::CPUBuffer<float> vertices = {};
