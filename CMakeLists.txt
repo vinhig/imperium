@@ -19,6 +19,9 @@ add_library(openfbx
 add_executable(Imperium
         source/main.cpp
 
+        source/loader/Loader.cpp
+        source/loader/Model.cpp
+
         source/logic/Game.cpp
 
         source/render/backend/BackendVulkan.cpp
@@ -37,6 +40,7 @@ endif (UNIX)
 # 3rd party includes
 target_include_directories(Imperium PUBLIC source/)
 target_include_directories(Imperium PUBLIC libraries/)
+target_include_directories(Imperium PUBLIC libraries/vma/src)
 
 # Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

@@ -1,3 +1,7 @@
+//
+// Created by vinhig on 15.01.2021.
+//
+
 #include "render/DeviceDesktop.h"
 
 #include <SDL2/SDL.h>

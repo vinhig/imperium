@@ -1,5 +1,5 @@
 //
-// Created by vinhi on 24.10.2020.
+// Created by vinhig on 24.10.2020.
 //
 
 #include <iostream>
@@ -17,6 +17,8 @@ int main(int argc, char** argv) {
   if (device->Failed()) {
     printf("Failed to create DesktopDevice.\n");
     return -1;
+  } else {
+    printf("DesktopDevice created successfully.\n");
   }
 
   auto myGame = new MyGame(device);

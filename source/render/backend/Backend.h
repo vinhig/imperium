@@ -1,12 +1,16 @@
 //
-// Created by vinhi on 15.01.2020.
+// Created by vinhig on 15.01.2021.
 //
 
 #pragma once
 
+#include "core/Option.h"
+
 namespace Imperium::Render::Backend {
 
 enum PipelineType { Graphics, Compute };
+
+enum BufferType { Vertex, Index, Uniform };
 
 class Backend {
  public:
@@ -20,7 +24,8 @@ class Backend {
 
   virtual void BindRenderpass(int renderpass) = 0;
 
-  virtual int CreatePipeline(PipelineType pipeline) = 0;
+  virtual Core::Option<int> CreatePipeline(PipelineType pipeline) = 0;
+  // virtual void CreateBuffer(BufferType bufferType) = 0;
 };
 
 }  // namespace Imperium::Render::Backend

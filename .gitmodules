@@ -7,3 +7,6 @@
 [submodule "libraries/vk-boostrap"]
 	path = libraries/vk-boostrap
 	url = https://github.com/charles-lunarg/vk-bootstrap
+[submodule "libraries/vma"]
+	path = libraries/vma
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator

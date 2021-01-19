@@ -1,9 +1,15 @@
+//
+// Created by vinhig on 15.01.2021.
+//
+
 #include "render/Context.h"
 
 #include <cstdio>
 
 #include "render/Device.h"
 #include "render/backend/BackendVulkan.h"
+#include "render/frontend/Mesh.h"
+#include "render/frontend/Texture.h"
 
 namespace Imperium::Render {
 Context::Context(API api, int width, int height) {
@@ -15,8 +21,6 @@ Context::Context(API api, int width, int height) {
 void Context::Init(Device* device) {
   switch (_api) {
     case API::Vulkan:
-      _failed = false;
-
       _backend = new Backend::BackendVulkan(device);
       break;
 
@@ -29,7 +33,17 @@ void Context::Init(Device* device) {
       return;
   }
 
-  _mainPipeline = _backend->CreatePipeline(Backend::PipelineType::Graphics);
+  auto mainPipeline = _backend->CreatePipeline(Backend::PipelineType::Graphics);
+
+  if (!mainPipeline.HasValue()) {
+    printf("Main pipeline failed to be created.\n");
+    return;
+  }
+
+  _mainPipeline = mainPipeline.Value();
+
+  // Everything is good
+  _failed = false;
 }
 
 void Context::BeginFrame() {
@@ -41,6 +55,14 @@ void Context::BeginFrame() {
 void Context::EndFrame() {
   _backend->EndPipeline(_mainPipeline);
   _backend->EndFrame();
+}
+
+Frontend::Texture Context::CreateTexture(CPUTexture texture) {
+
+}
+
+Frontend::Mesh Context::CreateMesh(CPUBuffer<float> vertices, CPUBuffer<int> indices) {
+  return Frontend::Mesh{};
 }
 
 Context::~Context() {

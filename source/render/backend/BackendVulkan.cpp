@@ -1,11 +1,16 @@
+//
+// Created by vinhig on 15.01.2021.
+//
+
 #include "render/backend/BackendVulkan.h"
 
 #include <SDL2/SDL_vulkan.h>
 #include <VkBootstrap.h>
-
+#define VMA_IMPLEMENTATION
 #include <fstream>
 
 #include "render/Device.h"
+#include <vk_mem_alloc.h>
 
 namespace Imperium::Render::Backend {
 BackendVulkan::BackendVulkan(Device* device) {
@@ -208,15 +213,16 @@ VkCommandBuffer BackendVulkan::CreateCommandBuffer() {
   return commandBuffer;
 }
 
-VkShaderModule BackendVulkan::CreateShaderModule(const char* filePath) {
+Core::Option<VkShaderModule> BackendVulkan::CreateShaderModule(
+    const char* filePath) {
   // Read file and convert it to u32 array
   std::ifstream file(filePath, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
     printf(
         "Hello there! Imperium wasn't able to find your shader "
-        "'%s'",
+        "'%s'\n",
         filePath);
-    return nullptr;
+    return Core::Option<VkShaderModule>();
   }
 
   size_t fileSize = (size_t)file.tellg();
@@ -239,10 +245,10 @@ VkShaderModule BackendVulkan::CreateShaderModule(const char* filePath) {
         "Hello there! Imperium wasn't able to read and compile your shader "
         "'%s'",
         filePath);
-    return nullptr;
+    return Core::Option<VkShaderModule>();
   }
 
-  return shaderModule;
+  return Core::Option<VkShaderModule>(shaderModule);
 }
 
 VkPipelineShaderStageCreateInfo BackendVulkan::CreateShaderStageInfo(
@@ -414,7 +420,7 @@ void BackendVulkan::BindRenderpass(int renderpass) {
   }
 }
 
-int BackendVulkan::CreatePipeline(PipelineType pipelineType) {
+Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
   if (pipelineType == PipelineType::Graphics) {
     /**
      * Create shader stages
@@ -422,10 +428,20 @@ int BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     auto vertexShader = CreateShaderModule("assets/mesh.vert.glsl.spv");
     auto fragmentShader = CreateShaderModule("assets/mesh.frag.glsl.spv");
 
+    // Creation of shader module may fail
+    if (!vertexShader.HasValue()) {
+      printf("Vertex shader failed to be created.\n");
+      return Core::Option<int>();
+    }
+    if (!fragmentShader.HasValue()) {
+      printf("Fragment shader failed to be created.\n");
+      return Core::Option<int>();
+    }
+
     auto vertexShaderStage =
-        CreateShaderStageInfo(VK_SHADER_STAGE_VERTEX_BIT, vertexShader);
-    auto fragmentShaderStage =
-        CreateShaderStageInfo(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader);
+        CreateShaderStageInfo(VK_SHADER_STAGE_VERTEX_BIT, vertexShader.Value());
+    auto fragmentShaderStage = CreateShaderStageInfo(
+        VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShader.Value());
 
     VkPipelineShaderStageCreateInfo shaderStages[2];
     shaderStages[0] = vertexShaderStage;
@@ -496,13 +512,15 @@ int BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                   nullptr, &pipeline) != VK_SUCCESS) {
       printf("Saaad.");
-      return VK_NULL_HANDLE;
+      return Core::Option<int>();
     }
-    vkDestroyShaderModule(_device, vertexShader, nullptr);
-    vkDestroyShaderModule(_device, fragmentShader, nullptr);
+    vkDestroyShaderModule(_device, vertexShader.Value(), nullptr);
+    vkDestroyShaderModule(_device, fragmentShader.Value(), nullptr);
 
     _pipelines.push_back({pipeline, pipelineLayout});
-    return _pipelines.size() - 1;
+    return Core::Option<int>(_pipelines.size() - 1);
+  } else {
+    return Core::Option<int>();
   }
 }
 

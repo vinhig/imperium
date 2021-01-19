@@ -1,28 +1,29 @@
 //
-// Created by vinhi on 15.01.2020.
+// Created by vinhig on 15.01.2021.
 //
 
 #pragma once
 
 #include "logic/Game.h"
+#include "render/frontend/Mesh.h"
 
 namespace Imperium::Render {
-  class Device;
+class Device;
 }
 
-using namespace Imperium::Logic;
-using namespace Imperium::Render;
-
-class MyGame : public Game {
+class MyGame : public Imperium::Logic::Game {
  private:
+  Imperium::Render::Frontend::Mesh triangle;
 
  public:
-  explicit MyGame(Device* device) : Game(device) {}
+  explicit MyGame(Imperium::Render::Device* device)
+      : Imperium::Logic::Game(device) {}
 
-  void Load(Device* device) override {};
+  void Load(Imperium::Render::Device* device) override {
+    triangle = LoadModel().Value();
+  };
 
-  void ResourceUpdate(Device* device) override{};
+  void ResourceUpdate(Imperium::Render::Device* device) override{};
 
-  void Draw(Device* device) override{};
-
+  void Draw(Imperium::Render::Device* device) override{};
 };

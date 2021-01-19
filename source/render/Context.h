@@ -1,10 +1,17 @@
 //
-// Created by vinhi on 14.01.2020.
+// Created by vinhig on 14.01.2021.
 //
+
+#include "render/Resources.h"
 
 namespace Imperium::Render::Backend {
 class Backend;
 }
+
+namespace Imperium::Render::Frontend {
+struct Texture;
+struct Mesh;
+}  // namespace Imperium::Render::Frontend
 
 namespace Imperium::Render {
 
@@ -28,7 +35,6 @@ class Context {
 
   ~Context();
 
-
   /**
    * API in use for this context.
    */
@@ -44,6 +50,9 @@ class Context {
    */
   int Height() const { return _height; };
 
+  /**
+   * Wether the context failed to be created.
+   */
   bool Failed() const { return _failed; };
 
   /**
@@ -54,6 +63,9 @@ class Context {
   void BeginFrame();
 
   void EndFrame();
+
+  Frontend::Texture CreateTexture(CPUTexture texture);
+  Frontend::Mesh CreateMesh(CPUBuffer<float> vertices, CPUBuffer<int> indices);
 };
 
 }  // namespace Imperium::Render

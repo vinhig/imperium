@@ -1,5 +1,5 @@
 //
-// Created by vinhi on 15.01.2020.
+// Created by vinhig on 15.01.2021.
 //
 
 #pragma once
@@ -8,7 +8,10 @@
 
 #include <vector>
 
+#include "core/Option.h"
 #include "render/backend/Backend.h"
+
+using namespace Imperium;
 
 namespace Imperium::Render {
 class Device;
@@ -59,7 +62,7 @@ class BackendVulkan : public Backend {
   std::vector<PipelineStuff> _pipelines;
 
   VkCommandBuffer CreateCommandBuffer();
-  VkShaderModule CreateShaderModule(const char* filePath);
+  Core::Option<VkShaderModule> CreateShaderModule(const char* filePath);
   static VkPipelineShaderStageCreateInfo CreateShaderStageInfo(
       VkShaderStageFlagBits stage, VkShaderModule shader);
   static VkPipelineVertexInputStateCreateInfo CreateVertexInputStateInfo(
@@ -85,7 +88,8 @@ class BackendVulkan : public Backend {
 
   void BindRenderpass(int renderpass) override;
 
-  int CreatePipeline(PipelineType pipelineType) override;
+  Core::Option<int> CreatePipeline(PipelineType pipelineType) override;
+  // void CreateBuffer(BufferType bufferType) override;
 };
 
 }  // namespace Imperium::Render::Backend
