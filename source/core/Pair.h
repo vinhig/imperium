@@ -12,7 +12,7 @@ class Pair {
   R _right;
 
  public:
-  Pair() = default;
+  Pair() : _left(), _right(){};
   Pair(L left, R right) : _left(left), _right(right){};
   ~Pair() = default;
   L Left() { return _left; };

@@ -22,14 +22,14 @@ namespace Imperium::Logic {
 class Game {
  private:
   Render::Device* _device;
-  Loader::Loader* _loader;
+  Loader::Loader* _loader{};
 
   void SysDraw();
 
  public:
   Game(Render::Device* device);
   ~Game();
-  virtual void Load(Render::Device* device) = 0;
+  virtual void Load() = 0;
   virtual void ResourceUpdate(Render::Device* device) = 0;
   virtual void Draw(Render::Device* device) = 0;
 

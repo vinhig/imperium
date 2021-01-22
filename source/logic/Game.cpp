@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#include <cstdio>
+
 #include "loader/Loader.h"
 #include "loader/Model.h"
 #include "render/Context.h"
@@ -9,7 +11,9 @@
 
 namespace Imperium::Logic {
 
-Game::Game(Render::Device* device) { _device = device; }
+Game::Game(Render::Device* device) {
+  _device = device;
+}
 
 Game::~Game() {}
 
@@ -37,9 +41,14 @@ Core::Option<Render::Frontend::Mesh> Game::LoadModel() {
 
   // Okay we know that's a simple triangle
   Render::CPUBuffer<float> vertices = {};
+  vertices.nbElements = meshes->Left().nbElements;
+  vertices.data = meshes->Left().elements;
   Render::CPUBuffer<int> indices = {};
+  indices.nbElements = meshes->Right().nbElements;
+  indices.data = meshes->Right().elements;
 
   auto mesh = _device->GetContext()->CreateMesh(vertices, indices);
+
   return Core::Option<Render::Frontend::Mesh>(mesh);
 }
 

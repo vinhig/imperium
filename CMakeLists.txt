@@ -24,6 +24,8 @@ add_executable(Imperium
 
         source/logic/Game.cpp
 
+        source/render/frontend/Mesh.cpp
+
         source/render/backend/BackendVulkan.cpp
         source/render/Context.cpp
         source/render/DeviceDesktop.cpp

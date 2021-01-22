@@ -19,11 +19,11 @@ class MyGame : public Imperium::Logic::Game {
   explicit MyGame(Imperium::Render::Device* device)
       : Imperium::Logic::Game(device) {}
 
-  void Load(Imperium::Render::Device* device) override {
-    triangle = LoadModel().Value();
-  };
+  void Load() override { triangle = LoadModel().Value(); };
 
   void ResourceUpdate(Imperium::Render::Device* device) override{};
 
   void Draw(Imperium::Render::Device* device) override{};
+
+  ~MyGame() { triangle.Destroy(); }
 };

@@ -9,10 +9,7 @@ namespace Imperium::Render {
 template <typename T>
 struct CPUBuffer {
   T* data;
-  union {
-    int size;
-    int nbElements;
-  };
+  int nbElements;
 };
 
 struct CPUTexture {

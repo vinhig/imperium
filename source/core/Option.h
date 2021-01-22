@@ -23,6 +23,7 @@ class Option {
 
   bool HasValue() const { return _hasValue; };
   void SetValue(T value) { _value = value; };
+  void Forget() { _hasValue = false; }
 
   T Value() { return _value; };
 };

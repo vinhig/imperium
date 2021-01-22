@@ -2,6 +2,8 @@
 // Created by vinhig on 14.01.2021.
 //
 
+#include <core/Option.h>
+
 #include "render/Resources.h"
 
 namespace Imperium::Render::Backend {
@@ -65,7 +67,8 @@ class Context {
   void EndFrame();
 
   Frontend::Texture CreateTexture(CPUTexture texture);
-  Frontend::Mesh CreateMesh(CPUBuffer<float> vertices, CPUBuffer<int> indices);
+  Frontend::Mesh CreateMesh(CPUBuffer<float> vertices,
+                                          CPUBuffer<int> indices);
 };
 
 }  // namespace Imperium::Render

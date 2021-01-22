@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstdio>
+
 #include "core/List.h"
 #include "core/Pair.h"
 
@@ -13,6 +15,8 @@ namespace Imperium::Loader {
 struct VertexBuffer {
   int nbElements{0};
   float* elements{nullptr};
+
+  VertexBuffer() {}
 };
 
 struct IndexBuffer {
@@ -24,11 +28,16 @@ using Meshes = Core::List<Core::Pair<VertexBuffer, IndexBuffer>>;
 
 class Model {
  private:
+  // List of meshes
   Meshes _meshes;
 
+  // Meshes may be not initialized
+  Core::List<bool> _setVertices;
+  Core::List<bool> _setIndices;
+
  public:
-  Model(int bufferCount);
-  ~Model();
+  explicit Model(int bufferCount);
+  ~Model() = default;
 
   Meshes& GetMeshes();
   void SetVertices(int bufferId, float* vertices, int nbElements);

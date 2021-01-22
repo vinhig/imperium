@@ -22,6 +22,8 @@ Core::Option<Model *> Loader::CreateModelTriangle() {
       0, 1, 2
     };
   // clang-format on
+  auto el = (float *)malloc(9 * 4);
+  el[0] = 42.0f;
   auto model = new Model(1);
   model->SetVertices(0, &vertices[0], 9);
   model->SetIndices(0, &indices[0], 3);

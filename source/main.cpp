@@ -23,9 +23,13 @@ int main(int argc, char** argv) {
 
   auto myGame = new MyGame(device);
 
+  myGame->Load();
+
   while (!myGame->ShouldClose()) {
     myGame->Process();
   }
+
+  delete myGame;
 
   delete device;
 }

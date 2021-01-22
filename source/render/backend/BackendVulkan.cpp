@@ -6,12 +6,18 @@
 
 #include <SDL2/SDL_vulkan.h>
 #include <VkBootstrap.h>
+#include <vk_mem_alloc.h>
+
 #include <fstream>
 
 #include "render/Device.h"
-#include <vk_mem_alloc.h>
 
 namespace Imperium::Render::Backend {
+struct BufferVulkan {
+  VkBuffer buffer{nullptr};
+  VmaAllocation allocation{nullptr};
+};
+
 BackendVulkan::BackendVulkan(Device* device) {
   printf("Creating Vulkan Backend.\n");
   /**
@@ -196,6 +202,15 @@ BackendVulkan::BackendVulkan(Device* device) {
 
   vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderSemaphore);
   vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentSemaphore);
+
+  /**
+   * vma allocator
+   */
+  VmaAllocatorCreateInfo allocatorCreateInfo = {};
+  allocatorCreateInfo.physicalDevice = _physicalDevice;
+  allocatorCreateInfo.device = _device;
+  allocatorCreateInfo.instance = _instance;
+  vmaCreateAllocator(&allocatorCreateInfo, &_allocator);
 }
 
 VkCommandBuffer BackendVulkan::CreateCommandBuffer() {
@@ -523,6 +538,55 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
   }
 }
 
+Buffer* BackendVulkan::CreateBuffer(BufferType bufferType, int size) {
+  VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  switch (bufferType) {
+    case Vertex:
+      bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    case Index:
+      bufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    case Uniform:
+      bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    case Staging:
+      bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  }
+  VkBufferCreateInfo bufferCreateInfo = {};
+  bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  bufferCreateInfo.size = size;
+  bufferCreateInfo.usage = bufferUsage;
+
+  auto buffer = (BufferVulkan*)malloc(sizeof(BufferVulkan));
+
+  VmaAllocationCreateInfo vmaAllocationCreateInfo = {};
+  vmaAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+  vmaCreateBuffer(_allocator, &bufferCreateInfo, &vmaAllocationCreateInfo,
+                  &buffer->buffer, &buffer->allocation, nullptr);
+
+  return (Buffer*)buffer;
+}
+
+void BackendVulkan::DeleteBuffer(Buffer* b) {
+  auto buffer = (BufferVulkan*)b;
+
+  vmaDestroyBuffer(_allocator, buffer->buffer, buffer->allocation);
+}
+
+void* BackendVulkan::MapBuffer(Buffer* b) {
+  auto buffer = (BufferVulkan*)b;
+
+  void* data;
+  vmaMapMemory(_allocator, buffer->allocation, &data);
+  return data;
+}
+
+void BackendVulkan::UnmapBuffer(Buffer* b) {
+  auto buffer = (BufferVulkan*)b;
+
+  vmaUnmapMemory(_allocator, buffer->allocation);
+}
+
+void BackendVulkan::CopyBuffer(Buffer* src, Buffer* dest) {}
+
 BackendVulkan::~BackendVulkan() {
   printf("~BackendVulkan()\n");
   if (!_failed) {
@@ -539,6 +603,8 @@ BackendVulkan::~BackendVulkan() {
     vkDestroyCommandPool(_device, _commandPool, nullptr);
 
     vkDestroyRenderPass(_device, _renderPass, nullptr);
+
+    vmaDestroyAllocator(_allocator);
 
     for (auto const& fb : _framebuffers) {
       vkDestroyFramebuffer(_device, fb, nullptr);

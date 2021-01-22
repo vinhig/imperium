@@ -6,6 +6,8 @@
 
 #include <vulkan/vulkan.h>
 
+VK_DEFINE_HANDLE(VmaAllocator)
+
 #include <vector>
 
 #include "core/Option.h"
@@ -32,6 +34,7 @@ class BackendVulkan : public Backend {
   VkPhysicalDevice _physicalDevice;
   VkPhysicalDeviceMemoryProperties _memoryProperties;
   VkDevice _device;
+  VmaAllocator _allocator;
 
   int _width{0};
   int _height{0};
@@ -90,6 +93,12 @@ class BackendVulkan : public Backend {
 
   Core::Option<int> CreatePipeline(PipelineType pipelineType) override;
   // void CreateBuffer(BufferType bufferType) override;
+
+  Buffer* CreateBuffer(BufferType bufferType, int size) override;
+  void DeleteBuffer(Buffer* buffer) override;
+  void* MapBuffer(Buffer* buffer) override;
+  void UnmapBuffer(Buffer* buffer) override;
+  void CopyBuffer(Buffer* src, Buffer* dest) override;
 };
 
 }  // namespace Imperium::Render::Backend

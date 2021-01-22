@@ -14,7 +14,7 @@ class Loader {
   ~Loader();
 
   /**
-   * Load fbx model from disk.
+   * Create dummy triangle model
    */
   Core::Option<Model*> CreateModelTriangle();
 };

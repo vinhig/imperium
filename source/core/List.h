@@ -17,11 +17,19 @@ class List {
 
  public:
   List() = default;
-  List(int size) : _size(size) { _data = (T*)malloc(sizeof(T) * size); }
-  ~List() {
-    delete[] _data;
-  };
+  /**
+   * Allocates enough space for n objects.
+   */
+  explicit List(int n) : _size(n) { _data = new T[n]; }
+  ~List() { delete[] _data; };
   T* Data() const { return _data; }
+
+  T* Get(int i) { return this->operator[](i); }
+  void Set(int i, T value) {
+    if (i < _size) {
+      _data[i] = value;
+    }
+  }
 
   Core::Option<T*> operator[](int i) {
     if (i >= _size) {

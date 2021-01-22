@@ -64,8 +64,13 @@ Frontend::Texture Context::CreateTexture(CPUTexture texture) {
 }
 
 Frontend::Mesh Context::CreateMesh(CPUBuffer<float> vertices,
-                                   CPUBuffer<int> indices) {
-  Frontend::Mesh mesh = {_backend};
+                                                 CPUBuffer<int> indices) {
+  Frontend::Mesh mesh = {};
+  mesh.backend = _backend;
+  mesh.vertices = vertices;
+  mesh.indices = indices;
+
+  mesh.Create();
 
   return mesh;
 }
