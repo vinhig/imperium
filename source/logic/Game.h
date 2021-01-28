@@ -21,8 +21,8 @@ namespace Imperium::Logic {
 
 class Game {
  private:
-  Render::Device* _device;
-  Loader::Loader* _loader{};
+  Render::Device* _device{nullptr};
+  Loader::Loader* _loader{nullptr};
 
   void SysDraw();
 

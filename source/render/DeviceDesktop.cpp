@@ -46,7 +46,7 @@ DeviceWindow DeviceDesktop::Window() const {
   if (_context == nullptr) {
     printf("wtf\n");
   }
-  DeviceWindow window;
+  DeviceWindow window = {};
   window.desktop = true;
   window.sdlWindow = _window;
   window.height = _context->Height();

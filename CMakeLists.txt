@@ -29,6 +29,7 @@ add_executable(Imperium
         source/render/backend/BackendVulkan.cpp
         source/render/Context.cpp
         source/render/DeviceDesktop.cpp
+        source/render/Resources.cpp
         source/render/Pch.cpp
         )
 
@@ -44,6 +45,7 @@ endif (UNIX)
 target_include_directories(Imperium PUBLIC source/)
 target_include_directories(Imperium PUBLIC libraries/)
 target_include_directories(Imperium PUBLIC libraries/vma/src)
+target_include_directories(Imperium PUBLIC libraries/eastl/include)
 
 # Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

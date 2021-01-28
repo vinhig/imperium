@@ -23,7 +23,9 @@ class MyGame : public Imperium::Logic::Game {
 
   void ResourceUpdate(Imperium::Render::Device* device) override{};
 
-  void Draw(Imperium::Render::Device* device) override{};
+  void Draw(Imperium::Render::Device* device) override{
+    triangle.Draw();
+  };
 
   ~MyGame() { triangle.Destroy(); }
 };

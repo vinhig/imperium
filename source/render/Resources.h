@@ -10,6 +10,8 @@ template <typename T>
 struct CPUBuffer {
   T* data;
   int nbElements;
+
+  void Display();
 };
 
 struct CPUTexture {

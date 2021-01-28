@@ -16,6 +16,14 @@ namespace Imperium::Render::Backend {
 struct BufferVulkan {
   VkBuffer buffer{nullptr};
   VmaAllocation allocation{nullptr};
+  size_t size;
+};
+
+struct VertexInputDescription {
+  std::vector<VkVertexInputBindingDescription> bindings;
+  std::vector<VkVertexInputAttributeDescription> attributes;
+
+  VkPipelineVertexInputStateCreateFlags flags = 0;
 };
 
 BackendVulkan::BackendVulkan(Device* device) {
@@ -85,16 +93,30 @@ BackendVulkan::BackendVulkan(Device* device) {
   /**
    * Create graphics queue
    */
-  auto queueReturn = logicalDevice.get_queue(vkb::QueueType::graphics);
+  auto graphicsQueueReturn = logicalDevice.get_queue(vkb::QueueType::graphics);
 
-  if (!queueReturn) {
+  if (!graphicsQueueReturn) {
     printf("Failed to find a suitable graphics queue.\n");
     return;
   }
 
-  _graphicsQueue = queueReturn.value();
+  _graphicsQueue = graphicsQueueReturn.value();
   _graphicsQueueFamily =
       logicalDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+  /**
+   * Create transfer queue
+   */
+  auto transferQueueReturn = logicalDevice.get_queue(vkb::QueueType::transfer);
+
+  if (!transferQueueReturn) {
+    printf("Failed to find a suitable graphics queue.\n");
+    return;
+  }
+
+  _transferQueue = transferQueueReturn.value();
+  _transferQueueFamily =
+      logicalDevice.get_queue_index(vkb::QueueType::transfer).value();
 
   /**
    * Create swapchain
@@ -117,21 +139,44 @@ BackendVulkan::BackendVulkan(Device* device) {
   _failed = false;
 
   /**
-   * Command pool
+   * Graphics command pool
    */
-  VkCommandPoolCreateInfo commandPoolCreateInfo = {};
-  commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-  commandPoolCreateInfo.pNext = nullptr;
+  VkCommandPoolCreateInfo graphicsCommandPoolCreateInfo = {};
+  graphicsCommandPoolCreateInfo.sType =
+      VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  graphicsCommandPoolCreateInfo.pNext = nullptr;
 
-  commandPoolCreateInfo.queueFamilyIndex = _graphicsQueueFamily;
-  commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+  graphicsCommandPoolCreateInfo.queueFamilyIndex = _graphicsQueueFamily;
+  graphicsCommandPoolCreateInfo.flags =
+      VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-  vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr, &_commandPool);
+  vkCreateCommandPool(_device, &graphicsCommandPoolCreateInfo, nullptr,
+                      &_graphicsCommandPool);
+
+  /**
+   * Graphics command pool
+   */
+  VkCommandPoolCreateInfo transferCommandPoolCreateInfo = {};
+  transferCommandPoolCreateInfo.sType =
+      VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  transferCommandPoolCreateInfo.pNext = nullptr;
+
+  transferCommandPoolCreateInfo.queueFamilyIndex = _transferQueueFamily;
+  transferCommandPoolCreateInfo.flags =
+      VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+  vkCreateCommandPool(_device, &transferCommandPoolCreateInfo, nullptr,
+                      &_transferCommandPool);
 
   /**
    * Main command buffer
    */
-  _mainCommandBuffer = this->CreateCommandBuffer();
+  _mainCommandBuffer = this->CreateCommandBuffer(_graphicsCommandPool);
+
+  /**
+   * Transfer command buffer
+   */
+  _transferCommandBuffer = this->CreateCommandBuffer(_transferCommandPool);
 
   /**
    * Default renderpass
@@ -194,6 +239,8 @@ BackendVulkan::BackendVulkan(Device* device) {
   fenceCreateInfo.pNext = nullptr;
   fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
   vkCreateFence(_device, &fenceCreateInfo, nullptr, &_renderFence);
+  vkCreateFence(_device, &fenceCreateInfo, nullptr, &_transferFence);
+  vkResetFences(_device, 1, &_transferFence);
 
   VkSemaphoreCreateInfo semaphoreCreateInfo = {};
   semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -213,11 +260,11 @@ BackendVulkan::BackendVulkan(Device* device) {
   vmaCreateAllocator(&allocatorCreateInfo, &_allocator);
 }
 
-VkCommandBuffer BackendVulkan::CreateCommandBuffer() {
+VkCommandBuffer BackendVulkan::CreateCommandBuffer(VkCommandPool commandPool) {
   VkCommandBufferAllocateInfo cmdAllocateInfo = {};
   cmdAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   cmdAllocateInfo.pNext = nullptr;
-  cmdAllocateInfo.commandPool = _commandPool;
+  cmdAllocateInfo.commandPool = commandPool;
   cmdAllocateInfo.commandBufferCount = 1;
   cmdAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
@@ -402,12 +449,23 @@ void BackendVulkan::EndFrame() {
   presentInfo.pImageIndices = &_swapchainImageIndex;
 
   vkQueuePresentKHR(_graphicsQueue, &presentInfo);
+
+  // Delete old stuff
+}
+
+void BackendVulkan::DeleteOldStuff() {
+  for (int i = 0; i < _nbOldBuffers; i++) {
+    DeleteBuffer(_oldBuffers[i]);
+  }
+  delete _oldBuffers;
+  _oldBuffers = nullptr;
+  _nbOldBuffers = 0;
 }
 
 void BackendVulkan::BeginPipeline(int pipeline) {
   vkCmdBindPipeline(_mainCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                     _pipelines[pipeline].pipeline);
-  vkCmdDraw(_mainCommandBuffer, 3, 1, 0, 0);
+  // vkCmdDraw(_mainCommandBuffer, 3, 1, 0, 0);
 }
 
 void BackendVulkan::EndPipeline(int pipeline) {}
@@ -439,8 +497,8 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     /**
      * Create shader stages
      */
-    auto vertexShader = CreateShaderModule("assets/mesh.vert.glsl.spv");
-    auto fragmentShader = CreateShaderModule("assets/mesh.frag.glsl.spv");
+    auto vertexShader = CreateShaderModule("assets/triangle.vert.glsl.spv");
+    auto fragmentShader = CreateShaderModule("assets/triangle.frag.glsl.spv");
 
     // Creation of shader module may fail
     if (!vertexShader.HasValue()) {
@@ -506,6 +564,11 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     auto vertexInput = CreateVertexInputStateInfo();
+    auto vertexDesc = Get3DVertexDescription();
+    vertexInput.pVertexAttributeDescriptions = vertexDesc.attributes.data();
+    vertexInput.vertexAttributeDescriptionCount = vertexDesc.attributes.size();
+    vertexInput.pVertexBindingDescriptions = vertexDesc.bindings.data();
+    vertexInput.vertexBindingDescriptionCount = vertexDesc.bindings.size();
     pipelineInfo.pVertexInputState = &vertexInput;
     auto inputAssembly =
         CreateInputAssemblyStateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
@@ -539,23 +602,30 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
 }
 
 Buffer* BackendVulkan::CreateBuffer(BufferType bufferType, int size) {
-  VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  VkBufferUsageFlags bufferUsage = 0;
   switch (bufferType) {
     case Vertex:
-      bufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+      bufferUsage =
+          VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+      break;
     case Index:
-      bufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+      bufferUsage =
+          VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+      break;
     case Uniform:
       bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+      break;
     case Staging:
       bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+      break;
   }
   VkBufferCreateInfo bufferCreateInfo = {};
   bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferCreateInfo.size = size;
   bufferCreateInfo.usage = bufferUsage;
 
-  auto buffer = (BufferVulkan*)malloc(sizeof(BufferVulkan));
+  auto buffer = new BufferVulkan;
+  buffer->size = size;
 
   VmaAllocationCreateInfo vmaAllocationCreateInfo = {};
   vmaAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
@@ -569,6 +639,17 @@ void BackendVulkan::DeleteBuffer(Buffer* b) {
   auto buffer = (BufferVulkan*)b;
 
   vmaDestroyBuffer(_allocator, buffer->buffer, buffer->allocation);
+}
+
+void BackendVulkan::DeferDeleteBuffer(Buffer* b) {
+  _nbOldBuffers++;
+  auto buffers = (Buffer**)malloc(sizeof(Buffer*) * _nbOldBuffers);
+  for (int i = 0; i < _nbOldBuffers - 1; i++) {
+    buffers[i] = _oldBuffers[i];
+  }
+  buffers[_nbOldBuffers - 1] = b;
+  delete _oldBuffers;
+  _oldBuffers = buffers;
 }
 
 void* BackendVulkan::MapBuffer(Buffer* b) {
@@ -585,22 +666,122 @@ void BackendVulkan::UnmapBuffer(Buffer* b) {
   vmaUnmapMemory(_allocator, buffer->allocation);
 }
 
-void BackendVulkan::CopyBuffer(Buffer* src, Buffer* dest) {}
+void BackendVulkan::CopyBuffer(Buffer* src, Buffer* dest) {
+  auto bufferSrc = (BufferVulkan*)src;
+  auto bufferDest = (BufferVulkan*)dest;
+  // printf("BackendVulkan::CopyBuffer(): Copying buffer inoperant.\n");
+
+  VkCommandBufferBeginInfo beginInfo = {};
+  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  beginInfo.pNext = nullptr;
+  beginInfo.pInheritanceInfo = nullptr;
+  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+  VkBufferCopy bufferCopy = {};
+  bufferCopy.srcOffset = 0;
+  bufferCopy.dstOffset = 0;
+  bufferCopy.size = bufferSrc->size;
+
+  vkBeginCommandBuffer(_transferCommandBuffer, &beginInfo);
+
+  vkCmdCopyBuffer(_transferCommandBuffer, bufferSrc->buffer, bufferDest->buffer,
+                  1, &bufferCopy);
+
+  vkEndCommandBuffer(_transferCommandBuffer);
+
+  VkSubmitInfo submitInfo = {};
+  submitInfo.pNext = nullptr;
+  submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submitInfo.commandBufferCount = 1;
+  submitInfo.pCommandBuffers = &_transferCommandBuffer;
+
+  vkQueueSubmit(_transferQueue, 1, &submitInfo, _transferFence);
+
+  vkWaitForFences(_device, 1, &_transferFence, true, 1000000000);
+  vkResetFences(_device, 1, &_transferFence);
+
+  vkResetCommandBuffer(_transferCommandBuffer,
+                       VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+}
+
+VertexInputDescription BackendVulkan::Get3DVertexDescription() {
+  VertexInputDescription description = {};
+
+  VkVertexInputBindingDescription mainBinding = {};
+  mainBinding.binding = 0;
+  mainBinding.stride = (3 + 3 + 3) * 4;
+  mainBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+  description.bindings.push_back(mainBinding);
+
+  // POSITION (location = 0)
+  VkVertexInputAttributeDescription positionAttribute = {};
+  positionAttribute.binding = 0;
+  positionAttribute.location = 0;
+  positionAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
+  positionAttribute.offset = 0;
+
+  // NORMAL (location = 1)
+  VkVertexInputAttributeDescription normalAttribute = {};
+  normalAttribute.binding = 0;
+  normalAttribute.location = 1;
+  normalAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
+  normalAttribute.offset = 3 * 4;
+
+  // COLOR (location = 1)
+  VkVertexInputAttributeDescription colorAttribute = {};
+  colorAttribute.binding = 0;
+  colorAttribute.location = 2;
+  colorAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
+  colorAttribute.offset = 3 * 2 * 4;
+
+  description.attributes.push_back(positionAttribute);
+  description.attributes.push_back(normalAttribute);
+  description.attributes.push_back(colorAttribute);
+
+  return description;
+}
+
+void BackendVulkan::BindVertexBuffers(int count, Buffer* vertexBuffers) {
+  auto buffers = (BufferVulkan*)vertexBuffers;
+  auto vbuffers = new VkBuffer[count];
+  for (int i = 0; i < count; i++) {
+    vbuffers[i] = buffers[i].buffer;
+  }
+  VkDeviceSize offset = 0;
+  vkCmdBindVertexBuffers(_mainCommandBuffer, 0, count, vbuffers, &offset);
+}
+
+void BackendVulkan::BindIndexBuffer(Buffer* indexBuffer) {
+  auto buffer = (BufferVulkan*)indexBuffer;
+  vkCmdBindIndexBuffer(_mainCommandBuffer, buffer->buffer, 0,
+                       VkIndexType::VK_INDEX_TYPE_UINT32);
+}
+
+void BackendVulkan::DrawElements(int count) {
+  vkCmdDraw(_mainCommandBuffer, count, 1, 0, 0);
+}
 
 BackendVulkan::~BackendVulkan() {
   printf("~BackendVulkan()\n");
   if (!_failed) {
     // Wait for everything before deleting any object
+    vkWaitForFences(_device, 1, &_renderFence, true, 1000000000);
+
     vkDeviceWaitIdle(_device);
     vkResetCommandBuffer(_mainCommandBuffer,
                          VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+    vkResetCommandBuffer(_transferCommandBuffer,
+                         VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+    this->DeleteOldStuff();
     vkDestroySwapchainKHR(_device, _swapchain, nullptr);
 
     for (auto const& imageView : _swapchainImageViews) {
       vkDestroyImageView(_device, imageView, nullptr);
     }
 
-    vkDestroyCommandPool(_device, _commandPool, nullptr);
+    vkDestroyCommandPool(_device, _transferCommandPool, nullptr);
+    vkDestroyCommandPool(_device, _graphicsCommandPool, nullptr);
 
     vkDestroyRenderPass(_device, _renderPass, nullptr);
 
@@ -616,6 +797,7 @@ BackendVulkan::~BackendVulkan() {
     }
 
     vkDestroyFence(_device, _renderFence, nullptr);
+    vkDestroyFence(_device, _transferFence, nullptr);
     vkDestroySemaphore(_device, _renderSemaphore, nullptr);
     vkDestroySemaphore(_device, _presentSemaphore, nullptr);
 

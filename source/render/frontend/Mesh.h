@@ -19,13 +19,19 @@ struct Mesh {
   Backend::Buffer* indexBuffer{nullptr};
   bool valid{false};
   CPUBuffer<float> vertices{};
-  CPUBuffer<int> indices{};
+  CPUBuffer<unsigned int> indices{};
 
   Mesh() = default;
   ~Mesh() = default;
 
+  /**
+   * Copy operator.
+   */
+  Mesh& operator=(Mesh other);
+
   void Create();
   void Destroy();
+  void Draw();
 };
 
 }  // namespace Imperium::Render::Frontend

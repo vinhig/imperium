@@ -18,13 +18,14 @@ enum BufferType {
   // Contains arbitrary data, stored in host and device visible.
   Uniform,
   // Used to copy data, stored in host and device visible.
-  Staging };
+  Staging
+};
 
 struct Buffer;
 
 class Backend {
  public:
-  virtual ~Backend()= default;;
+  virtual ~Backend() = default;
 
   virtual void BeginFrame() = 0;
   virtual void EndFrame() = 0;
@@ -34,10 +35,16 @@ class Backend {
 
   virtual void BindRenderpass(int renderpass) = 0;
 
+  virtual void BindVertexBuffers(int count, Buffer* vertexBuffers) = 0;
+  virtual void BindIndexBuffer(Buffer* indexBuffer) = 0;
+
+  virtual void DrawElements(int count) = 0;
+
   virtual Core::Option<int> CreatePipeline(PipelineType pipeline) = 0;
 
   virtual Buffer* CreateBuffer(BufferType bufferType, int size) = 0;
   virtual void DeleteBuffer(Buffer* buffer) = 0;
+  virtual void DeferDeleteBuffer(Buffer* buffer) = 0;
   virtual void* MapBuffer(Buffer* buffer) = 0;
   virtual void UnmapBuffer(Buffer* buffer) = 0;
   virtual void CopyBuffer(Buffer* src, Buffer* dest) = 0;

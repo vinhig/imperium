@@ -26,6 +26,8 @@ struct PipelineStuff {
   VkPipelineLayout pipelineLayout;
 };
 
+struct VertexInputDescription;
+
 class BackendVulkan : public Backend {
  private:
   VkInstance _instance;
@@ -42,11 +44,16 @@ class BackendVulkan : public Backend {
   // Commands
   VkQueue _graphicsQueue;
   uint32_t _graphicsQueueFamily;
-  VkCommandPool _commandPool;
+  VkQueue _transferQueue;
+  uint32_t _transferQueueFamily;
+  VkCommandPool _graphicsCommandPool;
+  VkCommandPool _transferCommandPool;
   VkCommandBuffer _mainCommandBuffer;
+  VkCommandBuffer _transferCommandBuffer;
 
   // Synchronisation
   VkFence _renderFence;
+  VkFence _transferFence;
   VkSemaphore _renderSemaphore;
   VkSemaphore _presentSemaphore;
 
@@ -64,7 +71,11 @@ class BackendVulkan : public Backend {
 
   std::vector<PipelineStuff> _pipelines;
 
-  VkCommandBuffer CreateCommandBuffer();
+  // Stuff to delete at end of frame
+  Buffer** _oldBuffers{nullptr};
+  int _nbOldBuffers{0};
+
+  VkCommandBuffer CreateCommandBuffer(VkCommandPool commandPool);
   Core::Option<VkShaderModule> CreateShaderModule(const char* filePath);
   static VkPipelineShaderStageCreateInfo CreateShaderStageInfo(
       VkShaderStageFlagBits stage, VkShaderModule shader);
@@ -79,6 +90,9 @@ class BackendVulkan : public Backend {
   CreateColorBlendAttachmentStateInfo();
   static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo();
 
+  VertexInputDescription Get3DVertexDescription();
+  void DeleteOldStuff();
+
  public:
   BackendVulkan(Device* device);
   ~BackendVulkan() override;
@@ -91,13 +105,22 @@ class BackendVulkan : public Backend {
 
   void BindRenderpass(int renderpass) override;
 
+  void BindVertexBuffers(int count, Buffer* vertexBuffers) override;
+  void BindIndexBuffer(Buffer* indexBuffer) override;
+
+  void DrawElements(int count) override;
+
   Core::Option<int> CreatePipeline(PipelineType pipelineType) override;
   // void CreateBuffer(BufferType bufferType) override;
 
   Buffer* CreateBuffer(BufferType bufferType, int size) override;
   void DeleteBuffer(Buffer* buffer) override;
+  void DeferDeleteBuffer(Buffer* buffer) override;
   void* MapBuffer(Buffer* buffer) override;
   void UnmapBuffer(Buffer* buffer) override;
+
+  // Reset transfer command buffer. Register a new copy buffer command,
+  // instantly run it, but don't wait for it.
   void CopyBuffer(Buffer* src, Buffer* dest) override;
 };
 

@@ -4,6 +4,8 @@
 
 #include "Loader.h"
 
+#include <string.h>
+
 #include "loader/Model.h"
 
 namespace Imperium::Loader {
@@ -13,20 +15,22 @@ Loader::~Loader() = default;
 Core::Option<Model *> Loader::CreateModelTriangle() {
   // Data for basic triangle
   // clang-format off
-    float vertices[] = {
-      1.0f,  1.0f, 0.0f, 
-      -1.0f, 1.0f, 0.0f,
-      0.0f, -1.0f, 0.0f,
-    };
-    int indices[] = {
-      0, 1, 2
-    };
+  float v[27] = {
+    1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+    -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+    0.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+  };
+
+  auto vertices = new float[27];
+  memcpy(vertices, v, sizeof(float) * 27);
+
+  auto indices = new unsigned int[3];
+  indices[0] = 0;
+  indices[1] = 1;
+  indices[2] = 2;
   // clang-format on
-  auto el = (float *)malloc(9 * 4);
-  el[0] = 42.0f;
   auto model = new Model(1);
-  model->SetVertices(0, &vertices[0], 9);
-  model->SetIndices(0, &indices[0], 3);
+  model->AddRawMesh({vertices, indices, 27, 3});
   return Core::Option<Model *>(model);
 }
 }  // namespace Imperium::Loader

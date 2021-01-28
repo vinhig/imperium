@@ -1,47 +1,32 @@
-//
-// Created by vinhig on 19.01.2021.
-//
-
 #pragma once
 
-#include <cstdio>
+//
+// Created by vinhig on 22.01.2021.
+//
 
-#include "core/List.h"
-#include "core/Pair.h"
-
-using namespace Imperium;
+#include <vector>
 
 namespace Imperium::Loader {
-struct VertexBuffer {
-  int nbElements{0};
-  float* elements{nullptr};
-
-  VertexBuffer() {}
+struct RawMesh {
+  float* vertices{nullptr};
+  unsigned int* indices{nullptr};
+  int nbVertices{0};
+  int nbIndices{0};
 };
 
-struct IndexBuffer {
-  int nbElements{0};
-  int* elements{nullptr};
-};
-
-using Meshes = Core::List<Core::Pair<VertexBuffer, IndexBuffer>>;
+using Meshes = std::vector<RawMesh>;
 
 class Model {
  private:
-  // List of meshes
   Meshes _meshes;
-
-  // Meshes may be not initialized
-  Core::List<bool> _setVertices;
-  Core::List<bool> _setIndices;
-
+  int _nbMeshes{0};
  public:
-  explicit Model(int bufferCount);
+  explicit Model(int nbBuffers);
   ~Model() = default;
 
-  Meshes& GetMeshes();
-  void SetVertices(int bufferId, float* vertices, int nbElements);
-  void SetIndices(int bufferId, int* indices, int nbElements);
-};
+  void AddRawMesh(RawMesh mesh);
 
+  RawMesh* GetMeshes();
+  int NbMeshes();
+};
 }  // namespace Imperium::Loader
