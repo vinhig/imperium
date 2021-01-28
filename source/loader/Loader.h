@@ -17,5 +17,7 @@ class Loader {
    * Create dummy triangle model
    */
   Core::Option<Model*> CreateModelTriangle();
+
+  Core::Option<Model*> CreateModelGltf(const char* path);
 };
 }  // namespace Imperium::Loader

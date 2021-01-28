@@ -1,0 +1,2 @@
+namespace Imperium::Render::Frontend {
+}

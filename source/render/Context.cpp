@@ -57,20 +57,18 @@ void Context::EndFrame() {
   _backend->EndFrame();
 }
 
-Frontend::Texture Context::CreateTexture(CPUTexture texture) {
-  Frontend::Texture tex = {_backend};
-
-  return tex;
+Frontend::Texture* Context::CreateTexture(CPUTexture texture) {
+  return nullptr;
 }
 
-Frontend::Mesh Context::CreateMesh(CPUBuffer<float> vertices,
-                                   CPUBuffer<unsigned int> indices) {
-  Frontend::Mesh mesh = {};
-  mesh.backend = _backend;
-  mesh.vertices = vertices;
-  mesh.indices = indices;
+Frontend::Mesh* Context::CreateMesh(CPUBuffer<Vertex> vertices,
+                                    CPUBuffer<unsigned int> indices) {
+  auto mesh = new Frontend::Mesh;
+  mesh->backend = _backend;
+  mesh->vertices = vertices;
+  mesh->indices = indices;
 
-  mesh.Create();
+  mesh->Create();
 
   return mesh;
 }

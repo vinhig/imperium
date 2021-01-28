@@ -66,9 +66,9 @@ class Context {
 
   void EndFrame();
 
-  Frontend::Texture CreateTexture(CPUTexture texture);
-  Frontend::Mesh CreateMesh(CPUBuffer<float> vertices,
-                            CPUBuffer<unsigned int> indices);
+  Frontend::Texture* CreateTexture(CPUTexture texture);
+  Frontend::Mesh* CreateMesh(CPUBuffer<Vertex> vertices,
+                             CPUBuffer<unsigned int> indices);
 };
 
 }  // namespace Imperium::Render

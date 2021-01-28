@@ -17,8 +17,9 @@ struct Mesh {
   Backend::Backend* backend{nullptr};
   Backend::Buffer* vertexBuffer{nullptr};
   Backend::Buffer* indexBuffer{nullptr};
+  unsigned int count{0};
   bool valid{false};
-  CPUBuffer<float> vertices{};
+  CPUBuffer<Vertex> vertices{};
   CPUBuffer<unsigned int> indices{};
 
   Mesh() = default;

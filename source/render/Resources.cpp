@@ -1,6 +1,6 @@
 #include "Resources.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace Imperium::Render {
 template <>

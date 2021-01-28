@@ -10,6 +10,6 @@
 [submodule "libraries/vma"]
 	path = libraries/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
-[submodule "libraries/eastl"]
-	path = libraries/eastl
-	url = https://github.com/electronicarts/EASTL/
+[submodule "libraries/cgltf"]
+	path = libraries/cgltf
+	url = https://github.com/jkuhlmann/cgltf

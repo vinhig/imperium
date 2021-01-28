@@ -6,12 +6,17 @@
 
 #include <vector>
 
+namespace Imperium::Render {
+struct Vertex;
+}
+
 namespace Imperium::Loader {
+
 struct RawMesh {
-  float* vertices{nullptr};
+  Render::Vertex* vertices{nullptr};
   unsigned int* indices{nullptr};
-  int nbVertices{0};
-  int nbIndices{0};
+  unsigned int nbVertices{0};
+  unsigned int nbIndices{0};
 };
 
 using Meshes = std::vector<RawMesh>;
@@ -20,6 +25,7 @@ class Model {
  private:
   Meshes _meshes;
   int _nbMeshes{0};
+
  public:
   explicit Model(int nbBuffers);
   ~Model() = default;

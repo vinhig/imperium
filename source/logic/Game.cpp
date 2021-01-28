@@ -8,6 +8,7 @@
 #include "render/Device.h"
 #include "render/Resources.h"
 #include "render/frontend/Mesh.h"
+#include "render/frontend/Model.h"
 
 namespace Imperium::Logic {
 
@@ -32,7 +33,7 @@ void Game::SysDraw() {
 
 bool Game::ShouldClose() { return _device->ShouldClose(); }
 
-Core::Option<Render::Frontend::Mesh> Game::LoadModel() {
+Core::Option<Render::Frontend::Mesh*> Game::LoadTriangle() {
   // Load from disk
   // Loader loads :
   // - textures
@@ -46,7 +47,7 @@ Core::Option<Render::Frontend::Mesh> Game::LoadModel() {
   auto meshes = model->GetMeshes();
   auto nbMeshes = model->NbMeshes();
   for (int i = 0; i < nbMeshes; i++) {
-    Render::CPUBuffer<float> vertices = {};
+    Render::CPUBuffer<Render::Vertex> vertices = {};
     vertices.nbElements = meshes[i].nbVertices;
     vertices.data = meshes[i].vertices;
 
@@ -58,8 +59,38 @@ Core::Option<Render::Frontend::Mesh> Game::LoadModel() {
 
     // TODO: atm it's just a triangle
 
-    return Core::Option<Render::Frontend::Mesh>(mesh);
+    return Core::Option<Render::Frontend::Mesh*>(mesh);
   }
+}
+
+Core::Option<Render::Frontend::Model*> Game::LoadModel(const char* path) {
+  auto model = _loader->CreateModelGltf(path);
+
+  if (!model.HasValue()) {
+    printf("Loader didn't manage to load model.");
+    return Core::Option<Render::Frontend::Model*>();
+  }
+
+  auto meshes = model.Value()->GetMeshes();
+  auto nbMeshes = model.Value()->NbMeshes();
+
+  auto buildModel = new Render::Frontend::Model(nbMeshes);
+
+  for (int i = 0; i < nbMeshes; i++) {
+    Render::CPUBuffer<Render::Vertex> vertices = {};
+    vertices.nbElements = meshes[i].nbVertices;
+    vertices.data = meshes[i].vertices;
+
+    Render::CPUBuffer<unsigned int> indices = {};
+    indices.nbElements = meshes[i].nbIndices;
+    indices.data = meshes[i].indices;
+
+    auto mesh = _device->GetContext()->CreateMesh(vertices, indices);
+
+    buildModel->AddMesh(mesh, nullptr);
+  }
+
+  return Core::Option<Render::Frontend::Model*>(buildModel);
 }
 
 }  // namespace Imperium::Logic

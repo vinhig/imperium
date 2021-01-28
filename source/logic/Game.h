@@ -14,6 +14,7 @@ namespace Imperium::Render {
 class Device;
 namespace Frontend {
 class Mesh;
+class Model;
 }
 }  // namespace Imperium::Render
 
@@ -37,7 +38,8 @@ class Game {
 
   bool ShouldClose();
 
-  Core::Option<Render::Frontend::Mesh> LoadModel();
+  Core::Option<Render::Frontend::Mesh*> LoadTriangle();
+  Core::Option<Render::Frontend::Model*> LoadModel(const char* path);
 };
 
 }  // namespace Imperium::Logic

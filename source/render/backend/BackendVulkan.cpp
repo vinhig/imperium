@@ -11,6 +11,7 @@
 #include <fstream>
 
 #include "render/Device.h"
+#include "render/Resources.h"
 
 namespace Imperium::Render::Backend {
 struct BufferVulkan {
@@ -709,7 +710,7 @@ VertexInputDescription BackendVulkan::Get3DVertexDescription() {
 
   VkVertexInputBindingDescription mainBinding = {};
   mainBinding.binding = 0;
-  mainBinding.stride = (3 + 3 + 3) * 4;
+  mainBinding.stride = sizeof(Render::Vertex);
   mainBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
   description.bindings.push_back(mainBinding);
@@ -719,21 +720,21 @@ VertexInputDescription BackendVulkan::Get3DVertexDescription() {
   positionAttribute.binding = 0;
   positionAttribute.location = 0;
   positionAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
-  positionAttribute.offset = 0;
+  positionAttribute.offset = offsetof(Render::Vertex, position);
 
   // NORMAL (location = 1)
   VkVertexInputAttributeDescription normalAttribute = {};
   normalAttribute.binding = 0;
   normalAttribute.location = 1;
   normalAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
-  normalAttribute.offset = 3 * 4;
+  normalAttribute.offset = offsetof(Render::Vertex, normal);
 
   // COLOR (location = 1)
   VkVertexInputAttributeDescription colorAttribute = {};
   colorAttribute.binding = 0;
   colorAttribute.location = 2;
-  colorAttribute.format = VK_FORMAT_R32G32B32_SFLOAT;
-  colorAttribute.offset = 3 * 2 * 4;
+  colorAttribute.format = VK_FORMAT_R32G32_SFLOAT;
+  colorAttribute.offset = offsetof(Render::Vertex, texCoord);
 
   description.attributes.push_back(positionAttribute);
   description.attributes.push_back(normalAttribute);
@@ -759,7 +760,8 @@ void BackendVulkan::BindIndexBuffer(Buffer* indexBuffer) {
 }
 
 void BackendVulkan::DrawElements(int count) {
-  vkCmdDraw(_mainCommandBuffer, count, 1, 0, 0);
+  // vkCmdDraw(_mainCommandBuffer, count, 1, 0, 0);
+  vkCmdDrawIndexed(_mainCommandBuffer, count, 1, 0, 0, 0);
 }
 
 BackendVulkan::~BackendVulkan() {

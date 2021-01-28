@@ -3,7 +3,7 @@
 //
 
 #include "loader/Model.h"
-#include <stdio.h>
+#include <cstdio>
 
 namespace Imperium::Loader {
 Model::Model(int nbBuffers) { _meshes.reserve(nbBuffers); }

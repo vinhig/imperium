@@ -21,10 +21,12 @@ add_executable(Imperium
 
         source/loader/Loader.cpp
         source/loader/Model.cpp
+        source/loader/Pch.cpp
 
         source/logic/Game.cpp
 
         source/render/frontend/Mesh.cpp
+        source/render/frontend/Model.cpp
 
         source/render/backend/BackendVulkan.cpp
         source/render/Context.cpp
@@ -44,8 +46,8 @@ endif (UNIX)
 # 3rd party includes
 target_include_directories(Imperium PUBLIC source/)
 target_include_directories(Imperium PUBLIC libraries/)
+target_include_directories(Imperium PUBLIC libraries/cgltf)
 target_include_directories(Imperium PUBLIC libraries/vma/src)
-target_include_directories(Imperium PUBLIC libraries/eastl/include)
 
 # Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

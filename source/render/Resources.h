@@ -6,6 +6,12 @@
 
 namespace Imperium::Render {
 
+struct Vertex {
+  float position[3];
+  float normal[3];
+  float texCoord[2];
+};
+
 template <typename T>
 struct CPUBuffer {
   T* data;
