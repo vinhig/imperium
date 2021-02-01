@@ -12,26 +12,26 @@
 
 namespace Imperium::Logic {
 
-Game::Game(Render::Device* device) {
+Game::Game(Render::Context* context) {
   _loader = new Loader::Loader();
-  _device = device;
+  _context = context;
 }
 
 Game::~Game() {}
 
 void Game::Process() {
-  _device->PollEvents();
+  _context->GetDevice()->PollEvents();
 
   this->SysDraw();
 }
 
 void Game::SysDraw() {
-  _device->GetContext()->BeginFrame();
-  this->Draw(_device);
-  _device->GetContext()->EndFrame();
+  _context->BeginFrame();
+  this->Draw(_context);
+  _context->EndFrame();
 }
 
-bool Game::ShouldClose() { return _device->ShouldClose(); }
+bool Game::ShouldClose() { return _context->GetDevice()->ShouldClose(); }
 
 Core::Option<Render::Frontend::Mesh*> Game::LoadTriangle() {
   // Load from disk
@@ -55,7 +55,7 @@ Core::Option<Render::Frontend::Mesh*> Game::LoadTriangle() {
     indices.nbElements = meshes[i].nbIndices;
     indices.data = meshes[i].indices;
 
-    auto mesh = _device->GetContext()->CreateMesh(vertices, indices);
+    auto mesh = _context->CreateMesh(vertices, indices);
 
     // TODO: atm it's just a triangle
 
@@ -85,7 +85,7 @@ Core::Option<Render::Frontend::Model*> Game::LoadModel(const char* path) {
     indices.nbElements = meshes[i].nbIndices;
     indices.data = meshes[i].indices;
 
-    auto mesh = _device->GetContext()->CreateMesh(vertices, indices);
+    auto mesh = _context->CreateMesh(vertices, indices);
 
     buildModel->AddMesh(mesh, nullptr);
   }

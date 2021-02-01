@@ -19,6 +19,7 @@ Context::Context(API api, int width, int height) {
 }
 
 void Context::Init(Device* device) {
+  _device = device;
   switch (_api) {
     case API::Vulkan:
       _backend = new Backend::BackendVulkan(device);

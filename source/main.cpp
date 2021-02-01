@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     printf("DesktopDevice created successfully.\n");
   }
 
-  auto myGame = new MyGame(device);
+  auto myGame = new MyGame(context);
 
   myGame->Load();
 

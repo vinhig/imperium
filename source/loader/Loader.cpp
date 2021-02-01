@@ -115,13 +115,13 @@ Core::Option<Model *> Loader::CreateModelGltf(const char *path) {
       auto vertices = new Render::Vertex[nbVertices];
       CollectVertices(&primitive, vertices, nbVertices);
 
-      for (int i = 0; i < nbVertices; i++) {
-        printf("P{%f, %f, %f} N{%f, %f, %f} T{%f, %f}\n",
-               vertices[i].position[0], vertices[i].position[1],
-               vertices[i].position[2], vertices[i].normal[0],
-               vertices[i].normal[1], vertices[i].normal[2],
-               vertices[i].texCoord[0], vertices[i].texCoord[1]);
-      }
+      // for (int i = 0; i < nbVertices; i++) {
+      //   printf("P{%f, %f, %f} N{%f, %f, %f} T{%f, %f}\n",
+      //          vertices[i].position[0], vertices[i].position[1],
+      //          vertices[i].position[2], vertices[i].normal[0],
+      //          vertices[i].normal[1], vertices[i].normal[2],
+      //          vertices[i].texCoord[0], vertices[i].texCoord[1]);
+      // }
 
       auto nbIndices = (unsigned int)primitive.indices->count;
       auto indices = new unsigned int[nbIndices];

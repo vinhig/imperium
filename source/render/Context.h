@@ -31,6 +31,7 @@ class Context {
   int _mainPipeline;
 
   Backend::Backend* _backend;
+  Device* _device;
 
  public:
   Context(API api, int width, int height);
@@ -56,6 +57,8 @@ class Context {
    * Wether the context failed to be created.
    */
   bool Failed() const { return _failed; };
+
+  Device* GetDevice() const { return _device; };
 
   /**
    * Init underlying backend.

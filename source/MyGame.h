@@ -17,8 +17,8 @@ class MyGame : public Imperium::Logic::Game {
   Imperium::Render::Frontend::Model* triangle;
 
  public:
-  explicit MyGame(Imperium::Render::Device* device)
-      : Imperium::Logic::Game(device) {}
+  explicit MyGame(Imperium::Render::Context* context)
+      : Imperium::Logic::Game(context) {}
 
   void Load() override {
     auto path =
@@ -28,9 +28,9 @@ class MyGame : public Imperium::Logic::Game {
     // triangle = LoadTriangle().Value();
   };
 
-  void ResourceUpdate(Imperium::Render::Device* device) override{};
+  void ResourceUpdate(Imperium::Render::Context* Context) override{};
 
-  void Draw(Imperium::Render::Device* device) override { triangle->Draw(); };
+  void Draw(Imperium::Render::Context* context) override { triangle->Draw(); };
 
   ~MyGame() { triangle->Destroy(); }
 };
