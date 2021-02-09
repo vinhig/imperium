@@ -30,7 +30,7 @@ void Mesh::Create() {
   backend->UnmapBuffer(stagingVertex);
 
   ptr = backend->MapBuffer(stagingIndex);
-  memcpy(ptr, indices.data, sizeof(Render::Vertex) * indices.nbElements);
+  memcpy(ptr, indices.data, sizeof(unsigned int) * indices.nbElements);
   backend->UnmapBuffer(stagingIndex);
 
   vertexBuffer =

@@ -18,7 +18,7 @@ DeviceDesktop::DeviceDesktop(Context* context) {
   }
   _context = context;
   _window =
-      SDL_CreateWindow("Imperium Game Engine", SDL_WINDOWPOS_CENTERED,
+      SDL_CreateWindow("Virgin triangle Chad avocado", SDL_WINDOWPOS_CENTERED,
                        SDL_WINDOWPOS_CENTERED, context->Width(),
                        context->Height(), SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
   if (!_window) {

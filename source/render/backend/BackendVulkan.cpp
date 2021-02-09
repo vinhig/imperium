@@ -134,10 +134,41 @@ BackendVulkan::BackendVulkan(Device* device) {
   vkb::Swapchain swapchain = swapchainBuilderReturn.value();
   _swapchainImages = swapchain.get_images().value();
   _swapchainImageViews = swapchain.get_image_views().value();
-  _swapchainImageFormat = swapchain.image_format;
+  _swapchainImageFormat = VkFormat::VK_FORMAT_B8G8R8A8_SRGB;
   _swapchain = swapchain.swapchain;
 
   _failed = false;
+
+  /**
+   * vma allocator
+   */
+  VmaAllocatorCreateInfo allocatorCreateInfo = {};
+  allocatorCreateInfo.physicalDevice = _physicalDevice;
+  allocatorCreateInfo.device = _device;
+  allocatorCreateInfo.instance = _instance;
+  vmaCreateAllocator(&allocatorCreateInfo, &_allocator);
+
+  /**
+   * Depth buffer
+   */
+  _depthFormat = VK_FORMAT_D32_SFLOAT;
+  VkExtent3D depthImageExtent = {(uint32_t)_width, (uint32_t)_height, 1};
+  auto depthBufferInfo =
+      CreateImageInfo(_depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                      depthImageExtent);
+
+  VmaAllocationCreateInfo depthBufferAllocInfo = {};
+  depthBufferAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+  depthBufferAllocInfo.requiredFlags =
+      VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+  vmaCreateImage(_allocator, &depthBufferInfo, &depthBufferAllocInfo,
+                 &_depthImage._image, &_depthImage._allocation, nullptr);
+
+  auto depthBufferViewInfo = CreateImageViewInfo(
+      _depthFormat, _depthImage._image, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+  vkCreateImageView(_device, &depthBufferViewInfo, nullptr, &_depthImageView);
 
   /**
    * Graphics command pool
@@ -182,6 +213,23 @@ BackendVulkan::BackendVulkan(Device* device) {
   /**
    * Default renderpass
    */
+  VkAttachmentDescription depthAttachment = {};
+  // Depth attachment
+  depthAttachment.flags = 0;
+  depthAttachment.format = _depthFormat;
+  depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+  depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+  depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  depthAttachment.finalLayout =
+      VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+  VkAttachmentReference depthAttachmentRef = {};
+  depthAttachmentRef.attachment = 1;
+  depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
   VkAttachmentDescription colorAttachment = {};
   colorAttachment.format = _swapchainImageFormat;
   colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -200,11 +248,14 @@ BackendVulkan::BackendVulkan(Device* device) {
   subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
   subpass.colorAttachmentCount = 1;
   subpass.pColorAttachments = &colorAttachmentRef;
+  subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+  VkAttachmentDescription attachments[2] = {colorAttachment, depthAttachment};
 
   VkRenderPassCreateInfo renderPassInfo = {};
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-  renderPassInfo.attachmentCount = 1;
-  renderPassInfo.pAttachments = &colorAttachment;
+  renderPassInfo.attachmentCount = 2;
+  renderPassInfo.pAttachments = &attachments[0];
   renderPassInfo.subpassCount = 1;
   renderPassInfo.pSubpasses = &subpass;
 
@@ -228,7 +279,12 @@ BackendVulkan::BackendVulkan(Device* device) {
   _framebuffers = std::vector<VkFramebuffer>(fbCount);
 
   for (size_t i = 0; i < fbCount; i++) {
-    fbCreateInfo.pAttachments = &_swapchainImageViews[i];
+    VkImageView attachments[2];
+    attachments[0] = _swapchainImageViews[i];
+    attachments[1] = _depthImageView;
+
+    fbCreateInfo.attachmentCount = 2;
+    fbCreateInfo.pAttachments = &attachments[0];
     vkCreateFramebuffer(_device, &fbCreateInfo, nullptr, &_framebuffers[i]);
   }
 
@@ -250,15 +306,6 @@ BackendVulkan::BackendVulkan(Device* device) {
 
   vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderSemaphore);
   vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_presentSemaphore);
-
-  /**
-   * vma allocator
-   */
-  VmaAllocatorCreateInfo allocatorCreateInfo = {};
-  allocatorCreateInfo.physicalDevice = _physicalDevice;
-  allocatorCreateInfo.device = _device;
-  allocatorCreateInfo.instance = _instance;
-  vmaCreateAllocator(&allocatorCreateInfo, &_allocator);
 }
 
 VkCommandBuffer BackendVulkan::CreateCommandBuffer(VkCommandPool commandPool) {
@@ -409,6 +456,62 @@ VkPipelineLayoutCreateInfo BackendVulkan::CreatePipelineLayoutInfo(
   return info;
 }
 
+VkImageCreateInfo BackendVulkan::CreateImageInfo(VkFormat format,
+                                                 VkImageUsageFlags usageFlags,
+                                                 VkExtent3D extent) {
+  VkImageCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  info.pNext = nullptr;
+
+  info.imageType = VK_IMAGE_TYPE_2D;
+
+  info.format = format;
+  info.extent = extent;
+
+  info.mipLevels = 1;
+  info.arrayLayers = 1;
+  info.samples = VK_SAMPLE_COUNT_1_BIT;
+  info.tiling = VK_IMAGE_TILING_OPTIMAL;
+  info.usage = usageFlags;
+
+  return info;
+}
+
+VkImageViewCreateInfo BackendVulkan::CreateImageViewInfo(
+    VkFormat format, VkImage image, VkImageAspectFlags aspectFlags) {
+  VkImageViewCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  info.pNext = nullptr;
+
+  info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  info.image = image;
+  info.format = format;
+  info.subresourceRange.baseMipLevel = 0;
+  info.subresourceRange.levelCount = 1;
+  info.subresourceRange.baseArrayLayer = 0;
+  info.subresourceRange.layerCount = 1;
+  info.subresourceRange.aspectMask = aspectFlags;
+
+  return info;
+}
+
+VkPipelineDepthStencilStateCreateInfo BackendVulkan::CreateDepthStencilInfo(
+    bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp) {
+  VkPipelineDepthStencilStateCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  info.pNext = nullptr;
+
+  info.depthTestEnable = bDepthTest ? VK_TRUE : VK_FALSE;
+  info.depthWriteEnable = bDepthWrite ? VK_TRUE : VK_FALSE;
+  info.depthCompareOp = bDepthTest ? compareOp : VK_COMPARE_OP_ALWAYS;
+  info.depthBoundsTestEnable = VK_FALSE;
+  info.minDepthBounds = 0.0f;
+  info.maxDepthBounds = 1.0f;
+  info.stencilTestEnable = VK_FALSE;
+
+  return info;
+}
+
 void BackendVulkan::BeginFrame() {
   // Wait for last frame dude
   vkWaitForFences(_device, 1, &_renderFence, true, 1000000000);
@@ -488,6 +591,11 @@ void BackendVulkan::BindRenderpass(int renderpass) {
     VkClearValue clearValue;
     clearValue.color = {{0.3f, 0.2f, 0.1f, 1.0f}};
 
+    VkClearValue depthClear;
+    depthClear.depthStencil.depth = 1.f;
+
+    VkClearValue clearValues[2] = {clearValue, depthClear};
+
     VkRenderPassBeginInfo rpInfo = {};
     rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     rpInfo.pNext = nullptr;
@@ -496,8 +604,8 @@ void BackendVulkan::BindRenderpass(int renderpass) {
     rpInfo.renderArea.offset.y = 0;
     rpInfo.renderArea.extent = {(uint32_t)_width, (uint32_t)_height};
     rpInfo.framebuffer = _framebuffers[_swapchainImageIndex];
-    rpInfo.clearValueCount = 1;
-    rpInfo.pClearValues = &clearValue;
+    rpInfo.clearValueCount = 2;
+    rpInfo.pClearValues = &clearValues[0];
 
     vkCmdBeginRenderPass(cmd, &rpInfo, VK_SUBPASS_CONTENTS_INLINE);
   }
@@ -574,7 +682,9 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     VkGraphicsPipelineCreateInfo pipelineInfo = {};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.pNext = nullptr;
-
+    auto depthStencilState =
+        CreateDepthStencilInfo(true, true, VK_COMPARE_OP_LESS_OR_EQUAL);
+    pipelineInfo.pDepthStencilState = &depthStencilState;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
     auto vertexInput = CreateVertexInputStateInfo();
@@ -800,6 +910,9 @@ BackendVulkan::~BackendVulkan() {
     for (auto const& imageView : _swapchainImageViews) {
       vkDestroyImageView(_device, imageView, nullptr);
     }
+
+    vkDestroyImageView(_device, _depthImageView, nullptr);
+    vmaDestroyImage(_allocator, _depthImage._image, _depthImage._allocation);
 
     vkDestroyCommandPool(_device, _transferCommandPool, nullptr);
     vkDestroyCommandPool(_device, _graphicsCommandPool, nullptr);

@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 
 VK_DEFINE_HANDLE(VmaAllocator)
+VK_DEFINE_HANDLE(VmaAllocation)
 
 #include <vector>
 
@@ -24,6 +25,11 @@ namespace Imperium::Render::Backend {
 struct PipelineStuff {
   VkPipeline pipeline;
   VkPipelineLayout pipelineLayout;
+};
+
+struct ImageStuff {
+  VkImage _image;
+  VmaAllocation _allocation;
 };
 
 struct VertexInputDescription;
@@ -65,6 +71,11 @@ class BackendVulkan : public Backend {
   uint32_t _swapchainImageIndex;
   bool _failed{true};
 
+  // Depth buffer
+  VkImageView _depthImageView;
+  ImageStuff _depthImage;
+  VkFormat _depthFormat;
+
   // Renderpass
   VkRenderPass _renderPass;
   std::vector<VkFramebuffer> _framebuffers;
@@ -91,6 +102,13 @@ class BackendVulkan : public Backend {
   static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo(
       size_t nbPushConstant, size_t* pushConstantSizes,
       VkShaderStageFlags* shaderStageFlags);
+  static VkImageCreateInfo CreateImageInfo(VkFormat format,
+                                           VkImageUsageFlags usageFlags,
+                                           VkExtent3D extent);
+  static VkImageViewCreateInfo CreateImageViewInfo(
+      VkFormat format, VkImage image, VkImageAspectFlags aspectFlags);
+  static VkPipelineDepthStencilStateCreateInfo CreateDepthStencilInfo(
+      bool bDepthTest, bool bDepthWrite, VkCompareOp compareOp);
 
   VertexInputDescription Get3DVertexDescription();
   void DeleteOldStuff();

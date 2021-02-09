@@ -64,12 +64,12 @@ void Context::BeginFrame() {
   auto lookAt = mathfu::LookAtHelper({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f},
                                      {0.0f, 1.0f, 0.0f}, -1.0f);
 
-  auto rotation = mathfu::mat3::RotationX(frame) *
-                  mathfu::mat3::RotationY(frame) *
-                  mathfu::mat3::RotationZ(frame * -1.0f);
+  auto rotation = mathfu::mat3::RotationX(M_PI) *
+                  mathfu::mat3::RotationY(frame * 3.0f) *
+                  mathfu::mat3::RotationZ(0.0f);
 
   auto model =
-      mathfu::TransformHelper({0.0f, 0.0f, 0.0f}, rotation, {3.0f, 3.0f, 3.0f});
+      mathfu::TransformHelper({0.0f, 0.0f, 0.0f}, rotation, {4.0f, 4.0f, 4.0f});
 
   auto mvp = perspective * lookAt * model;
 
