@@ -88,7 +88,9 @@ class BackendVulkan : public Backend {
   static VkPipelineMultisampleStateCreateInfo CreateMultisampleStateInfo();
   static VkPipelineColorBlendAttachmentState
   CreateColorBlendAttachmentStateInfo();
-  static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo();
+  static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo(
+      size_t nbPushConstant, size_t* pushConstantSizes,
+      VkShaderStageFlags* shaderStageFlags);
 
   VertexInputDescription Get3DVertexDescription();
   void DeleteOldStuff();
@@ -107,6 +109,8 @@ class BackendVulkan : public Backend {
 
   void BindVertexBuffers(int count, Buffer* vertexBuffers) override;
   void BindIndexBuffer(Buffer* indexBuffer) override;
+  // void BindConstantBuffer(int offset, Buffer* constantBuffer) override;
+  void BindUniform(int offset, int pipeline, size_t size, void* data) override;
 
   void DrawElements(int count) override;
 

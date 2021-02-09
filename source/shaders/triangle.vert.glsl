@@ -6,8 +6,13 @@ layout (location = 2) in vec2 vColor;
 
 layout (location = 0) out vec3 outColor;
 
+layout( push_constant ) uniform constants
+{
+	mat4 camera;
+} Camera;
+
 void main() 
 {	
-	gl_Position = vec4(vPosition, 1.0f);
+	gl_Position = Camera.camera * vec4(vPosition, 1.0f);
 	outColor = vNormal;
 }

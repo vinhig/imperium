@@ -19,6 +19,9 @@ add_library(openfbx
 add_executable(Imperium
         source/main.cpp
 
+        # source/core/Matrix4.cpp
+        # source/core/Vec3.cpp
+
         source/loader/Loader.cpp
         source/loader/Model.cpp
         source/loader/Pch.cpp
@@ -40,6 +43,7 @@ target_link_libraries(Imperium openfbx Vulkan::Vulkan vk-bootstrap OpenGL::GL SD
 
 if (UNIX)
     target_link_libraries(Imperium -ldl)
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -msse4.1 ")
 endif (UNIX)
 
 
@@ -48,6 +52,8 @@ target_include_directories(Imperium PUBLIC source/)
 target_include_directories(Imperium PUBLIC libraries/)
 target_include_directories(Imperium PUBLIC libraries/cgltf)
 target_include_directories(Imperium PUBLIC libraries/vma/src)
+target_include_directories(Imperium PUBLIC libraries/mathfu/include)
+target_include_directories(Imperium PUBLIC libraries/mathfu/dependencies/vectorial/include)
 
 # Shaders compilation
 file(GLOB_RECURSE GLSL_SOURCE_FILES "source/shaders/*.glsl")

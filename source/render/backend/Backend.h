@@ -37,6 +37,9 @@ class Backend {
 
   virtual void BindVertexBuffers(int count, Buffer* vertexBuffers) = 0;
   virtual void BindIndexBuffer(Buffer* indexBuffer) = 0;
+  // virtual void BindConstantBuffer(int offset, Buffer* constantBuffer) = 0;
+  virtual void BindUniform(int offset, int pipeline, size_t size,
+                           void* data) = 0;
 
   virtual void DrawElements(int count) = 0;
 

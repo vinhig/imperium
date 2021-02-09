@@ -4,6 +4,9 @@
 
 #include "render/Context.h"
 
+#include <mathfu/glsl_mappings.h>
+#include <mathfu/matrix.h>
+
 #include <cstdio>
 
 #include "render/Device.h"
@@ -48,9 +51,37 @@ void Context::Init(Device* device) {
 }
 
 void Context::BeginFrame() {
+  // clang-format off
+  float camera[16] = {
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f,
+  };
+  // clang-format on
+  auto perspective = mathfu::PerspectiveHelper(
+      70.0f, (float)Width() / (float)Height(), 0.01f, 100.0f, -1.0f);
+  auto lookAt = mathfu::LookAtHelper({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f},
+                                     {0.0f, 1.0f, 0.0f}, -1.0f);
+
+  auto rotation = mathfu::mat3::RotationX(frame) *
+                  mathfu::mat3::RotationY(frame) *
+                  mathfu::mat3::RotationZ(frame * -1.0f);
+
+  auto model =
+      mathfu::TransformHelper({0.0f, 0.0f, 0.0f}, rotation, {3.0f, 3.0f, 3.0f});
+
+  auto mvp = perspective * lookAt * model;
+
+  frame += 0.01;
+
+  mathfu::vec4_packed packed[4];
+  mvp.Pack(packed);
+
   _backend->BeginFrame();
   _backend->BindRenderpass(0);
   _backend->BeginPipeline(_mainPipeline);
+  _backend->BindUniform(0, _mainPipeline, 16 * 4, (void*)&packed->data_[0]);
 }
 
 void Context::EndFrame() {

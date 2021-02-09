@@ -33,6 +33,8 @@ class Context {
   Backend::Backend* _backend;
   Device* _device;
 
+  float frame{0.0f};
+
  public:
   Context(API api, int width, int height);
 

@@ -387,15 +387,25 @@ BackendVulkan::CreateColorBlendAttachmentStateInfo() {
   return colorBlendAttachment;
 }
 
-VkPipelineLayoutCreateInfo BackendVulkan::CreatePipelineLayoutInfo() {
+VkPipelineLayoutCreateInfo BackendVulkan::CreatePipelineLayoutInfo(
+    size_t nbPushConstant, size_t* pushConstantSizes,
+    VkShaderStageFlags* shaderStageFlags) {
+  VkPushConstantRange* ranges = new VkPushConstantRange[nbPushConstant];
+  for (int i = 0; i < nbPushConstant; i++) {
+    ranges[i] = {};
+    ranges[i].offset = i;
+    ranges[i].size = pushConstantSizes[i];
+    ranges[i].stageFlags = shaderStageFlags[i];
+  }
+
   VkPipelineLayoutCreateInfo info{};
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   info.pNext = nullptr;
   info.flags = 0;
   info.setLayoutCount = 0;
   info.pSetLayouts = nullptr;
-  info.pushConstantRangeCount = 0;
-  info.pPushConstantRanges = nullptr;
+  info.pushConstantRangeCount = nbPushConstant;
+  info.pPushConstantRanges = ranges;
   return info;
 }
 
@@ -523,7 +533,10 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     /**
      * Create pipeline layout
      */
-    auto layoutInfo = CreatePipelineLayoutInfo();
+    size_t cameraPushConstant = 16 * 4;
+    VkShaderStageFlags cameraStageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    auto layoutInfo =
+        CreatePipelineLayoutInfo(1, &cameraPushConstant, &cameraStageFlags);
     VkPipelineLayout pipelineLayout;
     vkCreatePipelineLayout(_device, &layoutInfo, nullptr, &pipelineLayout);
 
@@ -757,6 +770,12 @@ void BackendVulkan::BindIndexBuffer(Buffer* indexBuffer) {
   auto buffer = (BufferVulkan*)indexBuffer;
   vkCmdBindIndexBuffer(_mainCommandBuffer, buffer->buffer, 0,
                        VkIndexType::VK_INDEX_TYPE_UINT32);
+}
+
+void BackendVulkan::BindUniform(int offset, int pipeline, size_t size,
+                                void* data) {
+  vkCmdPushConstants(_mainCommandBuffer, _pipelines[pipeline].pipelineLayout,
+                     VK_SHADER_STAGE_VERTEX_BIT, 0, size, data);
 }
 
 void BackendVulkan::DrawElements(int count) {

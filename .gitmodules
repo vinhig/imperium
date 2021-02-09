@@ -13,3 +13,6 @@
 [submodule "libraries/cgltf"]
 	path = libraries/cgltf
 	url = https://github.com/jkuhlmann/cgltf
+[submodule "libraries/mathfu"]
+	path = libraries/mathfu
+	url = https://github.com/google/mathfu.git
