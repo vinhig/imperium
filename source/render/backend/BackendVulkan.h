@@ -32,6 +32,27 @@ struct ImageStuff {
   VmaAllocation _allocation;
 };
 
+struct BufferVulkan {
+  VkBuffer buffer{nullptr};
+  VmaAllocation allocation{nullptr};
+  size_t size{0};
+};
+
+struct FrameData {
+  VkCommandBuffer _commandBuffer{nullptr};
+
+  VkFence _renderFence{nullptr};
+  VkSemaphore _renderSemaphore{nullptr};
+  VkSemaphore _presentSemaphore{nullptr};
+};
+
+struct VertexInputDescription {
+  std::vector<VkVertexInputBindingDescription> bindings;
+  std::vector<VkVertexInputAttributeDescription> attributes;
+
+  VkPipelineVertexInputStateCreateFlags flags = 0;
+};
+
 struct VertexInputDescription;
 
 class BackendVulkan : public Backend {
@@ -46,6 +67,7 @@ class BackendVulkan : public Backend {
 
   int _width{0};
   int _height{0};
+  unsigned int _currentFrame{0};
 
   // Commands
   VkQueue _graphicsQueue;
@@ -54,14 +76,11 @@ class BackendVulkan : public Backend {
   uint32_t _transferQueueFamily;
   VkCommandPool _graphicsCommandPool;
   VkCommandPool _transferCommandPool;
-  VkCommandBuffer _mainCommandBuffer;
   VkCommandBuffer _transferCommandBuffer;
 
   // Synchronisation
-  VkFence _renderFence;
   VkFence _transferFence;
-  VkSemaphore _renderSemaphore;
-  VkSemaphore _presentSemaphore;
+  FrameData _framesData[2];
 
   // Swapchain
   VkSwapchainKHR _swapchain;
@@ -112,6 +131,8 @@ class BackendVulkan : public Backend {
 
   VertexInputDescription Get3DVertexDescription();
   void DeleteOldStuff();
+
+  FrameData& GetCurrentFrameData();
 
  public:
   BackendVulkan(Device* device);

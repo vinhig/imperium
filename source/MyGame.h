@@ -22,8 +22,7 @@ class MyGame : public Imperium::Logic::Game {
 
   void Load() override {
     auto path =
-        "/home/vincent/Projects/glTF-Sample-Models/2.0/Avocado/glTF/"
-        "Avocado.gltf";
+        "C:\\Users\\vinhi\\source\\repos\\glTF-Sample-Models\\2.0\\Avocado\\glTF\\Avocado.gltf";
     triangle = LoadModel(path).Value();
     // triangle = LoadTriangle().Value();
   };

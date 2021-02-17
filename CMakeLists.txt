@@ -32,6 +32,12 @@ add_executable(Imperium
         source/render/frontend/Model.cpp
 
         source/render/backend/BackendVulkan.cpp
+        source/render/backend/BackendVulkanInit.cpp
+        source/render/backend/BackendVulkanBuffer.cpp
+        source/render/backend/BackendVulkanInfo.cpp
+        source/render/backend/BackendVulkanFrame.cpp
+        source/render/backend/BackendVulkanCommand.cpp
+
         source/render/Context.cpp
         source/render/DeviceDesktop.cpp
         source/render/Resources.cpp
