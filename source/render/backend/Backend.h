@@ -47,6 +47,10 @@ struct DescriptorBinding {
   };
 };
 
+/**
+ * Abstract class defining what methods a proper backend should implement. A
+ * backend provides high level methods to interact with a specific graphics API.
+ */
 class Backend {
  public:
   virtual ~Backend() = default;

@@ -14,10 +14,17 @@ class Loader {
   ~Loader();
 
   /**
-   * Create dummy triangle model
+   * Create dummy triangle model.
    */
   Core::Option<Model*> CreateModelTriangle();
 
+  /**
+   * Load complex GLTF model from disk. GLTF version 2.0 with vertices
+   * (position, normal, texture coordinate) and indices are supported.
+   * Hierarchy, nodes and textures aren't.
+   * @param path Path to gltf on disk.
+   * @return Optional model (no value if model failed to be loaded).
+   */
   Core::Option<Model*> CreateModelGltf(const char* path);
 };
 }  // namespace Imperium::Loader

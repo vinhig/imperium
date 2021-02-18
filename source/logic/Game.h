@@ -31,12 +31,36 @@ class Game {
  public:
   Game(Render::Context* device);
   ~Game();
+  /**
+   * Called at the early beginning of the startup, just after the creation of
+   * `Context`, `Device` and `Backend`.
+   */
   virtual void Load() = 0;
-  virtual void ResourceUpdate(Render::Context* device) = 0;
-  virtual void Draw(Render::Context* device) = 0;
 
+  /**
+   * Never called, don't use it atm.
+   * @param device
+   */
+  virtual void ResourceUpdate(Render::Context* device) = 0;
+
+  /**
+   * Called one time per frame. Place your draw calls (whateverItIs->Draw())
+   * there.
+   * @param context Active context (high level object for resources
+   * manipulation).
+   */
+  virtual void Draw(Render::Context* context) = 0;
+
+  /**
+   * To call one time per frame, tick all subsystems and swap buffers (this one
+   * should be moved to another function).
+   */
   void Process();
 
+  /**
+   * User or event requires the game to shut down.
+   * @return Application should close.
+   */
   bool ShouldClose();
 
   Core::Option<Render::Frontend::Mesh*> LoadTriangle();

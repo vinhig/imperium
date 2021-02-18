@@ -35,7 +35,7 @@ struct Camera {
  public:
   /**
    * Create camera from given parameters. Atm, pos isn't used. Default position
-   * is set to {0, 0, 0}.
+   * is set to {0, 0, 0}. Perspective camera.
    * @param pos Position of the center of the camera.
    * @param fov Field of view.
    * @param aspect Aspect ratio (often width of screen/height of screen).
@@ -46,7 +46,17 @@ struct Camera {
          float far);
   ~Camera();
 
+  /**
+   * Packed data to use with buffer. Chunk of floats of size = Size(). See
+   * CameraPacked in `class Camera;`.
+   * @return Pointer to packed data.
+   */
   void* Data();
+
+  /**
+   * Size of underlying structure. See CameraPacked in `class Camera;`.
+   * @return Size of underlying camera structure.
+   */
   static unsigned Size();
 };
 }  // namespace Imperium::Logic

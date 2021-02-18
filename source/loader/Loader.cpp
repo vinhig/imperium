@@ -38,15 +38,16 @@ Core::Option<Model *> Loader::CreateModelTriangle() {
 }
 
 void CollectVertices(cgltf_primitive *primitive, Render::Vertex *vertices,
-                     int nbVertices) {
+                     int vertexCount) {
   for (int i = 0; i < primitive->attributes_count; i++) {
     auto attribute = primitive->attributes[i];
 
     switch (attribute.type) {
       case cgltf_attribute_type_position: {
-        auto positions = new float[nbVertices * 3];
-        cgltf_accessor_unpack_floats(attribute.data, positions, nbVertices * 3);
-        for (int l = 0; l < nbVertices; l++) {
+        auto positions = new float[vertexCount * 3];
+        cgltf_accessor_unpack_floats(attribute.data, positions,
+                                     vertexCount * 3);
+        for (int l = 0; l < vertexCount; l++) {
           vertices[l].position[0] = positions[l * 3 + 0];
           vertices[l].position[1] = positions[l * 3 + 1];
           vertices[l].position[2] = positions[l * 3 + 2];
@@ -54,9 +55,9 @@ void CollectVertices(cgltf_primitive *primitive, Render::Vertex *vertices,
         break;
       }
       case cgltf_attribute_type_normal: {
-        auto normals = new float[nbVertices * 3];
-        cgltf_accessor_unpack_floats(attribute.data, normals, nbVertices * 3);
-        for (int l = 0; l < nbVertices; l++) {
+        auto normals = new float[vertexCount * 3];
+        cgltf_accessor_unpack_floats(attribute.data, normals, vertexCount * 3);
+        for (int l = 0; l < vertexCount; l++) {
           vertices[l].normal[0] = normals[l * 3 + 0];
           vertices[l].normal[1] = normals[l * 3 + 1];
           vertices[l].normal[2] = normals[l * 3 + 2];
@@ -64,9 +65,10 @@ void CollectVertices(cgltf_primitive *primitive, Render::Vertex *vertices,
         break;
       }
       case cgltf_attribute_type_texcoord: {
-        auto texcoords = new float[nbVertices * 2];
-        cgltf_accessor_unpack_floats(attribute.data, texcoords, nbVertices * 2);
-        for (int l = 0; l < nbVertices; l++) {
+        auto texcoords = new float[vertexCount * 2];
+        cgltf_accessor_unpack_floats(attribute.data, texcoords,
+                                     vertexCount * 2);
+        for (int l = 0; l < vertexCount; l++) {
           vertices[l].texCoord[0] = texcoords[l * 2 + 0];
           vertices[l].texCoord[1] = texcoords[l * 2 + 1];
         }
@@ -111,26 +113,18 @@ Core::Option<Model *> Loader::CreateModelGltf(const char *path) {
     for (int j = 0; j < mesh.primitives_count; j++) {
       auto primitive = mesh.primitives[j];
 
-      auto nbVertices = (unsigned int)primitive.attributes[0].data->count;
-      auto vertices = new Render::Vertex[nbVertices];
-      CollectVertices(&primitive, vertices, nbVertices);
+      auto vertexCount = (unsigned int)primitive.attributes[0].data->count;
+      auto vertices = new Render::Vertex[vertexCount];
+      CollectVertices(&primitive, vertices, vertexCount);
 
-      // for (int i = 0; i < nbVertices; i++) {
-      //   printf("P{%f, %f, %f} N{%f, %f, %f} T{%f, %f}\n",
-      //          vertices[i].position[0], vertices[i].position[1],
-      //          vertices[i].position[2], vertices[i].normal[0],
-      //          vertices[i].normal[1], vertices[i].normal[2],
-      //          vertices[i].texCoord[0], vertices[i].texCoord[1]);
-      // }
-
-      auto nbIndices = (unsigned int)primitive.indices->count;
-      auto indices = new unsigned int[nbIndices];
-      for (int k = 0; k < nbIndices; ++k) {
+      auto indexCount = (unsigned int)primitive.indices->count;
+      auto indices = new unsigned int[indexCount];
+      for (int k = 0; k < indexCount; ++k) {
         cgltf_accessor_read_uint(primitive.indices, k, &indices[k],
                                  sizeof(unsigned int));
       }
 
-      model->AddRawMesh({vertices, indices, nbVertices, nbIndices});
+      model->AddRawMesh({vertices, indices, vertexCount, indexCount});
     }
   }
 

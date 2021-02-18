@@ -55,9 +55,7 @@ DeviceWindow DeviceDesktop::Window() const {
   return window;
 }
 
-Context* DeviceDesktop::GetContext() const {
-  return _context;
-}
+Context* DeviceDesktop::GetContext() const { return _context; }
 
 DeviceDesktop::~DeviceDesktop() {
   printf("~DeviceDesktop()\n");

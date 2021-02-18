@@ -6,7 +6,6 @@
 #include "loader/Model.h"
 #include "render/Context.h"
 #include "render/Device.h"
-#include "render/Resources.h"
 #include "render/frontend/Mesh.h"
 #include "render/frontend/Model.h"
 

@@ -17,6 +17,10 @@ struct CPUBuffer {
   T* data;
   int nbElements;
 
+  /**
+   * For debug purposes only, display in human-readable form the content of this
+   * buffer.
+   */
   void Display();
 };
 

@@ -12,6 +12,10 @@ namespace Imperium::Render {
 
 class Context;
 
+/**
+ * Device to use on desktop platform (GNU/Linux and Windows). Basically a
+ * wrapper around SDL2.
+ */
 class DeviceDesktop : public Device {
  private:
   SDL_Window* _window{nullptr};
@@ -20,11 +24,17 @@ class DeviceDesktop : public Device {
   Context* _context{nullptr};
 
  public:
-  DeviceDesktop(Context* context);
+  explicit DeviceDesktop(Context* context);
   ~DeviceDesktop();
 
-  void PollEvents();
+  void PollEvents() override;
 
+  /**
+   * Something went wrong during initialisation of this device. Nothing should
+   * be expected from a Device that failed its creation.
+   * @return Device failed to be created (false = success, true = problem
+   * encountered :-/).
+   */
   bool Failed() const { return _failed; };
 
   bool ShouldClose() const override { return _shouldClose; };
