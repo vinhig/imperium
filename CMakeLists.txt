@@ -26,6 +26,7 @@ add_executable(Imperium
         source/loader/Model.cpp
         source/loader/Pch.cpp
 
+        source/logic/Camera.cpp
         source/logic/Game.cpp
 
         source/render/frontend/Mesh.cpp
@@ -37,6 +38,7 @@ add_executable(Imperium
         source/render/backend/BackendVulkanInfo.cpp
         source/render/backend/BackendVulkanFrame.cpp
         source/render/backend/BackendVulkanCommand.cpp
+        source/render/backend/BackendVulkanDescriptor.cpp
 
         source/render/Context.cpp
         source/render/DeviceDesktop.cpp

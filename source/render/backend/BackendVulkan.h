@@ -14,6 +14,8 @@ VK_DEFINE_HANDLE(VmaAllocation)
 #include "core/Option.h"
 #include "render/backend/Backend.h"
 
+constexpr unsigned int FRAME_OVERLAP = 3;
+
 using namespace Imperium;
 
 namespace Imperium::Render {
@@ -23,19 +25,30 @@ class Device;
 namespace Imperium::Render::Backend {
 
 struct PipelineStuff {
-  VkPipeline pipeline;
-  VkPipelineLayout pipelineLayout;
+  VkPipeline pipeline{nullptr};
+  VkPipelineLayout pipelineLayout{nullptr};
 };
 
 struct ImageStuff {
-  VkImage _image;
-  VmaAllocation _allocation;
+  VkImage _image{nullptr};
+  VmaAllocation _allocation{nullptr};
+};
+
+struct PipelineVulkan {
+  VkPipeline _pipeline{nullptr};
+  VkPipelineLayout _pipelineLayout{nullptr};
 };
 
 struct BufferVulkan {
   VkBuffer buffer{nullptr};
   VmaAllocation allocation{nullptr};
   size_t size{0};
+  // Used with frame dependant buffers
+  BufferVulkan* next{nullptr};
+};
+
+struct BufferFrameDependant {
+  BufferVulkan buffers[FRAME_OVERLAP];
 };
 
 struct FrameData {
@@ -44,6 +57,14 @@ struct FrameData {
   VkFence _renderFence{nullptr};
   VkSemaphore _renderSemaphore{nullptr};
   VkSemaphore _presentSemaphore{nullptr};
+};
+
+struct DescriptorLayoutVulkan {
+  VkDescriptorSetLayout _setLayout{nullptr};
+};
+
+struct DescriptorSetVulkan {
+  VkDescriptorSet _set[FRAME_OVERLAP];
 };
 
 struct VertexInputDescription {
@@ -64,6 +85,7 @@ class BackendVulkan : public Backend {
   VkPhysicalDeviceMemoryProperties _memoryProperties;
   VkDevice _device;
   VmaAllocator _allocator;
+  VkDescriptorPool _descriptorPool;
 
   int _width{0};
   int _height{0};
@@ -80,7 +102,7 @@ class BackendVulkan : public Backend {
 
   // Synchronisation
   VkFence _transferFence;
-  FrameData _framesData[2];
+  FrameData _framesData[FRAME_OVERLAP];
 
   // Swapchain
   VkSwapchainKHR _swapchain;
@@ -99,11 +121,13 @@ class BackendVulkan : public Backend {
   VkRenderPass _renderPass;
   std::vector<VkFramebuffer> _framebuffers;
 
-  std::vector<PipelineStuff> _pipelines;
+  // std::vector<PipelineStuff> _pipelines;
 
   // Stuff to delete at end of frame
   Buffer** _oldBuffers{nullptr};
   int _nbOldBuffers{0};
+  Pipeline** _oldPipelines{nullptr};
+  int _nbOldPipelines{0};
 
   VkCommandBuffer CreateCommandBuffer(VkCommandPool commandPool);
   Core::Option<VkShaderModule> CreateShaderModule(const char* filePath);
@@ -119,8 +143,9 @@ class BackendVulkan : public Backend {
   static VkPipelineColorBlendAttachmentState
   CreateColorBlendAttachmentStateInfo();
   static VkPipelineLayoutCreateInfo CreatePipelineLayoutInfo(
-      size_t nbPushConstant, size_t* pushConstantSizes,
-      VkShaderStageFlags* shaderStageFlags);
+      unsigned pushConstantCount, const unsigned* pushConstantSizes,
+      unsigned descriptorCount, DescriptorLayout* descriptors,
+      const VkShaderStageFlags* shaderStageFlags);
   static VkImageCreateInfo CreateImageInfo(VkFormat format,
                                            VkImageUsageFlags usageFlags,
                                            VkExtent3D extent);
@@ -135,35 +160,52 @@ class BackendVulkan : public Backend {
   FrameData& GetCurrentFrameData();
 
  public:
-  BackendVulkan(Device* device);
+  explicit BackendVulkan(Device* device);
   ~BackendVulkan() override;
 
   void BeginFrame() override;
   void EndFrame() override;
 
-  void BeginPipeline(int pipeline) override;
-  void EndPipeline(int pipeline) override;
+  void BeginPipeline(Pipeline* pipeline) override;
+  void EndPipeline(Pipeline* pipeline) override;
 
   void BindRenderpass(int renderpass) override;
 
   void BindVertexBuffers(int count, Buffer* vertexBuffers) override;
   void BindIndexBuffer(Buffer* indexBuffer) override;
   // void BindConstantBuffer(int offset, Buffer* constantBuffer) override;
-  void BindUniform(int offset, int pipeline, size_t size, void* data) override;
+  void BindUniform(int offset, Pipeline* pipeline, size_t size,
+                   void* data) override;
 
   void DrawElements(int count) override;
 
-  Core::Option<int> CreatePipeline(PipelineType pipelineType) override;
+  Core::Option<Pipeline*> CreatePipeline(
+      PipelineType pipeline, unsigned descriptorCount,
+      DescriptorLayout* descriptors) override;
+  void DeletePipeline(Pipeline* pipeline) override;
+  void DeferDeletePipeline(Pipeline* buffer) override;
   // void CreateBuffer(BufferType bufferType) override;
 
-  Buffer* CreateBuffer(BufferType bufferType, int size) override;
+  Buffer* CreateBuffer(BufferType bufferType, unsigned size) override;
   void DeleteBuffer(Buffer* buffer) override;
   void DeferDeleteBuffer(Buffer* buffer) override;
   void* MapBuffer(Buffer* buffer) override;
   void UnmapBuffer(Buffer* buffer) override;
 
-  // Reset transfer command buffer. Register a new copy buffer command,
-  // instantly run it, but don't wait for it.
+  DescriptorLayout* CreateDescriptorLayout(
+      int bindingCount, DescriptorBinding* bindings) override;
+  DescriptorSet* CreateDescriptorSet(DescriptorLayout* descriptorLayout,
+                                     int bindingCount,
+                                     DescriptorBinding* bindings) override;
+  void BindDescriptorSet(Pipeline* pipeline,
+                         DescriptorSet* descriptor) override;
+
+  /**
+   * Reset transfer command buffer. Register a new copy buffer command,
+   * instantly run it, but don't wait for it.
+   * @param src Buffer to copy from.
+   * @param dest Buffer to copy to.
+   */
   void CopyBuffer(Buffer* src, Buffer* dest) override;
 };
 

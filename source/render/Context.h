@@ -8,6 +8,14 @@
 
 namespace Imperium::Render::Backend {
 class Backend;
+struct Pipeline;
+struct Buffer;
+struct DescriptorSet;
+struct DescriptorLayout;
+}  // namespace Imperium::Render::Backend
+
+namespace Imperium::Logic {
+class Camera;
 }
 
 namespace Imperium::Render::Frontend {
@@ -28,10 +36,15 @@ class Context {
   int _height{0};
   bool _failed{true};
 
-  int _mainPipeline;
+  Backend::Pipeline* _mainPipeline;
 
-  Backend::Backend* _backend;
-  Device* _device;
+  Backend::Backend* _backend{nullptr};
+  Device* _device{nullptr};
+
+  Backend::DescriptorSet* _globalDescriptor{nullptr};
+
+  Backend::Buffer* _cameraBuffer;
+  Logic::Camera* _camera;
 
   float frame{0.0f};
 

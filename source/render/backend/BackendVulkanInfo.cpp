@@ -120,10 +120,11 @@ BackendVulkan::CreateColorBlendAttachmentStateInfo() {
 }
 
 VkPipelineLayoutCreateInfo BackendVulkan::CreatePipelineLayoutInfo(
-    size_t nbPushConstant, size_t* pushConstantSizes,
-    VkShaderStageFlags* shaderStageFlags) {
-  VkPushConstantRange* ranges = new VkPushConstantRange[nbPushConstant];
-  for (int i = 0; i < nbPushConstant; i++) {
+    unsigned pushConstantCount, const unsigned* pushConstantSizes,
+    unsigned descriptorCount, DescriptorLayout* descriptors,
+    const VkShaderStageFlags* shaderStageFlags) {
+  auto ranges = new VkPushConstantRange[pushConstantCount];
+  for (int i = 0; i < pushConstantCount; i++) {
     ranges[i] = {};
     ranges[i].offset = i;
     ranges[i].size = pushConstantSizes[i];
@@ -134,9 +135,9 @@ VkPipelineLayoutCreateInfo BackendVulkan::CreatePipelineLayoutInfo(
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   info.pNext = nullptr;
   info.flags = 0;
-  info.setLayoutCount = 0;
-  info.pSetLayouts = nullptr;
-  info.pushConstantRangeCount = nbPushConstant;
+  info.setLayoutCount = descriptorCount;
+  info.pSetLayouts = (VkDescriptorSetLayout*)descriptors;
+  info.pushConstantRangeCount = pushConstantCount;
   info.pPushConstantRanges = ranges;
   return info;
 }

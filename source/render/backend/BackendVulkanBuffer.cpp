@@ -15,24 +15,42 @@ void BackendVulkan::DeleteOldStuff() {
   delete _oldBuffers;
   _oldBuffers = nullptr;
   _nbOldBuffers = 0;
+
+  for (int i = 0; i < _nbOldPipelines; i++) {
+    DeletePipeline(_oldPipelines[i]);
+  }
+  delete _oldPipelines;
+  _oldPipelines = nullptr;
+  _nbOldPipelines = 0;
 }
 
-Buffer* BackendVulkan::CreateBuffer(BufferType bufferType, int size) {
+Buffer* BackendVulkan::CreateBuffer(BufferType bufferType, unsigned size) {
   VkBufferUsageFlags bufferUsage = 0;
+  VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
   switch (bufferType) {
     case Vertex:
       bufferUsage =
           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+      memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
       break;
     case Index:
       bufferUsage =
           VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+      memoryUsage = VMA_MEMORY_USAGE_GPU_ONLY;
       break;
     case Uniform:
+      // Uniform buffer are a bit special
+      // They should be created in 'group', a group is composed by multiple
+      // uniform buffers and each of them will be used in a specific frame. For
+      // example, if FRAME_OVERLAP is set to 2, creating one Buffer will create
+      // 2 Buffers. First one will be used in even frames and the other in odd
+      // frames.
       bufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+      memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
       break;
     case Staging:
       bufferUsage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+      memoryUsage = VMA_MEMORY_USAGE_CPU_TO_GPU;
       break;
   }
   VkBufferCreateInfo bufferCreateInfo = {};
@@ -40,21 +58,43 @@ Buffer* BackendVulkan::CreateBuffer(BufferType bufferType, int size) {
   bufferCreateInfo.size = size;
   bufferCreateInfo.usage = bufferUsage;
 
-  auto buffer = new BufferVulkan;
-  buffer->size = size;
+  if (bufferType != BufferType::Uniform) {
+    auto buffer = new BufferVulkan;
+    buffer->size = size;
 
-  VmaAllocationCreateInfo vmaAllocationCreateInfo = {};
-  vmaAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-  vmaCreateBuffer(_allocator, &bufferCreateInfo, &vmaAllocationCreateInfo,
-                  &buffer->buffer, &buffer->allocation, nullptr);
+    VmaAllocationCreateInfo vmaAllocationCreateInfo = {};
+    vmaAllocationCreateInfo.usage = memoryUsage;
+    vmaCreateBuffer(_allocator, &bufferCreateInfo, &vmaAllocationCreateInfo,
+                    &buffer->buffer, &buffer->allocation, nullptr);
 
-  return (Buffer*)buffer;
+    return (Buffer*)buffer;
+  } else {
+    auto* bufferFrameDependant = new BufferFrameDependant;
+    int i = 0;
+    for (auto& buffer : bufferFrameDependant->buffers) {
+      buffer.size = size;
+      if (i < FRAME_OVERLAP - 1) {
+        buffer.next = &bufferFrameDependant->buffers[i + 1];
+      }
+
+      VmaAllocationCreateInfo vmaAllocationCreateInfo = {};
+      vmaAllocationCreateInfo.usage = memoryUsage;
+      vmaCreateBuffer(_allocator, &bufferCreateInfo, &vmaAllocationCreateInfo,
+                      &buffer.buffer, &buffer.allocation, nullptr);
+      i++;
+    }
+    return (Buffer*)bufferFrameDependant;
+  }
 }
 
 void BackendVulkan::DeleteBuffer(Buffer* b) {
   auto buffer = (BufferVulkan*)b;
 
   vmaDestroyBuffer(_allocator, buffer->buffer, buffer->allocation);
+
+  if (buffer->next) {
+    DeleteBuffer((Buffer*)buffer->next);
+  }
 }
 
 void BackendVulkan::DeferDeleteBuffer(Buffer* b) {

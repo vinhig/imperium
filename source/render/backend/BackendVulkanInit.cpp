@@ -281,7 +281,22 @@ BackendVulkan::BackendVulkan(Device* device) {
   semaphoreCreateInfo.pNext = nullptr;
   semaphoreCreateInfo.flags = 0;
 
-  for (int i = 0; i < 2; i++) {
+  /**
+   * Descriptor pool
+   */
+  VkDescriptorPoolSize descriptorPoolSizes[1] = {
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10}};
+
+  VkDescriptorPoolCreateInfo poolCreateInfo = {};
+  poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  poolCreateInfo.flags = 0;
+  poolCreateInfo.maxSets = 10;
+  poolCreateInfo.poolSizeCount = 1;
+  poolCreateInfo.pPoolSizes = &descriptorPoolSizes[0];
+
+  vkCreateDescriptorPool(_device, &poolCreateInfo, nullptr, &_descriptorPool);
+
+  for (int i = 0; i < FRAME_OVERLAP; i++) {
     vkCreateFence(_device, &fenceCreateInfo, nullptr,
                   &_framesData[i]._renderFence);
 
@@ -311,7 +326,10 @@ BackendVulkan::~BackendVulkan() {
                          VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
     vkResetCommandBuffer(_transferCommandBuffer,
                          VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-    this->DeleteOldStuff();
+    DeleteOldStuff();
+
+    vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
+
     vkDestroySwapchainKHR(_device, _swapchain, nullptr);
 
     for (auto const& imageView : _swapchainImageViews) {
@@ -330,11 +348,6 @@ BackendVulkan::~BackendVulkan() {
 
     for (auto const& fb : _framebuffers) {
       vkDestroyFramebuffer(_device, fb, nullptr);
-    }
-
-    for (auto const& stuff : _pipelines) {
-      vkDestroyPipelineLayout(_device, stuff.pipelineLayout, nullptr);
-      vkDestroyPipeline(_device, stuff.pipeline, nullptr);
     }
 
     for (auto const& frameData : _framesData) {

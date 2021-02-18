@@ -48,14 +48,14 @@ Core::Option<VkShaderModule> BackendVulkan::CreateShaderModule(
   return Core::Option<VkShaderModule>(shaderModule);
 }
 
-void BackendVulkan::BeginPipeline(int pipeline) {
+void BackendVulkan::BeginPipeline(Pipeline* pipeline) {
   vkCmdBindPipeline(GetCurrentFrameData()._commandBuffer,
                     VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    _pipelines[pipeline].pipeline);
+                    ((PipelineVulkan*)pipeline)->_pipeline);
   // vkCmdDraw(_mainCommandBuffer, 3, 1, 0, 0);
 }
 
-void BackendVulkan::EndPipeline(int pipeline) {}
+void BackendVulkan::EndPipeline(Pipeline* pipeline) {}
 
 void BackendVulkan::BindRenderpass(int renderpass) {
   if (renderpass == 0) {
@@ -84,7 +84,9 @@ void BackendVulkan::BindRenderpass(int renderpass) {
   }
 }
 
-Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
+Core::Option<Pipeline*> BackendVulkan::CreatePipeline(
+    PipelineType pipelineType, unsigned descriptorCount,
+    DescriptorLayout* descriptors) {
   if (pipelineType == PipelineType::Graphics) {
     /**
      * Create shader stages
@@ -95,11 +97,11 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     // Creation of shader module may fail
     if (!vertexShader.HasValue()) {
       printf("Vertex shader failed to be created.\n");
-      return Core::Option<int>();
+      return Core::Option<Pipeline*>();
     }
     if (!fragmentShader.HasValue()) {
       printf("Fragment shader failed to be created.\n");
-      return Core::Option<int>();
+      return Core::Option<Pipeline*>();
     }
 
     auto vertexShaderStage =
@@ -114,20 +116,21 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     /**
      * Create pipeline layout
      */
-    size_t cameraPushConstant = 16 * 4;
+    unsigned cameraPushConstant = 16 * 4;
     VkShaderStageFlags cameraStageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     auto layoutInfo =
-        CreatePipelineLayoutInfo(1, &cameraPushConstant, &cameraStageFlags);
+        CreatePipelineLayoutInfo(1, &cameraPushConstant,
+                                 descriptorCount, descriptors, &cameraStageFlags);
     VkPipelineLayout pipelineLayout;
     vkCreatePipelineLayout(_device, &layoutInfo, nullptr, &pipelineLayout);
 
     VkViewport viewport = {};
-    viewport.height = _height;
-    viewport.width = _width;
-    viewport.x = 0;
-    viewport.y = 0;
-    viewport.minDepth = 0.0;
-    viewport.maxDepth = 1.0;
+    viewport.height = (float)_height;
+    viewport.width = (float)_width;
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
 
     VkRect2D scissor = {};
     scissor.extent = {(uint32_t)_width, (uint32_t)_height};
@@ -186,16 +189,37 @@ Core::Option<int> BackendVulkan::CreatePipeline(PipelineType pipelineType) {
     if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipelineInfo,
                                   nullptr, &pipeline) != VK_SUCCESS) {
       printf("Saaad.");
-      return Core::Option<int>();
+      return Core::Option<Pipeline*>();
     }
     vkDestroyShaderModule(_device, vertexShader.Value(), nullptr);
     vkDestroyShaderModule(_device, fragmentShader.Value(), nullptr);
 
-    _pipelines.push_back({pipeline, pipelineLayout});
-    return Core::Option<int>(_pipelines.size() - 1);
+    auto p = new PipelineVulkan;
+    p->_pipeline = pipeline;
+    p->_pipelineLayout = pipelineLayout;
+
+    // _pipelines.push_back({pipeline, pipelineLayout});
+    return Core::Option<Pipeline*>((Pipeline*)p);
   } else {
-    return Core::Option<int>();
+    return Core::Option<Pipeline*>();
   }
+}
+
+void BackendVulkan::DeletePipeline(Pipeline* pipeline) {
+  vkDestroyPipelineLayout(_device, ((PipelineVulkan*)pipeline)->_pipelineLayout,
+                          nullptr);
+  vkDestroyPipeline(_device, ((PipelineVulkan*)pipeline)->_pipeline, nullptr);
+}
+
+void BackendVulkan::DeferDeletePipeline(Pipeline* p) {
+  _nbOldPipelines++;
+  auto pipelines = (Pipeline**)malloc(sizeof(Buffer*) * _nbOldPipelines);
+  for (int i = 0; i < _nbOldPipelines - 1; i++) {
+    pipelines[i] = _oldPipelines[i];
+  }
+  pipelines[_nbOldPipelines - 1] = p;
+  delete _oldPipelines;
+  _oldPipelines = pipelines;
 }
 
 void BackendVulkan::BindVertexBuffers(int count, Buffer* vertexBuffers) {
@@ -215,10 +239,15 @@ void BackendVulkan::BindIndexBuffer(Buffer* indexBuffer) {
                        VkIndexType::VK_INDEX_TYPE_UINT32);
 }
 
-void BackendVulkan::BindUniform(int offset, int pipeline, size_t size,
+/*void BackendVulkan::BindConstantBuffer(int offset, Buffer* constantBuffer) {
+  auto buffer = ((BufferFrameDependant*)constantBuffer)
+                    ->buffers[_currentFrame % FRAME_OVERLAP];
+}*/
+
+void BackendVulkan::BindUniform(int offset, Pipeline* pipeline, size_t size,
                                 void* data) {
   vkCmdPushConstants(GetCurrentFrameData()._commandBuffer,
-                     _pipelines[pipeline].pipelineLayout,
+                     ((PipelineVulkan*)pipeline)->_pipelineLayout,
                      VK_SHADER_STAGE_VERTEX_BIT, 0, size, data);
 }
 
@@ -228,7 +257,7 @@ void BackendVulkan::DrawElements(int count) {
 }
 
 FrameData& BackendVulkan::GetCurrentFrameData() {
-  return _framesData[(_currentFrame) % 2];
+  return _framesData[(_currentFrame) % FRAME_OVERLAP];
 }
 
 }  // namespace Imperium::Render::Backend

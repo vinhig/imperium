@@ -1,8 +1,8 @@
+#pragma once
+
 //
 // Created by vinhig on 24.10.2020.
 //
-
-#pragma once
 
 #include "core/Option.h"
 
@@ -15,7 +15,7 @@ class Context;
 namespace Frontend {
 class Mesh;
 class Model;
-}
+}  // namespace Frontend
 }  // namespace Imperium::Render
 
 namespace Imperium::Logic {
